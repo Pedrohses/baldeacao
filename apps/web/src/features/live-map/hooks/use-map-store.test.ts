@@ -24,8 +24,12 @@ describe('useMapStore', () => {
   it('seleciona veículo ou parada, uma de cada vez, e limpa a seleção', () => {
     const { selectVehicle, selectStop, clearSelection } = useMapStore.getState();
 
-    selectVehicle('11433');
-    expect(useMapStore.getState().selection).toEqual({ kind: 'vehicle', vehicleId: '11433' });
+    selectVehicle('11433', '875A-10');
+    expect(useMapStore.getState().selection).toEqual({
+      kind: 'vehicle',
+      vehicleId: '11433',
+      routeId: '875A-10',
+    });
 
     selectStop('4301848');
     expect(useMapStore.getState().selection).toEqual({ kind: 'stop', stopId: '4301848' });

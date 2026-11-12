@@ -11,7 +11,7 @@ export const DEFAULT_MAP_VIEWPORT: MapViewState = {
 };
 
 export type MapSelection =
-  | { kind: 'vehicle'; vehicleId: string }
+  | { kind: 'vehicle'; vehicleId: string; routeId: string | null }
   | { kind: 'stop'; stopId: string }
   | null;
 
@@ -26,7 +26,7 @@ export interface MapStateData {
 
 export interface MapStateActions {
   setViewport(viewport: MapViewState): void;
-  selectVehicle(vehicleId: string): void;
+  selectVehicle(vehicleId: string, routeId?: string | null): void;
   selectStop(stopId: string): void;
   clearSelection(): void;
   /** Registra o `updatedAt` de um snapshot e recalcula `isStale`. */
@@ -52,7 +52,8 @@ export const useMapStore = create<MapState>()((set, get) => ({
   ...initialMapState,
 
   setViewport: (viewport) => set({ viewport }),
-  selectVehicle: (vehicleId) => set({ selection: { kind: 'vehicle', vehicleId } }),
+  selectVehicle: (vehicleId, routeId = null) =>
+    set({ selection: { kind: 'vehicle', vehicleId, routeId } }),
   selectStop: (stopId) => set({ selection: { kind: 'stop', stopId } }),
   clearSelection: () => set({ selection: null }),
 

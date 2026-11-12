@@ -2,6 +2,7 @@ export {
   MapViewportSync,
   StaleDataNotice,
   VEHICLES_LAYER_ID,
+  type VehicleHighlight,
   VehiclesLayer,
   type VehiclesLayerProps,
 } from './components';

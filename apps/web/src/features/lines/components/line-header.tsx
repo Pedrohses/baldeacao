@@ -4,7 +4,7 @@ export interface LineHeaderProps {
   line: Pick<Route, 'shortName' | 'longName' | 'color' | 'textColor'>;
 }
 
-const FALLBACK_COLOR = '1D4ED8';
+const FALLBACK_COLOR = '0B4F5C';
 const FALLBACK_TEXT_COLOR = 'FFFFFF';
 
 /** Código da linha em selo com a cor da linha, seguido do nome. */
@@ -21,7 +21,7 @@ export function LineHeader({ line }: LineHeaderProps) {
       >
         {line.shortName}
       </span>
-      <h2 className="min-w-0 truncate text-lg font-semibold">{line.longName}</h2>
+      <h2 className="min-w-0 truncate text-xl font-bold">{line.longName}</h2>
     </div>
   );
 }
