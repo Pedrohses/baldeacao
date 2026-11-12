@@ -68,5 +68,7 @@ export const ItinerarySchema = z.object({
   walkDistanceM: z.number().nonnegative(),
   transfers: z.number().int().nonnegative(), // baldeações
   legs: z.array(LegSchema).min(1),
+  // Mesmos trechos (mesmas linhas) em saídas seguintes, agrupados neste itinerário.
+  alsoDepartsAt: z.array(IsoDateTimeSchema).optional(),
 });
 export type Itinerary = z.infer<typeof ItinerarySchema>;

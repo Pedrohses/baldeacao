@@ -21,6 +21,8 @@ export const API_PATHS = {
    * `full` (busca confirmada) junta o local com endereços do Nominatim (com cache).
    */
   searchPlaces: '/places/search',
+  /** v2: lugar mais próximo de um ponto (Nominatim reverse, com cache). Query: `lat`, `lon`. */
+  reversePlace: '/places/reverse',
   /** v2: planejar viagem (OpenTripPlanner). POST com corpo TripRequest. */
   planTrip: '/trips/plan',
 } as const;
@@ -90,5 +92,24 @@ export const SearchPlacesResponseSchema = z.object({ places: z.array(PlaceSchema
 export type SearchPlacesResponse = z.infer<typeof SearchPlacesResponseSchema>;
 
 // O corpo de planTrip é TripRequestSchema (trip.ts).
-export const PlanTripResponseSchema = z.object({ itineraries: z.array(ItinerarySchema) });
+export const ReversePlaceQuerySchema = z.object({
+  lat: z.coerce.number().min(-90).max(90),
+  lon: z.coerce.number().min(-180).max(180),
+});
+export type ReversePlaceQuery = z.infer<typeof ReversePlaceQuerySchema>;
+
+export const ReversePlaceResponseSchema = z.object({ place: PlaceSchema.nullable() });
+export type ReversePlaceResponse = z.infer<typeof ReversePlaceResponseSchema>;
+
+/** Motivo de uma resposta vazia ou limitada do planejador. */
+export const PlanTripNoticeSchema = z.enum([
+  'origin_outside_service_area', // nenhuma parada a até 1 km da origem
+  'destination_outside_service_area', // nenhuma parada a até 1 km do destino
+]);
+export type PlanTripNotice = z.infer<typeof PlanTripNoticeSchema>;
+
+export const PlanTripResponseSchema = z.object({
+  itineraries: z.array(ItinerarySchema),
+  notices: z.array(PlanTripNoticeSchema).optional(),
+});
 export type PlanTripResponse = z.infer<typeof PlanTripResponseSchema>;
