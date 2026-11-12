@@ -42,5 +42,6 @@ import { PositionsGateway } from './presentation/ws/positions.gateway';
     RefreshPositionsScheduler,
     PositionsGateway,
   ],
+  exports: [GetVehicleSnapshotUseCase],
 })
 export class RealtimeModule {}
