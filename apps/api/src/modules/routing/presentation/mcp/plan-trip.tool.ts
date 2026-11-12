@@ -62,7 +62,14 @@ const outputSchema = {
   cidade: z.string(),
   origem: placeOutput,
   destino: placeOutput,
-  avisos: z.array(z.enum(['origin_outside_service_area', 'destination_outside_service_area'])),
+  avisos: z.array(
+    z.enum([
+      'origin_outside_service_area',
+      'destination_outside_service_area',
+      'date_outside_service',
+      'time_in_past_moved',
+    ]),
+  ),
   itinerarios: z.array(
     z.object({
       saida: z.string(),
@@ -162,7 +169,7 @@ export class PlanTripTool extends McpTool {
           if (itineraries.length === 0) {
             const empty =
               `Não encontrei itinerário de transporte público ${route} nesse horário. ` +
-              (notices.length > 0
+              (notices.some((n) => n.endsWith('_outside_service_area'))
                 ? 'Escolha um ponto mais perto de uma linha.'
                 : 'Tente outro horário ou lugares mais próximos de uma linha.');
             return toolText([...warnings, empty].join('\n\n'), structured);
@@ -231,7 +238,7 @@ function joinClocks(isos: string[], timeZone: string): string {
   return `${clocks.slice(0, -1).join(', ')} e ${clocks[clocks.length - 1]}`;
 }
 
-/** Explica em português cada aviso de área de atendimento. */
+/** Explica em português cada aviso. */
 function describeNotices(
   notices: PlanTripNotice[],
   from: PlaceOutput,
@@ -240,6 +247,15 @@ function describeNotices(
 ): string[] {
   const radius = `${SERVICE_AREA_RADIUS_M / 1000} km`;
   return notices.map((notice) => {
+    if (notice === 'time_in_past_moved') {
+      return 'Atenção: o horário pedido já passou; mostrei as opções para o mesmo horário amanhã.';
+    }
+    if (notice === 'date_outside_service') {
+      return (
+        'Atenção: a data pedida está fora da validade da tabela de horários carregada para ' +
+        `${cityName}; os horários podem não valer ou não aparecer. Tente uma data mais próxima.`
+      );
+    }
     const [which, place] =
       notice === 'origin_outside_service_area' ? ['da origem', from] : ['do destino', to];
     return (

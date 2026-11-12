@@ -4,12 +4,22 @@ import { API_PATHS, ApiErrorBodySchema, PlanTripResponseSchema } from '@baldeaca
 import { tripRequestExample } from '@baldeacao/types/examples';
 import request from 'supertest';
 import type { App } from 'supertest/types';
-import { fakeOtpFetch, readOtpFixture } from '../../../../../test/support/routing-in-memory';
-import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
+import {
+  FixedClock,
+  fakeOtpFetch,
+  readOtpFixture,
+} from '../../../../../test/support/routing-in-memory';
+import {
+  InMemoryServiceCalendar,
+  InMemoryStopRepository,
+} from '../../../../../test/support/transit-in-memory';
+import { GetServicePeriodUseCase } from '../../../transit/application/use-cases/get-service-period.use-case';
+import { ServiceCalendarRepository } from '../../../transit/domain/ports/service-calendar.port';
 import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
 import { Stop } from '../../../transit/domain/entities/stop.entity';
 import { StopRepository } from '../../../transit/domain/ports/stop-repository.port';
 import { PlanTripUseCase } from '../../application/use-cases/plan-trip.use-case';
+import { Clock } from '../../domain/ports/clock.port';
 import { TripPlanner } from '../../domain/ports/trip-planner.port';
 import { OtpClient } from '../../infrastructure/adapters/otp.client';
 import { OtpTripPlannerAdapter } from '../../infrastructure/adapters/otp-trip-planner.adapter';
@@ -31,7 +41,10 @@ async function appWith(client: OtpClient): Promise<INestApplication<App>> {
     providers: [
       PlanTripUseCase,
       HasNearbyStopUseCase,
+      GetServicePeriodUseCase,
       { provide: StopRepository, useValue: new InMemoryStopRepository([ORIGIN_STOP]) },
+      { provide: ServiceCalendarRepository, useValue: new InMemoryServiceCalendar() },
+      { provide: Clock, useValue: new FixedClock() },
       { provide: OtpClient, useValue: client },
       { provide: TripPlanner, useClass: OtpTripPlannerAdapter },
     ],

@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Itinerary } from '../../src/modules/routing/domain/entities/itinerary.entity';
+import { Clock } from '../../src/modules/routing/domain/ports/clock.port';
 import { TripPlanner } from '../../src/modules/routing/domain/ports/trip-planner.port';
 import type { TripPlanQuery } from '../../src/modules/routing/domain/value-objects/trip-plan-query';
 
@@ -38,5 +39,16 @@ export class InMemoryTripPlanner extends TripPlanner {
     return this.result instanceof Error
       ? Promise.reject(this.result)
       : Promise.resolve(this.result);
+  }
+}
+
+/** Relógio parado em `iso` (padrão: 12/11/2026 às 07:00 em São Paulo). */
+export class FixedClock extends Clock {
+  constructor(private readonly iso = '2026-11-12T07:00:00-03:00') {
+    super();
+  }
+
+  now(): Date {
+    return new Date(this.iso);
   }
 }

@@ -1,6 +1,10 @@
 import { itineraryExample } from '@baldeacao/types/examples';
-import { InMemoryTripPlanner } from '../../../../../test/support/routing-in-memory';
-import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
+import { FixedClock, InMemoryTripPlanner } from '../../../../../test/support/routing-in-memory';
+import {
+  InMemoryServiceCalendar,
+  InMemoryStopRepository,
+} from '../../../../../test/support/transit-in-memory';
+import { GetServicePeriodUseCase } from '../../../transit/application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
 import { Stop } from '../../../transit/domain/entities/stop.entity';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
@@ -20,8 +24,15 @@ function stopAt(id: string, location: { lat: number; lon: number }): Stop {
 function planTrip(
   planner: InMemoryTripPlanner,
   stops: Stop[] = [stopAt('A', FROM), stopAt('B', TO)],
+  clock = new FixedClock(),
+  calendar = new InMemoryServiceCalendar(),
 ): PlanTripUseCase {
-  return new PlanTripUseCase(planner, new HasNearbyStopUseCase(new InMemoryStopRepository(stops)));
+  return new PlanTripUseCase(
+    planner,
+    new HasNearbyStopUseCase(new InMemoryStopRepository(stops)),
+    new GetServicePeriodUseCase(calendar),
+    clock,
+  );
 }
 
 /** Mesmo itinerário saindo `minutes` depois. */
@@ -63,7 +74,7 @@ describe('PlanTripUseCase', () => {
     await useCase.execute({
       from: FROM,
       to: TO,
-      arriveBy: '2026-11-12T09:00:00Z',
+      arriveBy: '2026-11-12T12:00:00Z',
       maxItineraries: 9,
     });
     await useCase.execute({ from: FROM, to: TO, maxItineraries: 0 });
@@ -71,7 +82,7 @@ describe('PlanTripUseCase', () => {
     expect(out.itineraries).toHaveLength(2);
     expect(planner.queries.map((q) => [q.time, q.maxItineraries, q.candidates])).toEqual([
       [{ departAt }, 2, 12],
-      [{ arriveBy: '2026-11-12T09:00:00Z' }, 5, 20],
+      [{ arriveBy: '2026-11-12T12:00:00Z' }, 5, 20],
       [null, 1, 12],
     ]);
   });
@@ -144,5 +155,59 @@ describe('PlanTripUseCase', () => {
       'destination_outside_service_area',
     ]);
     expect(planner.queries).toHaveLength(2);
+  });
+
+  describe('avisos de data e hora', () => {
+    it('hora que já passou vai para o mesmo horário no dia seguinte, com aviso', async () => {
+      const planner = new InMemoryTripPlanner([ITINERARY]);
+      // Agora: 12/11 às 16:00; pedido: 12/11 às 08:00.
+      const useCase = planTrip(planner, undefined, new FixedClock('2026-11-12T16:00:00-03:00'));
+      const out = await useCase.execute({
+        from: FROM,
+        to: TO,
+        departAt: '2026-11-12T08:00:00-03:00',
+      });
+      expect(out.notices).toEqual(['time_in_past_moved']);
+      expect(planner.queries[0]?.time).toEqual({ departAt: '2026-11-13T08:00:00-03:00' });
+
+      // Dois dias atrás vai para amanhã, não para ontem; chegada também.
+      await useCase.execute({ from: FROM, to: TO, arriveBy: '2026-11-10T09:30:00-03:00' });
+      expect(planner.queries[1]?.time).toEqual({ arriveBy: '2026-11-13T09:30:00-03:00' });
+    });
+
+    it('até 5 minutos no passado não move', async () => {
+      const planner = new InMemoryTripPlanner([ITINERARY]);
+      const useCase = planTrip(planner, undefined, new FixedClock('2026-11-12T08:04:00-03:00'));
+      const out = await useCase.execute({
+        from: FROM,
+        to: TO,
+        departAt: '2026-11-12T08:00:00-03:00',
+      });
+      expect(out.notices).toEqual([]);
+      expect(planner.queries[0]?.time).toEqual({ departAt: '2026-11-12T08:00:00-03:00' });
+    });
+
+    it('data fora da validade do GTFS avisa date_outside_service (também para agora)', async () => {
+      const planner = new InMemoryTripPlanner([]);
+      const useCase = planTrip(planner);
+      const out = await useCase.execute({
+        from: FROM,
+        to: TO,
+        departAt: '2027-02-01T08:00:00-03:00',
+      });
+      expect(out.notices).toEqual(['date_outside_service']);
+
+      const expired = planTrip(
+        planner,
+        undefined,
+        new FixedClock('2026-11-12T07:00:00-03:00'),
+        new InMemoryServiceCalendar({ startDate: '2025-01-01', endDate: '2026-06-30' }),
+      );
+      expect((await expired.execute({ from: FROM, to: TO })).notices).toEqual([
+        'date_outside_service',
+      ]);
+      const noFeed = planTrip(planner, undefined, undefined, new InMemoryServiceCalendar(null));
+      expect((await noFeed.execute({ from: FROM, to: TO })).notices).toEqual([]);
+    });
   });
 });

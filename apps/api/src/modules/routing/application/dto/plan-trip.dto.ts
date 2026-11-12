@@ -14,6 +14,6 @@ export interface PlanTripInput {
 
 export interface PlanTripOutput {
   itineraries: Itinerary[];
-  /** Avisos de área de atendimento; vazio quando origem e destino têm parada perto. */
+  /** Avisos (área atendida, data fora da validade do GTFS, hora movida); vazio sem nada a avisar. */
   notices: PlanTripNotice[];
 }

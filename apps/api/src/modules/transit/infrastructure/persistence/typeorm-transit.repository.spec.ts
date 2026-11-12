@@ -13,6 +13,7 @@ import { ImportGtfsFeedUseCase } from '../../../sources/application/use-cases/im
 import { CsvGtfsFeedReader } from '../../../sources/infrastructure/adapters/csv-gtfs-feed-reader.adapter';
 import { PostgresGtfsFeedStore } from '../../../sources/infrastructure/persistence/postgres-gtfs-feed-store.adapter';
 import { TypeormRouteRepository } from './typeorm-route.repository';
+import { TypeormServiceCalendarRepository } from './typeorm-service-calendar.repository';
 import { TypeormStopRepository } from './typeorm-stop.repository';
 
 jest.setTimeout(POSTGIS_TEST_TIMEOUT_MS);
@@ -40,6 +41,14 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
     stops = new TypeormStopRepository(db.dataSource);
   });
   afterAll(() => db?.stop());
+
+  it('validade do calendário: do primeiro start_date ao último end_date', async () => {
+    const calendar = new TypeormServiceCalendarRepository(db.dataSource);
+    expect(await calendar.servicePeriod()).toEqual({
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+    });
+  });
 
   describe('TypeormRouteRepository', () => {
     it('busca por letreiro sem diferenciar maiúsculas', async () => {
