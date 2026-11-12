@@ -52,6 +52,16 @@ export function TripScreen({ initial }: TripScreenProps) {
   const [picking, setPicking] = useState<TripField | null>(null);
   const [timeOpen, setTimeOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ field: TripField; key: number } | null>(null);
+  // "Minha localização" vinda da URL: buscando, ou falhou (permissão negada ou sem GPS).
+  const gpsField: TripField | null =
+    initial.origin === 'current-location'
+      ? 'origin'
+      : initial.destination === 'current-location'
+        ? 'destination'
+        : null;
+  const [geo, setGeo] = useState<{ field: TripField; status: 'locating' | 'failed' } | null>(() =>
+    gpsField ? { field: gpsField, status: 'locating' } : null,
+  );
   const padding = useMapPadding(snap);
   const resolveMapPoint = useResolveMapPoint();
 
@@ -67,16 +77,18 @@ export function TripScreen({ initial }: TripScreenProps) {
 
   // "Minha localização" vinda da URL: resolve pelo GPS ao abrir.
   useEffect(() => {
-    const field: TripField | null =
-      initial.origin === 'current-location'
-        ? 'origin'
-        : initial.destination === 'current-location'
-          ? 'destination'
-          : null;
+    const field = gpsField;
     if (!field) return;
     let cancelled = false;
     void locate().then((position) => {
-      if (cancelled || !position) return;
+      if (cancelled) return;
+      if (!position) {
+        // Nunca deixar a ponta vazia em silêncio: avisa e põe o foco no campo.
+        setGeo({ field, status: 'failed' });
+        setFocusRequest((previous) => ({ field, key: (previous?.key ?? 0) + 1 }));
+        return;
+      }
+      setGeo(null);
       const place = currentLocationPlace(position);
       if (field === 'origin') setOrigin(place);
       else setDestination(place);
@@ -84,7 +96,7 @@ export function TripScreen({ initial }: TripScreenProps) {
     return () => {
       cancelled = true;
     };
-  }, [initial.origin, initial.destination, setOrigin, setDestination]);
+  }, [gpsField, setOrigin, setDestination]);
 
   const status: ItineraryListStatus = !trip.request
     ? 'idle'
@@ -96,6 +108,8 @@ export function TripScreen({ initial }: TripScreenProps) {
   const itineraries = plan.data?.itineraries ?? [];
   const notices = status === 'success' ? (plan.data?.notices ?? []) : [];
   const selected = status === 'success' ? (itineraries[current.index] ?? null) : null;
+  // O aviso do GPS some quando a pessoa escolhe a ponta de outro jeito.
+  const geoPending = geo && !(geo.field === 'origin' ? trip.origin : trip.destination) ? geo : null;
 
   function startPicking(field: TripField) {
     setPicking(field);
@@ -145,6 +159,21 @@ export function TripScreen({ initial }: TripScreenProps) {
             error={trip.error}
             focusRequest={focusRequest}
           />
+          {geoPending?.status === 'locating' ? (
+            <p role="status" className="mt-2 text-sm text-muted">
+              Buscando sua localização...
+            </p>
+          ) : null}
+          {geoPending?.status === 'failed' ? (
+            <p
+              role="alert"
+              className="mt-2 rounded-md border border-warn/40 bg-warn/10 p-3 text-sm"
+            >
+              {geoPending.field === 'origin'
+                ? 'Não conseguimos sua localização. Ative a permissão ou escolha a origem.'
+                : 'Não conseguimos sua localização. Ative a permissão ou escolha o destino.'}
+            </p>
+          ) : null}
         </div>
         <div className="mt-3">
           <TimeChip
