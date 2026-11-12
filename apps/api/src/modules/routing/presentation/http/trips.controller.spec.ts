@@ -64,7 +64,7 @@ describe('HTTP do routing (contrato v2)', () => {
     const last = fetchFn.calls[fetchFn.calls.length - 1]?.body as {
       variables: { first: number; dateTime?: unknown };
     };
-    expect(last.variables.first).toBe(3);
+    expect(last.variables.first).toBe(12);
     expect(last.variables.dateTime).toBeUndefined();
   });
 

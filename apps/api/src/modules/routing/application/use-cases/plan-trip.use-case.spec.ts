@@ -9,16 +9,39 @@ const FROM = { lat: -23.6, lon: -46.7202 };
 const TO = { lat: -23.5163, lon: -46.6252 };
 const ITINERARY: Itinerary = itineraryExample;
 
+/** Mesmo itinerário saindo `minutes` depois. */
+function shifted(it: Itinerary, minutes: number): Itinerary {
+  const move = (iso: string) => new Date(Date.parse(iso) + minutes * 60_000).toISOString();
+  return {
+    ...it,
+    startAt: move(it.startAt),
+    endAt: move(it.endAt),
+    legs: it.legs.map((leg) => ({ ...leg, startAt: move(leg.startAt), endAt: move(leg.endAt) })),
+  };
+}
+
+const WALK_ONLY: Itinerary = {
+  ...shifted(ITINERARY, 30),
+  transfers: 0,
+  legs: [{ ...ITINERARY.legs[0]!, routeId: null }],
+};
+const OTHER_LINE: Itinerary = {
+  ...shifted(ITINERARY, 10),
+  legs: ITINERARY.legs.map((leg) => (leg.mode === 'bus' ? { ...leg, routeId: '875A-10' } : leg)),
+};
+
 describe('PlanTripUseCase', () => {
   it('sem hora parte agora e pede 3 itinerários por padrão', async () => {
     const planner = new InMemoryTripPlanner([ITINERARY]);
     const result = await new PlanTripUseCase(planner).execute({ from: FROM, to: TO });
     expect(result).toEqual({ itineraries: [ITINERARY] });
-    expect(planner.queries).toEqual([{ from: FROM, to: TO, time: null, maxItineraries: 3 }]);
+    expect(planner.queries).toEqual([
+      { from: FROM, to: TO, time: null, maxItineraries: 3, candidates: 12 },
+    ]);
   });
 
   it('repassa saída ou chegada e limita a quantidade de 1 a 5', async () => {
-    const planner = new InMemoryTripPlanner([ITINERARY, ITINERARY, ITINERARY]);
+    const planner = new InMemoryTripPlanner([ITINERARY, WALK_ONLY, OTHER_LINE]);
     const useCase = new PlanTripUseCase(planner);
     const departAt = '2026-11-12T08:00:00-03:00';
     const out = await useCase.execute({ from: FROM, to: TO, departAt, maxItineraries: 2 });
@@ -31,10 +54,10 @@ describe('PlanTripUseCase', () => {
     await useCase.execute({ from: FROM, to: TO, maxItineraries: 0 });
 
     expect(out.itineraries).toHaveLength(2);
-    expect(planner.queries.map((q) => [q.time, q.maxItineraries])).toEqual([
-      [{ departAt }, 2],
-      [{ arriveBy: '2026-11-12T09:00:00Z' }, 5],
-      [null, 1],
+    expect(planner.queries.map((q) => [q.time, q.maxItineraries, q.candidates])).toEqual([
+      [{ departAt }, 2, 12],
+      [{ arriveBy: '2026-11-12T09:00:00Z' }, 5, 20],
+      [null, 1, 12],
     ]);
   });
 
@@ -61,5 +84,33 @@ describe('PlanTripUseCase', () => {
     await expect(
       new PlanTripUseCase(planner).execute({ from: FROM, to: TO }),
     ).rejects.toBeInstanceOf(SourceUnavailableError);
+  });
+
+  it('agrupa saídas com as mesmas linhas e ordena os grupos pela chegada', async () => {
+    const planner = new InMemoryTripPlanner([
+      shifted(ITINERARY, 5),
+      OTHER_LINE,
+      ITINERARY,
+      shifted(ITINERARY, 5),
+      shifted(ITINERARY, 15),
+      shifted(ITINERARY, 25),
+      shifted(ITINERARY, 35),
+      WALK_ONLY,
+    ]);
+    const { itineraries } = await new PlanTripUseCase(planner).execute({ from: FROM, to: TO });
+
+    expect(itineraries.map((it) => [it.startAt, it.alsoDepartsAt])).toEqual([
+      [
+        ITINERARY.startAt,
+        [
+          shifted(ITINERARY, 5).startAt,
+          shifted(ITINERARY, 15).startAt,
+          shifted(ITINERARY, 25).startAt,
+        ],
+      ],
+      [OTHER_LINE.startAt, undefined],
+      [WALK_ONLY.startAt, undefined],
+    ]);
+    expect(itineraries[1]).not.toHaveProperty('alsoDepartsAt');
   });
 });

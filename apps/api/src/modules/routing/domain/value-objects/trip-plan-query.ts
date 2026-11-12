@@ -8,5 +8,8 @@ export interface TripPlanQuery {
   from: Coordinates;
   to: Coordinates;
   time: TripTime;
+  /** Opções distintas pedidas pelo usuário. */
   maxItineraries: number;
+  /** Quantos itinerários pedir ao planejador antes de agrupar saídas repetidas. */
+  candidates: number;
 }

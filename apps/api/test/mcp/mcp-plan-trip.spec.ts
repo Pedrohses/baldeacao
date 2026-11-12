@@ -59,6 +59,7 @@ describe('Tool MCP planejar_viagem', () => {
         to: placeDestinationExample.location,
         time: { departAt: '2026-11-12T08:00:00-03:00' },
         maxItineraries: 3,
+        candidates: 12,
       },
     ]);
     expect(textOf(result)).toBe(

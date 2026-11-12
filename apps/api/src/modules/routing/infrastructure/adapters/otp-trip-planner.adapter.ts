@@ -19,7 +19,7 @@ export function toOtpVariables(query: TripPlanQuery): OtpPlanVariables {
       label: DESTINATION_LABEL,
       location: { coordinate: { latitude: query.to.lat, longitude: query.to.lon } },
     },
-    first: query.maxItineraries,
+    first: query.candidates,
   };
   if (query.time && 'departAt' in query.time) {
     variables.dateTime = { earliestDeparture: query.time.departAt };
