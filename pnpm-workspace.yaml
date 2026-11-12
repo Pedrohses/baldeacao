@@ -3,5 +3,10 @@ packages:
   - packages/*
 allowBuilds:
   '@parcel/watcher': false
+  cpu-features: set this to true or false
+  msgpackr-extract: set this to true or false
+  protobufjs: set this to true or false
+  ssh2: set this to true or false
 minimumReleaseAgeExclude:
   - prettier@3.10.0
+  - bullmq@6.7.5

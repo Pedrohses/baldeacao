@@ -2,3 +2,4 @@
 export * from './common.js';
 export * from './transit.js';
 export * from './realtime.js';
+export * from './http.js';
