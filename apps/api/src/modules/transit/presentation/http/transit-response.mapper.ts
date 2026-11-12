@@ -1,9 +1,11 @@
 import type {
+  Arrival as ArrivalDto,
   LineShape as LineShapeDto,
   NearbyStop as NearbyStopDto,
   Route as RouteDto,
   Stop as StopDto,
 } from '@baldeacao/types';
+import type { Arrival } from '../../domain/entities/arrival.entity';
 import type { LineShape } from '../../domain/entities/line-shape.entity';
 import type { Route } from '../../domain/entities/route.entity';
 import type { NearbyStop, Stop } from '../../domain/entities/stop.entity';
@@ -45,6 +47,23 @@ export const TransitResponseMapper = {
       directionId: shape.directionId,
       shapeId: shape.shapeId,
       points: shape.points.map(({ lat, lon }) => ({ lat, lon })),
+    };
+  },
+
+  arrival(arrival: Arrival): ArrivalDto {
+    return {
+      stopId: arrival.stopId,
+      routeId: arrival.routeId,
+      routeShortName: arrival.routeShortName,
+      directionId: arrival.directionId,
+      headsign: arrival.headsign,
+      vehicleId: arrival.vehicleId,
+      expectedAt: arrival.expectedAt,
+      isRealtime: arrival.isRealtime,
+      accessible: arrival.accessible,
+      vehicleLocation: arrival.vehicleLocation
+        ? { lat: arrival.vehicleLocation.lat, lon: arrival.vehicleLocation.lon }
+        : null,
     };
   },
 };
