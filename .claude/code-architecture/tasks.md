@@ -85,17 +85,26 @@ Quatro agentes em paralelo (fases 2 e 3 do roadmap).
 
 | ID | Agente | Tarefa | Depende de | Pronto quando |
 | --- | --- | --- | --- | --- |
-| A1-01 | A1 | Migrações das tabelas GTFS com PostGIS (`routes`, `stops`, `trips`, `stop_times`, `calendar`, `frequencies`, `shapes`) | Portão 0 | `migration:run` cria tudo com índices GIST |
-| A1-02 | A1 | Importador do GTFS da SPTrans em lote (`sources`), com comando `pnpm --filter api gtfs:import` | A1-01 | Importa o recorte de fixture em teste e o GTFS completo local |
-| A1-03 | A1 | Casos de uso e endpoints: buscar linha, linha por código com traçado, paradas num raio | A1-02 | Testes de aplicação e de repositório (Testcontainers) passam |
-| A1-04 | A1 | Previsão de chegada por parada via Olho Vivo, com cache curto no Redis | A1-03 | Endpoint responde com o contrato `Arrival` |
-| A2-01 | A2 | Worker BullMQ que consulta posições a cada ~30 s e grava no Redis (GEO + `updated_at`) | Portão 0 | Teste com fixture; Redis local preenchido em execução real |
-| A2-02 | A2 | Endpoint de snapshot de posições (todas ou por linha) | A2-01 | Responde com o contrato `VehicleSnapshot` |
-| A2-03 | A2 | Gateway Socket.IO publicando por canal (`positions:all`, `positions:line:<codigo>`) a cada ciclo | A2-01 | Cliente de teste recebe eventos no formato do contrato |
-| F1-01 | F1 | `VehiclesLayer` em GeoJSON e hook `useVehiclePositions` (snapshot + socket + `setQueryData`) | Portão 0 | Teste do hook com socket falso; camada renderiza fixture |
-| F1-02 | F1 | Store Zustand do mapa (viewport, seleção) e estado "dados atrasados" | F1-01 | Teste do store; aviso aparece com `isStale` |
-| F2-01 | F2 | Feature `stops`: `StopsLayer`, `StopSheet` e `ArrivalsList` sobre o contrato | Portão 0 | Testes com fixture passam |
-| F2-02 | F2 | Feature `lines`: `LineHeader` e `RouteShapeLayer` | Portão 0 | Traçado de fixture aparece no mapa de teste |
+| A1-01 ✅ | A1 | Migrações das tabelas GTFS com PostGIS (`routes`, `stops`, `trips`, `stop_times`, `calendar`, `frequencies`, `shapes`) | Portão 0 | `migration:run` cria tudo com índices GIST |
+| A1-02 ✅ | A1 | Importador do GTFS da SPTrans em lote (`sources`), com comando `pnpm --filter api gtfs:import` | A1-01 | Importa o recorte de fixture em teste e o GTFS completo local |
+| A1-03 ✅ | A1 | Casos de uso e endpoints: buscar linha, linha por código com traçado, paradas num raio | A1-02 | Testes de aplicação e de repositório (Testcontainers) passam |
+| A1-04 ✅ | A1 | Previsão de chegada por parada via Olho Vivo, com cache curto no Redis | A1-03 | Endpoint responde com o contrato `Arrival` |
+| A2-01 ✅ | A2 | Worker BullMQ que consulta posições a cada ~30 s e grava no Redis (GEO + `updated_at`) | Portão 0 | Teste com fixture; Redis local preenchido em execução real |
+| A2-02 ✅ | A2 | Endpoint de snapshot de posições (todas ou por linha) | A2-01 | Responde com o contrato `VehicleSnapshot` |
+| A2-03 ✅ | A2 | Gateway Socket.IO publicando por canal (`positions:all`, `positions:line:<codigo>`) a cada ciclo | A2-01 | Cliente de teste recebe eventos no formato do contrato |
+| F1-01 ✅ | F1 | `VehiclesLayer` em GeoJSON e hook `useVehiclePositions` (snapshot + socket + `setQueryData`) | Portão 0 | Teste do hook com socket falso; camada renderiza fixture |
+| F1-02 ✅ | F1 | Store Zustand do mapa (viewport, seleção) e estado "dados atrasados" | F1-01 | Teste do store; aviso aparece com `isStale` |
+| F2-01 ✅ | F2 | Feature `stops`: `StopsLayer`, `StopSheet` e `ArrivalsList` sobre o contrato | Portão 0 | Testes com fixture passam |
+| F2-02 ✅ | F2 | Feature `lines`: `LineHeader` e `RouteShapeLayer` | Portão 0 | Traçado de fixture aparece no mapa de teste |
+
+**Registro da Onda 1 (2026-11-12):** as 11 tasks integradas na `main` (api 162 testes, web 57). Pendente para o Portão 1: compor as camadas na tela do mapa, `WEB_ORIGIN` na config (hoje fixo no gateway), build do web sem `.env` e a verificação ponta a ponta.
+
+Decisões da Onda 1 fora dos documentos:
+- Entrada de HTTP validada com os schemas Zod do contrato, não com class-validator (que não está instalado); a regra do backend precisa ser atualizada ou o class-validator adotado.
+- GTFS: chave (source_id, id), pg_trgm para busca de linha, importação por `INSERT ... SELECT FROM unnest` em lotes de 5000 numa transação, trocando o feed anterior da fonte.
+- Previsão: cache Redis de 20 s; `headsign` é lt1 quando sl=1 e lt0 quando sl=2; `expectedAt` no fuso America/Sao_Paulo.
+- Tempo real: Redis com `vehicles:sptrans` (GEO), `vehicle:sptrans:{id}` (TTL 300 s), `realtime:sptrans:updated_at` e pub/sub `positions:sptrans`; o subscribe responde ack e já envia a foto atual do canal.
+- Front: `ArrivalsList` refaz a consulta a cada 15 s; o socket mantém as posições frescas (`staleTime: Infinity`); `isStale` reavaliado a cada 5 s.
 
 **Portão 1 (integração):** o orquestrador junta as branches, compõe as camadas na tela do mapa, troca fixtures por API real e confere ponta a ponta: GTFS importado, ônibus se movendo, toque numa parada mostra a previsão. Esse é o vídeo do post 1.
 
