@@ -134,6 +134,8 @@ Decisões da Onda 2 fora dos documentos: MCP stateless com resposta JSON, 60 req
 
 **Redesign de UX/UI (2026-11-12):** especificação em `.claude/code-architecture/redesign-ux.md`; P0 e P1 integrados (shell com abas, "Para onde?", paradas perto, Ir para cá/Sair daqui, busca que aceita o digitado, /viagem com busca automática e linha do tempo, heatmap de ônibus, tokens, Atkinson, modo escuro, favicon). Autocompletar usa busca local de paradas/estações (`mode=quick`, 2 a 18 ms); Nominatim só na busca confirmada (`mode=full`), por exigência da política dele. REST e Socket.IO comprimidos (posições de 2,2 MB para 184 KB). P2 pendente: aba Linhas, mapa persistente entre abas, estilo escuro do mapa, posições filtradas por área, `GET /places/reverse`.
 
+**QA rodada 1 (2026-11-12):** 17 bugs achados e corrigidos. Principal: o GTFS da SPTrans não tem `exact_times`, e o OTP somava o headway inteiro como espera (caminhadas longas, saídas adiantadas, timeouts); `infra/otp/gtfs-exact-times.py` marca `exact_times=1` no `prepare.sh`. Busca com nota por qualidade (termos no nome/apelido, município, distância à Sé, número da casa), apelidos do OSM e bairros, `kind: station`, CEP fora do município descartado, avisos `date_outside_service` e `time_in_past_moved`, erros `{code,message}` em português, Enter só escolhe resultado forte, GPS negado com aviso. Pendente: acesso ao aeroporto de Guarulhos (estação a 2,3 km do centroide), reverse devolvendo `stop` para estações.
+
 **Portão 2 (integração):** o orquestrador expõe a API local por Cloudflare Tunnel, conecta o servidor MCP no Claude e confere: o Claude responde previsão de chegada e planeja "do Morumbis ao Tietê" com dado real. Esse é o post 2.
 
 ## Onda 3 - Experiência
