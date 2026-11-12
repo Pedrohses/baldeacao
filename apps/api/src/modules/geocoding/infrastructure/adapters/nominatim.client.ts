@@ -64,6 +64,31 @@ export class NominatimClient {
   }
 
   /**
+   * Busca estruturada só por CEP (`postalcode`), no Brasil e na Grande SP. Não mistura com
+   * `q`: o Nominatim não aceita os dois juntos.
+   */
+  async searchPostalCode(postalCode: string, limit: number): Promise<NominatimSearchResult[]> {
+    this.assertConfigured();
+    const params = new URLSearchParams({
+      postalcode: postalCode,
+      format: 'jsonv2',
+      addressdetails: '1',
+      countrycodes: 'br',
+      viewbox: GREATER_SAO_PAULO_VIEWBOX,
+      bounded: '1',
+      'accept-language': 'pt-BR',
+      limit: String(limit),
+    });
+    const body = await this.getJson(`search?${params.toString()}`);
+    if (!Array.isArray(body)) {
+      throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, {
+        cause: new Error('Resposta do Nominatim não é uma lista'),
+      });
+    }
+    return body as NominatimSearchResult[];
+  }
+
+  /**
    * `/reverse` no nível de prédio/rua (zoom 18). null quando o Nominatim não acha lugar
    * (ele responde 200 com `{ "error": "Unable to geocode" }`).
    */

@@ -5,7 +5,7 @@ no formato jsonv2 do Nominatim 5.x (campos `category`, `addresstype`, `address`,
 
 - `search-morumbis.json`: busca "estádio do morumbis". Quatro tipos de resultado: estádio
   (`leisure/stadium`, vira `poi`), ponto de ônibus (`highway/bus_stop`, vira `stop`), rua
-  (`highway/residential`, vira `address`) e estação (`railway/station`, vira `stop`).
+  (`highway/residential`, vira `address`) e estação (`railway/station`, vira `station`).
 - `search-empty.json`: busca sem resultado (o Nominatim devolve `[]`).
 - `reverse-paulista.json`: `GET /reverse?format=jsonv2&zoom=18&addressdetails=1` num ponto da
   Av. Paulista (um objeto, não lista; rua vira `address`).

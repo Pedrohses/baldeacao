@@ -271,6 +271,22 @@ describe('SearchPlacesUseCase', () => {
     });
   });
 
+  it('só CEP: quick vazio; full vai ao Nominatim com chave própria e vazio fica vazio', async () => {
+    const cache = new InMemoryGeocodeCache();
+    const geocoder = new FakeGeocoder([]);
+    const useCase = new SearchPlacesUseCase(
+      cache,
+      geocoder,
+      new SearchStopsByNameUseCase(new InMemoryStopRepository()),
+      new InMemoryKnownPlaceRepository(),
+    );
+    expect((await useCase.execute({ query: '01310-200', mode: 'quick' })).places).toEqual([]);
+    expect(geocoder.calls).toHaveLength(0);
+    expect((await useCase.execute({ query: '01310200', mode: 'full' })).places).toEqual([]);
+    expect(geocoder.calls).toEqual([{ query: 'cep:01310-200', limit: SEARCH_PLACES_LIMIT }]);
+    expect(cache.entries.has('cep:01310-200')).toBe(true);
+  });
+
   describe('ranking com município e apelidos', () => {
     // "Município" de teste: tudo ao norte de -23.8 e a leste de -46.85.
     const inCity = (p: { lat: number; lon: number }) => p.lat > -23.8 && p.lon > -46.85;

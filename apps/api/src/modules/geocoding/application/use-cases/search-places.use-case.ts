@@ -7,7 +7,7 @@ import { GeocodeCache } from '../../domain/ports/geocode-cache.port';
 import { Geocoder } from '../../domain/ports/geocoder.port';
 import { KnownPlaceRepository } from '../../domain/ports/known-place-repository.port';
 import { type PlaceCandidate, rankPlaces } from '../../domain/value-objects/local-place-rank';
-import { normalizePlaceQuery } from '../../domain/value-objects/place-query';
+import { isPostalCodeQuery, normalizePlaceQuery } from '../../domain/value-objects/place-query';
 import type { SearchPlacesInput, SearchPlacesOutput } from '../dto/search-places.dto';
 
 /** Mínimo para a busca local (autocompletar). */
@@ -54,6 +54,16 @@ export class SearchPlacesUseCase {
       throw new InvalidPlaceQueryError(
         `Digite pelo menos ${SEARCH_PLACES_QUICK_MIN_LENGTH} caracteres para buscar um lugar.`,
       );
+    }
+
+    // Só CEP: nada local casa com dígitos; no full vai direto ao Nominatim (busca estruturada).
+    if (isPostalCodeQuery(key)) {
+      if (input.mode === 'quick') return { places: [] };
+      // Chave própria ("cep:01310-200"): não reaproveita o cache da busca por texto livre.
+      const digits = key.replace(/\D/g, '');
+      const cepKey = `cep:${digits.slice(0, 5)}-${digits.slice(5)}`;
+      const remote = await this.searchRemote(cepKey, input.query);
+      return { places: remote.slice(0, SEARCH_PLACES_LIMIT) };
     }
 
     if (input.mode === 'quick' || key.length < SEARCH_PLACES_MIN_LENGTH) {
