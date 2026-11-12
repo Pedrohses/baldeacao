@@ -3,6 +3,8 @@ import type { Arrival } from '../../domain/entities/arrival.entity';
 import { InvalidTransitQueryError } from '../../domain/errors/invalid-transit-query.error';
 import { ArrivalsCache } from '../../domain/ports/arrivals-cache.port';
 import { ArrivalsProvider } from '../../domain/ports/arrivals-provider.port';
+import { StopRepository } from '../../domain/ports/stop-repository.port';
+import { StopNotFoundError } from '../../domain/errors/stop-not-found.error';
 import type { GetStopArrivalsInput, GetStopArrivalsOutput } from '../dto/stop-arrivals.dto';
 
 /** A Olho Vivo recalcula a previsão a cada ciclo de posições (~30 s); 20 s mantém o dado fresco. */
@@ -15,6 +17,7 @@ export class GetStopArrivalsUseCase {
   constructor(
     private readonly provider: ArrivalsProvider,
     private readonly cache: ArrivalsCache,
+    private readonly stops: StopRepository,
   ) {}
 
   async execute(input: GetStopArrivalsInput): Promise<GetStopArrivalsOutput> {
@@ -27,6 +30,9 @@ export class GetStopArrivalsUseCase {
       return null;
     });
     if (cached) return { stopId, arrivals: sortByExpectedAt(cached) };
+
+    // Parada que não existe no GTFS: erro claro em vez de lista vazia da Olho Vivo.
+    if (!(await this.stops.exists(stopId))) throw new StopNotFoundError(stopId);
 
     const arrivals = sortByExpectedAt(await this.provider.forStop(stopId));
     await this.cache.set(stopId, arrivals, ARRIVALS_CACHE_TTL_SECONDS).catch((error: unknown) => {

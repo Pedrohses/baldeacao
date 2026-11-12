@@ -64,6 +64,49 @@ describe('NominatimGeocoderAdapter', () => {
     expect(await none.reverse({ lat: -10, lon: -40 })).toBeNull();
   });
 
+  it('consulta só com CEP usa a busca estruturada (postalcode), sem q', async () => {
+    const result = JSON.stringify([
+      {
+        place_id: 1,
+        osm_type: 'way',
+        osm_id: 10,
+        lat: '-23.5614',
+        lon: '-46.6559',
+        category: 'place',
+        type: 'postcode',
+        addresstype: 'postcode',
+        name: '',
+        display_name: '01310-200, Bela Vista, São Paulo, Brasil',
+        address: { postcode: '01310-200', suburb: 'Bela Vista', city: 'São Paulo' },
+      },
+      {
+        place_id: 2,
+        osm_type: 'node',
+        osm_id: 11,
+        lat: '-23.24',
+        lon: '-46.41',
+        category: 'place',
+        type: 'postcode',
+        addresstype: 'postcode',
+        name: '',
+        display_name: '12960-000, Nazaré Paulista, Brasil',
+        address: { postcode: '12960-000', town: 'Nazaré Paulista' },
+      },
+    ]);
+    const fetchFn = fakeNominatimFetch(result);
+    const places = await adapterWith(fetchFn).search('cep:01310200', 8);
+    // O CEP de outra cidade que o Nominatim devolveu fica de fora.
+    expect(places.map((p) => p.id)).toEqual(['osm:way:10']);
+    const [{ url }] = fetchFn.calls as [(typeof fetchFn.calls)[number]];
+    expect(url.searchParams.get('postalcode')).toBe('01310-200');
+    expect(url.searchParams.get('countrycodes')).toBe('br');
+    expect(url.searchParams.get('viewbox')).toBe('-47.21,-23.18,-45.69,-24.07');
+    expect(url.searchParams.has('q')).toBe(false);
+
+    const empty = adapterWith(fakeNominatimFetch('[]'));
+    expect(await empty.search('01310-200', 8)).toEqual([]);
+  });
+
   it('corta no limite pedido', async () => {
     const places = await adapterWith(fakeNominatimFetch(MORUMBIS)).search('morumbis', 2);
     expect(places.map((p) => p.id)).toEqual(['osm:way:23935207', 'osm:node:4517265781']);

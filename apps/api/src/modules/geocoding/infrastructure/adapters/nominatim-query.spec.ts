@@ -1,4 +1,4 @@
-import { normalizeAddressQuery, streetOnlyQuery } from './nominatim-query';
+import { normalizeAddressQuery, postalCodeOnly, streetOnlyQuery } from './nominatim-query';
 
 describe('normalizeAddressQuery', () => {
   it('converte o formato do Google para vírgulas, sem CEP nem UF', () => {
@@ -24,5 +24,14 @@ describe('streetOnlyQuery', () => {
 
   it('não reduz consultas curtas', () => {
     expect(streetOnlyQuery('Rua Augusta, 1500')).toBeNull();
+  });
+});
+
+describe('postalCodeOnly', () => {
+  it('reconhece só CEP, com ou sem hífen e prefixo', () => {
+    expect(postalCodeOnly('01310-200')).toBe('01310-200');
+    expect(postalCodeOnly(' 01310200 ')).toBe('01310-200');
+    expect(postalCodeOnly('cep:01310-200')).toBe('01310-200');
+    expect(postalCodeOnly('Av. Paulista, 1578, 01310-200')).toBeNull();
   });
 });

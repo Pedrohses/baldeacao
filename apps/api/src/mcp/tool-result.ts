@@ -2,6 +2,7 @@ import type { Logger } from '@nestjs/common';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { DomainError } from '../shared/domain/errors/domain-error';
 import { SourceUnavailableError } from '../shared/domain/errors/source-unavailable.error';
+import { friendlySourceMessage } from '../shared/presentation/source-messages';
 
 /** Resposta de sucesso: texto em português e, se houver outputSchema, os dados estruturados. */
 export function toolText(text: string, structured?: Record<string, unknown>): CallToolResult {
@@ -22,16 +23,6 @@ const FRIENDLY_BY_CODE: Record<string, string> = {
     'A fonte de tempo real da SPTrans (Olho Vivo) está indisponível no momento. Tente novamente em instantes.',
 };
 
-// Fonte fora do ar: a mensagem do adaptador pode citar configuração (OTP_URL etc.), então
-// o usuário recebe o texto da fonte; o detalhe fica no log.
-const SOURCE_UNAVAILABLE_BY_SOURCE: Record<string, string> = {
-  'olho-vivo':
-    'A fonte de tempo real da SPTrans (Olho Vivo) está indisponível no momento. Tente novamente em instantes.',
-  otp: 'O planejador de viagens está indisponível no momento. Tente novamente em instantes.',
-  nominatim:
-    'A busca de endereços está indisponível no momento. Tente novamente em instantes ou informe outro lugar.',
-};
-
 const UNEXPECTED =
   'Não consegui consultar os dados agora por uma falha interna. Tente novamente em instantes.';
 
@@ -49,7 +40,7 @@ export async function runTool(
   } catch (error) {
     if (error instanceof SourceUnavailableError) {
       logger.warn(`${toolName}: ${error.code} (${error.source}): ${error.message}`);
-      return toolError(SOURCE_UNAVAILABLE_BY_SOURCE[error.source] ?? error.message);
+      return toolError(friendlySourceMessage(error));
     }
     if (error instanceof DomainError) {
       logger.warn(`${toolName}: ${error.code}: ${error.message}`);

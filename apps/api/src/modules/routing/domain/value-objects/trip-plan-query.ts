@@ -1,4 +1,4 @@
-import type { Coordinates } from '../entities/itinerary.entity';
+import type { Coordinates, TripMode } from '../entities/itinerary.entity';
 
 /** Quando viajar: sair a partir de, chegar até, ou agora (null). Datas em ISO 8601 com fuso. */
 export type TripTime = { departAt: string } | { arriveBy: string } | null;
@@ -12,4 +12,6 @@ export interface TripPlanQuery {
   maxItineraries: number;
   /** Quantos itinerários pedir ao planejador antes de agrupar saídas repetidas. */
   candidates: number;
+  /** Modos de transporte proibidos nesta consulta (alternativa sem o modo dominante). */
+  excludeModes?: TripMode[];
 }

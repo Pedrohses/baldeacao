@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { cityInput, resolveCity, unsupportedCityMessage } from '../../../../mcp/city';
 import { formatAge, formatClock, plural } from '../../../../mcp/format';
 import { McpTool } from '../../../../mcp/mcp-tool';
+import { parseToolInput, relaxShape } from '../../../../mcp/tool-input';
 import { runTool, toolError, toolText } from '../../../../mcp/tool-result';
 import { GetVehicleSnapshotUseCase } from '../../application/use-cases/get-vehicle-snapshot.use-case';
 import { RealtimeDataNotReadyError } from '../../domain/errors/realtime-data-not-ready.error';
@@ -37,12 +38,15 @@ export class DataStatusTool extends McpTool {
         description:
           'Diz se os dados de tempo real (posição dos ônibus) estão atualizados e de quando é o último dado ' +
           '(ex.: "Os dados de tempo real estão atualizados?").',
-        inputSchema,
+        inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: false },
       },
-      ({ cidade }) =>
+      (args) =>
         runTool(this.logger, this.name, async () => {
+          const input = parseToolInput(inputSchema, args);
+          if (!input.ok) return input.result;
+          const { cidade } = input.data;
           const city = resolveCity(cidade);
           if (!city) return toolError(unsupportedCityMessage(cidade));
           const limitSeconds = REALTIME_STALE_AFTER_MS / 1000;

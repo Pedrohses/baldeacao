@@ -54,7 +54,7 @@ describe('Tool MCP planejar_viagem', () => {
 
     expect(result.isError).toBeFalsy();
     expect(fakes.geocoder.queries).toEqual(['morumbis', 'terminal tietê']);
-    expect(fakes.planner.queries).toEqual([
+    expect(fakes.planner.queries.filter((q) => !q.excludeModes)).toEqual([
       {
         from: placeOriginExample.location,
         to: placeDestinationExample.location,
@@ -153,12 +153,34 @@ describe('Tool MCP planejar_viagem', () => {
     });
   });
 
+  it('caminhada curta com tempo longo explica que inclui espera', async () => {
+    const [first, ...rest] = itineraryExample.legs;
+    fakes.planner.result = [
+      { ...itineraryExample, legs: [{ ...first!, distanceM: 29, durationS: 240 }, ...rest] },
+    ];
+    const result = await plan({ origem: 'Morumbis', destino: 'Terminal Tietê' });
+    expect(textOf(result)).toContain(
+      '1. Caminhe 30 m até Av. Giovanni Gronchi (4 min, inclui espera).',
+    );
+    // Tempo coerente com a distância não ganha a explicação.
+    expect(textOf(result)).toContain('Caminhe 300 m até Terminal Rodoviário Tietê (3 min).');
+  });
+
   it('pede endereço mais específico quando não acha a origem', async () => {
     const result = await plan({ origem: 'Lugar Nenhum', destino: 'Tietê' });
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain('Não encontrei a origem "Lugar Nenhum"');
     expect(textOf(result)).toContain('endereço mais específico');
     expect(fakes.planner.queries).toHaveLength(0);
+  });
+
+  it('aceita origem de 2 caracteres ("Sé") e recusa 1 em português', async () => {
+    fakes.geocoder.byTerm.set('sé', [new Place(placeOriginExample)]);
+    const ok = await plan({ origem: 'Sé', destino: 'Terminal Tietê' });
+    expect(textOf(ok)).not.toContain('Entrada inválida');
+    const short = await plan({ origem: 'S', destino: 'Terminal Tietê' });
+    expect(short.isError).toBe(true);
+    expect(textOf(short)).toBe('Entrada inválida: Informe a origem com pelo menos 2 caracteres.');
   });
 
   it('pede endereço mais específico quando não acha o destino', async () => {

@@ -1,4 +1,4 @@
-import type { Itinerary } from '../entities/itinerary.entity';
+import type { Itinerary, TripMode } from '../entities/itinerary.entity';
 
 /** Saídas seguintes guardadas em cada grupo. */
 export const ALSO_DEPARTS_MAX = 3;
@@ -53,4 +53,40 @@ export function groupItineraries(itineraries: Itinerary[], max: number): Itinera
   return grouped
     .sort((a, b) => time(a.endAt) - time(b.endAt) || time(a.startAt) - time(b.startAt))
     .slice(0, Math.max(0, max));
+}
+
+/** Alternativa sem o modo dominante só entra se durar até isto vezes a melhor opção. */
+export const ALTERNATIVE_MAX_DURATION_RATIO = 1.5;
+
+/**
+ * Modos a excluir para buscar uma alternativa ao itinerário: a família do modo com mais tempo
+ * de veículo (metrô e trem juntos; ônibus e trólebus juntos). null quando é só caminhada.
+ */
+export function dominantModeFamily(itinerary: Itinerary): TripMode[] | null {
+  const seconds = new Map<TripMode, number>();
+  for (const leg of itinerary.legs) {
+    if (leg.mode === 'walk') continue;
+    seconds.set(leg.mode, (seconds.get(leg.mode) ?? 0) + leg.durationS);
+  }
+  let dominant: TripMode | null = null;
+  for (const [mode, total] of seconds) {
+    if (dominant === null || total > (seconds.get(dominant) ?? 0)) dominant = mode;
+  }
+  if (dominant === null) return null;
+  if (dominant === 'subway' || dominant === 'rail') return ['subway', 'rail'];
+  if (dominant === 'bus' || dominant === 'trolleybus') return ['bus', 'trolleybus'];
+  return [dominant];
+}
+
+/**
+ * A melhor alternativa (menor duração) de assinatura diferente de `best`, se durar até 1,5x
+ * a duração dele; senão null.
+ */
+export function pickAlternative(best: Itinerary, candidates: Itinerary[]): Itinerary | null {
+  const signature = itinerarySignature(best);
+  const limit = best.durationS * ALTERNATIVE_MAX_DURATION_RATIO;
+  const options = groupItineraries(candidates, Number.MAX_SAFE_INTEGER)
+    .filter((it) => itinerarySignature(it) !== signature && it.durationS <= limit)
+    .sort((a, b) => a.durationS - b.durationS || time(a.endAt) - time(b.endAt));
+  return options[0] ?? null;
 }

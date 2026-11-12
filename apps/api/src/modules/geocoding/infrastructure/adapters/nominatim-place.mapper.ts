@@ -1,11 +1,14 @@
 import { Place, type PlaceKind } from '../../domain/entities/place.entity';
 import type { NominatimSearchResult } from './nominatim.types';
 
+// Parada de ônibus (e terminal); estação de metrô ou trem fica em STATION_TYPES.
 const STOP_TYPES: Record<string, ReadonlySet<string>> = {
   highway: new Set(['bus_stop']),
   amenity: new Set(['bus_station']),
-  railway: new Set(['station', 'halt', 'tram_stop', 'subway_entrance']),
   public_transport: new Set(['station', 'stop_position', 'platform', 'stop_area']),
+};
+const STATION_TYPES: Record<string, ReadonlySet<string>> = {
+  railway: new Set(['station', 'halt', 'tram_stop', 'subway_entrance']),
 };
 
 // Categorias e addresstypes que são endereço (rua, número, bairro, cidade, CEP).
@@ -35,6 +38,7 @@ function first(address: Record<string, string | undefined>, keys: string[]): str
 }
 
 function kindOf(result: NominatimSearchResult): PlaceKind {
+  if (STATION_TYPES[result.category]?.has(result.type)) return 'station';
   if (STOP_TYPES[result.category]?.has(result.type)) return 'stop';
   if (ADDRESS_CATEGORIES.has(result.category)) return 'address';
   if (result.addresstype && ADDRESS_TYPES.has(result.addresstype) && !result.name?.trim()) {

@@ -57,19 +57,39 @@ function fold(text: string): string {
     .toLowerCase();
 }
 
-/** Lugares conhecidos em memória (busca por trecho do nome, sem acento). */
+/** Lugar conhecido para o repositório em memória; o que faltar recebe valor neutro. */
+export type KnownPlaceSeed = Pick<KnownPlaceMatch, 'place' | 'importance'> &
+  Partial<Omit<KnownPlaceMatch, 'place' | 'importance'>>;
+
+/**
+ * Lugares conhecidos em memória (busca por trecho do nome ou apelido, sem acento).
+ * `cityTest` decide quem fica dentro do município (padrão: ninguém sabe, null).
+ */
 export class InMemoryKnownPlaceRepository extends KnownPlaceRepository {
   readonly replaced: KnownPlaceRecord[][] = [];
+  readonly boundaries: Array<string | null> = [];
+  private readonly places: KnownPlaceMatch[];
 
-  constructor(private readonly places: KnownPlaceMatch[] = []) {
+  constructor(
+    seeds: KnownPlaceSeed[] = [],
+    private readonly cityTest: ((point: Coordinates) => boolean) | null = null,
+  ) {
     super();
+    this.places = seeds.map((seed) => ({
+      category: '',
+      aliases: [],
+      inCity: cityTest ? cityTest(seed.place.location) : null,
+      ...seed,
+    }));
   }
 
   searchByName(text: string, limit: number): Promise<KnownPlaceMatch[]> {
     const needle = fold(text);
     return Promise.resolve(
       this.places
-        .filter((match) => fold(match.place.name).includes(needle))
+        .filter((match) =>
+          [match.place.name, ...match.aliases].some((name) => fold(name).includes(needle)),
+        )
         .sort((a, b) => b.importance - a.importance)
         .slice(0, limit),
     );
@@ -86,8 +106,14 @@ export class InMemoryKnownPlaceRepository extends KnownPlaceRepository {
     return Promise.resolve(nearest ?? null);
   }
 
-  replaceAll(records: KnownPlaceRecord[]): Promise<number> {
+  inServiceCity(points: Coordinates[]): Promise<Array<boolean | null>> {
+    const test = this.cityTest;
+    return Promise.resolve(points.map((point) => (test ? test(point) : null)));
+  }
+
+  replaceAll(records: KnownPlaceRecord[], cityBoundaryGeoJson: string | null): Promise<number> {
     this.replaced.push(records);
+    this.boundaries.push(cityBoundaryGeoJson);
     return Promise.resolve(records.length);
   }
 }

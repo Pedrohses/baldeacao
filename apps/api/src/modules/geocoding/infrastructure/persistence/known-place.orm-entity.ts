@@ -29,6 +29,14 @@ export class KnownPlaceOrmEntity {
   @Column({ type: 'smallint', default: 0 })
   importance: number;
 
+  /** Nomes alternativos separados por "|" (índice de trigramas só na migração). */
+  @Column({ type: 'text', default: '' })
+  aliases: string;
+
+  /** Dentro do município atendido; null sem limite importado. */
+  @Column({ name: 'in_city', type: 'boolean', nullable: true })
+  inCity: boolean | null;
+
   @Column({ type: 'text', nullable: true })
   address: string | null;
 

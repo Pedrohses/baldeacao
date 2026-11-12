@@ -11,6 +11,9 @@ export abstract class StopRepository {
    */
   abstract searchByName(text: string, limit: number): Promise<StopNameMatch[]>;
 
+  /** Se a parada (stop_id do GTFS) existe. */
+  abstract exists(stopId: string): Promise<boolean>;
+
   /** Se há pelo menos uma parada a até `radiusM` metros de `center`. */
   abstract existsWithin(center: Coordinates, radiusM: number): Promise<boolean>;
 }

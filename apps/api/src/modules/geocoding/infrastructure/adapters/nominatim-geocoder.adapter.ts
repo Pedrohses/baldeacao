@@ -3,7 +3,7 @@ import type { Coordinates, Place } from '../../domain/entities/place.entity';
 import { Geocoder } from '../../domain/ports/geocoder.port';
 import { NominatimClient } from './nominatim.client';
 import { NominatimPlaceMapper } from './nominatim-place.mapper';
-import { normalizeAddressQuery, streetOnlyQuery } from './nominatim-query';
+import { normalizeAddressQuery, postalCodeOnly, streetOnlyQuery } from './nominatim-query';
 
 /** Geocoder sobre o Nominatim (1 req/s, Grande SP). O cache fica no caso de uso. */
 @Injectable()
@@ -13,6 +13,18 @@ export class NominatimGeocoderAdapter extends Geocoder {
   }
 
   async search(query: string, limit: number): Promise<Place[]> {
+    // Só CEP: busca estruturada; sem resultado com o mesmo CEP, vazio (nada de texto livre,
+    // que devolve qualquer lugar com aqueles dígitos).
+    const postalCode = postalCodeOnly(query);
+    if (postalCode) {
+      const results = await this.client.searchPostalCode(postalCode, limit);
+      const prefix = postalCode.slice(0, 5);
+      const matching = results.filter((r) => {
+        const found = r.address?.postcode?.replace(/\D/g, '');
+        return !found || found.startsWith(prefix);
+      });
+      return NominatimPlaceMapper.toDomainList(matching).slice(0, limit);
+    }
     const normalized = normalizeAddressQuery(query) || query;
     let results = await this.client.search(normalized, limit);
     // Endereço completo sem resultado: tenta só rua, número e cidade.

@@ -15,7 +15,10 @@ import type { App } from 'supertest/types';
 import {
   InMemoryRouteRepository,
   InMemoryStopRepository,
+  stopLiberdade,
+  stopPaulista,
 } from '../../../../../test/support/transit-in-memory';
+import { Stop } from '../../domain/entities/stop.entity';
 import { OlhoVivoClient } from '../../../../shared/infrastructure/olho-vivo/olho-vivo.client';
 import { FindNearbyStopsUseCase } from '../../application/use-cases/find-nearby-stops.use-case';
 import { GetLineDetailsUseCase } from '../../application/use-cases/get-line-details.use-case';
@@ -82,7 +85,15 @@ describe('HTTP do transit (contrato v1)', () => {
         },
         { provide: ArrivalsCache, useValue: new NoopArrivalsCache() },
         { provide: RouteRepository, useValue: new InMemoryRouteRepository() },
-        { provide: StopRepository, useValue: new InMemoryStopRepository() },
+        {
+          provide: StopRepository,
+          // 4200953 existe no GTFS; a Olho Vivo falsa é que falha para ela.
+          useValue: new InMemoryStopRepository([
+            stopPaulista,
+            stopLiberdade,
+            new Stop({ ...stopLiberdade, id: '4200953', name: 'Parada que falha' }),
+          ]),
+        },
       ],
     }).compile();
     app = moduleRef.createNestApplication();
@@ -175,7 +186,31 @@ describe('HTTP do transit (contrato v1)', () => {
       const res = await request(app.getHttpServer())
         .get(API_PATHS.stopArrivals('4200953'))
         .expect(503);
-      expect(ApiErrorBodySchema.parse(res.body).code).toBe('SOURCE_UNAVAILABLE');
+      const body = ApiErrorBodySchema.parse(res.body);
+      expect(body.code).toBe('SOURCE_UNAVAILABLE');
+      // Texto amigável da fonte, sem nome interno nem variável de configuração.
+      expect(body.message).toMatch(/Olho Vivo/);
+      expect(body.message).not.toMatch(/OLHOVIVO_TOKEN|olho-vivo/);
+    });
+
+    it('parada que não existe responde 404 ApiErrorBody', async () => {
+      const res = await request(app.getHttpServer())
+        .get(API_PATHS.stopArrivals('nope123'))
+        .expect(404);
+      expect(ApiErrorBodySchema.parse(res.body)).toEqual({
+        code: 'STOP_NOT_FOUND',
+        message: 'Parada nope123 não encontrada.',
+      });
+    });
+
+    it('validação em português', async () => {
+      const res = await request(app.getHttpServer())
+        .get(API_PATHS.nearbyStops)
+        .query({ lat: 'abc', lon: '-46.6' })
+        .expect(400);
+      expect(ApiErrorBodySchema.parse(res.body).message).toBe(
+        'Parâmetros inválidos (lat: deve ser um número).',
+      );
     });
   });
 });

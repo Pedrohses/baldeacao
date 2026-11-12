@@ -3,6 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { cityInput, resolveCity, unsupportedCityMessage } from '../../../../mcp/city';
 import { McpTool } from '../../../../mcp/mcp-tool';
+import { parseToolInput, relaxShape } from '../../../../mcp/tool-input';
 import { runTool, toolError, toolText } from '../../../../mcp/tool-result';
 import {
   FindNearbyStopsUseCase,
@@ -66,12 +67,15 @@ export class NearbyStopsTool extends McpTool {
         description:
           'Lista os pontos de ônibus e estações perto de uma coordenada, do mais perto ao mais longe ' +
           '(ex.: "Quais pontos tem perto de mim?"). Devolve o código de cada parada, usado em previsao_chegada.',
-        inputSchema,
+        inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
       },
-      ({ latitude, longitude, raio_metros, limite, cidade }) =>
+      (args) =>
         runTool(this.logger, this.name, async () => {
+          const input = parseToolInput(inputSchema, args);
+          if (!input.ok) return input.result;
+          const { latitude, longitude, raio_metros, limite, cidade } = input.data;
           const city = resolveCity(cidade);
           if (!city) return toolError(unsupportedCityMessage(cidade));
 

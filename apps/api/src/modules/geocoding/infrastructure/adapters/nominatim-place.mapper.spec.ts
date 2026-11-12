@@ -12,7 +12,7 @@ describe('NominatimPlaceMapper', () => {
       ['osm:way:23935207', 'poi'],
       ['osm:node:4517265781', 'stop'],
       ['osm:way:172463014', 'address'],
-      ['osm:node:7015421980', 'stop'],
+      ['osm:node:7015421980', 'station'],
     ]);
     for (const place of places) expect(PlaceSchema.parse({ ...place })).toBeTruthy();
   });

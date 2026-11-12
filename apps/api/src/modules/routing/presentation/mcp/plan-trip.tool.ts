@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { cityInput, resolveCity, unsupportedCityMessage } from '../../../../mcp/city';
 import { formatClock, plural } from '../../../../mcp/format';
 import { McpTool } from '../../../../mcp/mcp-tool';
+import { parseToolInput, relaxShape } from '../../../../mcp/tool-input';
 import { runTool, toolError, toolText } from '../../../../mcp/tool-result';
 import { SearchPlacesUseCase } from '../../../geocoding/application/use-cases/search-places.use-case';
 import {
@@ -24,7 +25,7 @@ const inputSchema = {
   origem: z
     .string()
     .trim()
-    .min(3, 'Informe a origem com pelo menos 3 caracteres.')
+    .min(2, 'Informe a origem com pelo menos 2 caracteres.')
     .max(200)
     .describe(
       'De onde sai: endereço, lugar ou estação (ex.: "Morumbis", "Av. Paulista, 1578") ou "latitude,longitude".',
@@ -32,7 +33,7 @@ const inputSchema = {
   destino: z
     .string()
     .trim()
-    .min(3, 'Informe o destino com pelo menos 3 caracteres.')
+    .min(2, 'Informe o destino com pelo menos 2 caracteres.')
     .max(200)
     .describe('Para onde vai, no mesmo formato da origem (ex.: "Terminal Tietê").'),
   saida: timeInput.describe(
@@ -62,7 +63,14 @@ const outputSchema = {
   cidade: z.string(),
   origem: placeOutput,
   destino: placeOutput,
-  avisos: z.array(z.enum(['origin_outside_service_area', 'destination_outside_service_area'])),
+  avisos: z.array(
+    z.enum([
+      'origin_outside_service_area',
+      'destination_outside_service_area',
+      'date_outside_service',
+      'time_in_past_moved',
+    ]),
+  ),
   itinerarios: z.array(
     z.object({
       saida: z.string(),
@@ -92,6 +100,9 @@ const outputSchema = {
 };
 
 type PlaceOutput = z.infer<typeof placeOutput>;
+
+/** Velocidade a pé conservadora para saber se o tempo do trecho inclui espera. */
+const WALK_SPEED_M_S = 0.8;
 
 const COORDINATES = /^\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/;
 
@@ -128,12 +139,15 @@ export class PlanTripTool extends McpTool {
           '(ex.: "Como chego do Tatuapé à Paulista saindo às 8h?"). Devolve as opções com duração, ' +
           'horários, baldeações e cada trecho, as saídas seguintes com as mesmas linhas ("também às") ' +
           'e avisos quando a origem ou o destino ficam longe de qualquer parada.',
-        inputSchema,
+        inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: true },
       },
-      ({ origem, destino, saida, chegada, opcoes, cidade }) =>
+      (args) =>
         runTool(this.logger, this.name, async () => {
+          const input = parseToolInput(inputSchema, args);
+          if (!input.ok) return input.result;
+          const { origem, destino, saida, chegada, opcoes, cidade } = input.data;
           const city = resolveCity(cidade);
           if (!city) return toolError(unsupportedCityMessage(cidade));
 
@@ -162,7 +176,7 @@ export class PlanTripTool extends McpTool {
           if (itineraries.length === 0) {
             const empty =
               `Não encontrei itinerário de transporte público ${route} nesse horário. ` +
-              (notices.length > 0
+              (notices.some((n) => n.endsWith('_outside_service_area'))
                 ? 'Escolha um ponto mais perto de uma linha.'
                 : 'Tente outro horário ou lugares mais próximos de uma linha.');
             return toolText([...warnings, empty].join('\n\n'), structured);
@@ -231,7 +245,7 @@ function joinClocks(isos: string[], timeZone: string): string {
   return `${clocks.slice(0, -1).join(', ')} e ${clocks[clocks.length - 1]}`;
 }
 
-/** Explica em português cada aviso de área de atendimento. */
+/** Explica em português cada aviso. */
 function describeNotices(
   notices: PlanTripNotice[],
   from: PlaceOutput,
@@ -240,6 +254,15 @@ function describeNotices(
 ): string[] {
   const radius = `${SERVICE_AREA_RADIUS_M / 1000} km`;
   return notices.map((notice) => {
+    if (notice === 'time_in_past_moved') {
+      return 'Atenção: o horário pedido já passou; mostrei as opções para o mesmo horário amanhã.';
+    }
+    if (notice === 'date_outside_service') {
+      return (
+        'Atenção: a data pedida está fora da validade da tabela de horários carregada para ' +
+        `${cityName}; os horários podem não valer ou não aparecer. Tente uma data mais próxima.`
+      );
+    }
     const [which, place] =
       notice === 'origin_outside_service_area' ? ['da origem', from] : ['do destino', to];
     return (
@@ -269,7 +292,11 @@ function describeLeg(leg: Leg, timeZone: string): string {
   if (leg.mode === 'walk') {
     // O adaptador do OTP rotula o ponto final como "Destino"; no texto fica "até o destino".
     const target = leg.to.name === 'Destino' ? 'o destino' : leg.to.name;
-    return `Caminhe ${formatDistance(leg.distanceM)} até ${target} (${formatDuration(leg.durationS)}).`;
+    // Tempo do trecho como o OTP deu; acima do tempo a pé (0,8 m/s), a diferença é espera.
+    const walkingS = leg.distanceM / WALK_SPEED_M_S;
+    const waits = minutes(leg.durationS) > Math.max(1, minutes(walkingS));
+    const time = `${formatDuration(leg.durationS)}${waits ? ', inclui espera' : ''}`;
+    return `Caminhe ${formatDistance(leg.distanceM)} até ${target} (${time}).`;
   }
   // O GTFS da SPTrans nomeia metrô e trem como "METRÔ L4" e "CPTM L9"; o veículo já está no texto.
   const shortName = leg.routeShortName?.replace(/^(METR[ÔO]|CPTM)\s+/i, '');

@@ -26,3 +26,11 @@ export function streetOnlyQuery(normalized: string): string | null {
   const head = /^\d+[a-zA-Z]?$/.test(parts[1] ?? '') ? parts.slice(0, 2) : parts.slice(0, 1);
   return [...head, 'São Paulo'].join(', ');
 }
+
+const POSTAL_CODE_ONLY = /^\s*(?:cep\s*:?\s*)?(\d{5})-?(\d{3})\s*$/i;
+
+/** "01310-200" (ou "01310200", "CEP 01310-200") vira "01310-200"; null se não for só CEP. */
+export function postalCodeOnly(query: string): string | null {
+  const match = POSTAL_CODE_ONLY.exec(query);
+  return match ? `${match[1]}-${match[2]}` : null;
+}

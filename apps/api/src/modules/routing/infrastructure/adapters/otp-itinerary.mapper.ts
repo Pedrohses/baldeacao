@@ -5,6 +5,7 @@ import type {
   LegPlace,
   TripMode,
 } from '../../domain/entities/itinerary.entity';
+import { legHeadsign } from '../../domain/value-objects/leg-headsign';
 import { decodeGooglePolyline } from './google-polyline';
 import type { OtpItinerary, OtpLeg, OtpLegTime, OtpPlace } from './otp.types';
 
@@ -93,7 +94,9 @@ export const OtpItineraryMapper = {
       routeId: route ? stripFeedPrefix(route.gtfsId) : null,
       routeShortName: route ? route.shortName?.trim() || route.longName?.trim() || null : null,
       routeColor: route ? routeColor(route.color) : null,
-      headsign: isTransit ? leg.headsign?.trim() || null : null,
+      headsign: isTransit
+        ? legHeadsign(leg.headsign?.trim() || null, from.name, route?.longName?.trim() || null)
+        : null,
       intermediateStops: isTransit ? (leg.intermediateStops ?? []).filter(Boolean).length : 0,
       isRealtime: isTransit && leg.realTime === true,
       points: legPoints(leg, from.location, to.location),

@@ -4,9 +4,11 @@ import { z } from 'zod';
 import { cityInput, resolveCity, unsupportedCityMessage } from '../../../../mcp/city';
 import { formatClock } from '../../../../mcp/format';
 import { McpTool } from '../../../../mcp/mcp-tool';
+import { parseToolInput, relaxShape } from '../../../../mcp/tool-input';
 import { runTool, toolError, toolText } from '../../../../mcp/tool-result';
 import { GetStopArrivalsUseCase } from '../../application/use-cases/get-stop-arrivals.use-case';
 import type { Arrival } from '../../domain/entities/arrival.entity';
+import { StopNotFoundError } from '../../domain/errors/stop-not-found.error';
 
 const MAX_ARRIVALS = 15;
 
@@ -60,16 +62,28 @@ export class StopArrivalsTool extends McpTool {
         description:
           'Diz quando os próximos ônibus passam numa parada, com a previsão em tempo real da SPTrans ' +
           '(ex.: "Quando passa o 875A no meu ponto?"). Use paradas_proximas para achar o código da parada.',
-        inputSchema,
+        inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: true },
       },
-      ({ parada, linha, cidade }) =>
+      (args) =>
         runTool(this.logger, this.name, async () => {
+          const input = parseToolInput(inputSchema, args);
+          if (!input.ok) return input.result;
+          const { parada, linha, cidade } = input.data;
           const city = resolveCity(cidade);
           if (!city) return toolError(unsupportedCityMessage(cidade));
 
-          const { stopId, arrivals } = await this.getStopArrivals.execute({ stopId: parada });
+          let result;
+          try {
+            result = await this.getStopArrivals.execute({ stopId: parada });
+          } catch (error) {
+            if (!(error instanceof StopNotFoundError)) throw error;
+            return toolError(
+              `A parada ${parada} não existe. Use paradas_proximas para achar o código da parada.`,
+            );
+          }
+          const { stopId, arrivals } = result;
           const nowMs = Date.now();
           const chegadas = arrivals
             .filter((a) => linha === undefined || matchesLine(a, linha))

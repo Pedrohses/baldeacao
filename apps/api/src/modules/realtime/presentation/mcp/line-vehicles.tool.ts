@@ -5,7 +5,9 @@ import { z } from 'zod';
 import { cityInput, resolveCity, unsupportedCityMessage } from '../../../../mcp/city';
 import { formatAge, formatClock, plural } from '../../../../mcp/format';
 import { McpTool } from '../../../../mcp/mcp-tool';
+import { parseToolInput, relaxShape } from '../../../../mcp/tool-input';
 import { runTool, toolError, toolText } from '../../../../mcp/tool-result';
+import { LineExistsUseCase } from '../../../transit/application/use-cases/line-exists.use-case';
 import { GetVehicleSnapshotUseCase } from '../../application/use-cases/get-vehicle-snapshot.use-case';
 
 const MAX_VEHICLES = 50;
@@ -43,7 +45,10 @@ export class LineVehiclesTool extends McpTool {
   readonly name = 'onibus_da_linha';
   private readonly logger = new Logger(LineVehiclesTool.name);
 
-  constructor(private readonly getSnapshot: GetVehicleSnapshotUseCase) {
+  constructor(
+    private readonly getSnapshot: GetVehicleSnapshotUseCase,
+    private readonly lineExists: LineExistsUseCase,
+  ) {
     super();
   }
 
@@ -55,12 +60,15 @@ export class LineVehiclesTool extends McpTool {
         description:
           'Mostra onde estão agora os ônibus de uma linha, com a posição de cada veículo ' +
           '(ex.: "Onde estão os ônibus dessa linha agora?"). Use buscar_linha para achar o código.',
-        inputSchema,
+        inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: false },
       },
-      ({ linha, cidade }) =>
+      (args) =>
         runTool(this.logger, this.name, async () => {
+          const input = parseToolInput(inputSchema, args);
+          if (!input.ok) return input.result;
+          const { linha, cidade } = input.data;
           const city = resolveCity(cidade);
           if (!city) return toolError(unsupportedCityMessage(cidade));
 
@@ -94,9 +102,17 @@ export class LineVehiclesTool extends McpTool {
             : '';
 
           if (onibus.length === 0) {
-            const hint = linha.includes('-')
-              ? ''
-              : ' Confira o código completo da linha (ex.: 875A-10) com buscar_linha.';
+            const { exists, suggestions } = await this.lineExists.execute({ routeId: linha });
+            if (!exists && suggestions.length === 0) {
+              return toolError(
+                `A linha ${linha} não existe. Use buscar_linha para achar o código completo ` +
+                  '(ex.: 875A-10).',
+              );
+            }
+            const hint =
+              suggestions.length > 0
+                ? ` Use o código completo da linha (${suggestions.join(', ')}); confira com buscar_linha.`
+                : '';
             return toolText(
               `Nenhum ônibus da linha ${linha} com posição agora (${freshness}).${hint}${warning}`,
               structured,

@@ -8,6 +8,10 @@ import {
   type StopNameMatch,
 } from '../../src/modules/transit/domain/entities/stop.entity';
 import { RouteRepository } from '../../src/modules/transit/domain/ports/route-repository.port';
+import {
+  ServiceCalendarRepository,
+  type ServicePeriod,
+} from '../../src/modules/transit/domain/ports/service-calendar.port';
 import { StopRepository } from '../../src/modules/transit/domain/ports/stop-repository.port';
 import type { Coordinates } from '../../src/modules/transit/domain/value-objects/coordinates';
 
@@ -105,6 +109,10 @@ export class InMemoryStopRepository extends StopRepository {
     return Promise.resolve(found);
   }
 
+  exists(stopId: string): Promise<boolean> {
+    return Promise.resolve(this.stops.some((stop) => stop.id === stopId));
+  }
+
   existsWithin(center: Coordinates, radiusM: number): Promise<boolean> {
     return Promise.resolve(this.stops.some((stop) => haversineM(center, stop.location) <= radiusM));
   }
@@ -138,4 +146,20 @@ export function haversineM(a: Coordinates, b: Coordinates): number {
   const h =
     Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
   return 2 * 6_371_008.8 * Math.asin(Math.sqrt(h));
+}
+
+/** Calendário em memória; padrão: o ano de 2026 inteiro (como a fixture sptrans-mini). */
+export class InMemoryServiceCalendar extends ServiceCalendarRepository {
+  constructor(
+    private readonly period: ServicePeriod | null = {
+      startDate: '2026-01-01',
+      endDate: '2026-12-31',
+    },
+  ) {
+    super();
+  }
+
+  servicePeriod(): Promise<ServicePeriod | null> {
+    return Promise.resolve(this.period);
+  }
 }

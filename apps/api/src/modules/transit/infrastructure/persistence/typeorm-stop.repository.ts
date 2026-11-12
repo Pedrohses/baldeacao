@@ -96,6 +96,14 @@ export class TypeormStopRepository extends StopRepository {
     return rows.map((row) => ({ stop: StopMapper.toDomain(row), isStation: row.is_station }));
   }
 
+  async exists(stopId: string): Promise<boolean> {
+    const [row] = await this.dataSource.query<Array<{ found: boolean }>>(
+      'SELECT EXISTS (SELECT 1 FROM stops WHERE stop_id = $1) AS found',
+      [stopId],
+    );
+    return row?.found === true;
+  }
+
   async existsWithin(center: Coordinates, radiusM: number): Promise<boolean> {
     const [row] = await this.dataSource.query<Array<{ found: boolean }>>(EXISTS_WITHIN_SQL, [
       center.lon,

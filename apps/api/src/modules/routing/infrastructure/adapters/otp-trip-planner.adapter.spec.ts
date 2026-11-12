@@ -6,7 +6,7 @@ import type { TripPlanQuery } from '../../domain/value-objects/trip-plan-query';
 import { OtpClient } from './otp.client';
 import { stripFeedPrefix, tripModeFromOtp } from './otp-itinerary.mapper';
 import { OTP_PLAN_CONNECTION_QUERY } from './otp-plan-connection.query';
-import { OtpTripPlannerAdapter } from './otp-trip-planner.adapter';
+import { allowedOtpModes, OtpTripPlannerAdapter } from './otp-trip-planner.adapter';
 
 const QUERY: TripPlanQuery = {
   from: { lat: -23.6, lon: -46.7202 },
@@ -145,6 +145,53 @@ describe('OtpTripPlannerAdapter', () => {
     const fetchFn = fakeOtpFetch('{}');
     await expect(plannerWith(fetchFn, null).plan(QUERY)).rejects.toThrow(/OTP_URL/);
     expect(fetchFn.calls).toHaveLength(0);
+  });
+});
+
+describe('OtpTripPlannerAdapter: novas tentativas e modos', () => {
+  const body = readOtpFixture('plan-connection-bus-subway.json');
+  function variablesOf(call: { body: unknown }): Record<string, unknown> {
+    return (call.body as { variables: Record<string, unknown> }).variables;
+  }
+
+  it('timeout: tenta de novo com first menor e janela de 45 min', async () => {
+    const calls: Array<{ body: unknown }> = [];
+    let n = 0;
+    const fetchFn = ((_: unknown, init?: RequestInit) => {
+      calls.push({ body: JSON.parse(typeof init?.body === 'string' ? init.body : 'null') });
+      if (++n === 1) return Promise.reject(new DOMException('aborted', 'AbortError'));
+      return Promise.resolve(new Response(body, { status: 200 }));
+    }) as typeof fetch;
+    const itineraries = await plannerWith(fetchFn).plan(QUERY);
+    expect(itineraries).toHaveLength(2);
+    expect(calls.map(variablesOf).map((v) => [v.first, v.searchWindow])).toEqual([
+      [12, undefined],
+      [6, 'PT45M'],
+    ]);
+  });
+
+  it('falha de rede tenta de novo a mesma consulta; duas falhas viram 503', async () => {
+    const calls: Array<{ body: unknown }> = [];
+    const fetchFn = ((_: unknown, init?: RequestInit) => {
+      calls.push({ body: JSON.parse(typeof init?.body === 'string' ? init.body : 'null') });
+      return Promise.reject(new TypeError('fetch failed'));
+    }) as typeof fetch;
+    await expect(plannerWith(fetchFn).plan(QUERY)).rejects.toBeInstanceOf(SourceUnavailableError);
+    expect(calls.map(variablesOf).map((v) => v.first)).toEqual([12, 12]);
+  });
+
+  it('excludeModes vira modes.transit.transit só com os outros modos', async () => {
+    const fetchFn = fakeOtpFetch(body);
+    await plannerWith(fetchFn).plan({ ...QUERY, excludeModes: ['subway', 'rail'] });
+    const [call] = fetchFn.calls as [(typeof fetchFn.calls)[number]];
+    expect(variablesOf(call).modes).toEqual({
+      transit: {
+        transit: ['BUS', 'COACH', 'TROLLEYBUS', 'TRAM', 'CABLE_CAR', 'GONDOLA', 'FERRY'].map(
+          (mode) => ({ mode }),
+        ),
+      },
+    });
+    expect(allowedOtpModes(undefined)).toBeNull();
   });
 });
 

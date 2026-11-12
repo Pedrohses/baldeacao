@@ -10,6 +10,8 @@ import {
   stopLiberdade,
   stopPaulista,
 } from '../../../../../test/support/transit-in-memory';
+import { Stop } from '../../../transit/domain/entities/stop.entity';
+import { FindNearbyStopsUseCase } from '../../../transit/application/use-cases/find-nearby-stops.use-case';
 import { SearchStopsByNameUseCase } from '../../../transit/application/use-cases/search-stops-by-name.use-case';
 import { Place } from '../../domain/entities/place.entity';
 import { InvalidPlaceQueryError } from '../../domain/errors/invalid-place-query.error';
@@ -30,6 +32,10 @@ const SE = new Place({
   kind: 'address',
   location: { lat: -23.5503, lon: -46.6339 },
 });
+
+function nearby(stops?: Stop[]): FindNearbyStopsUseCase {
+  return new FindNearbyStopsUseCase(new InMemoryStopRepository(stops));
+}
 
 function noStops(): SearchStopsByNameUseCase {
   return new SearchStopsByNameUseCase(new InMemoryStopRepository([]));
@@ -60,6 +66,7 @@ describe('SearchPlacesUseCase', () => {
       geocoder,
       noStops(),
       new InMemoryKnownPlaceRepository(),
+      nearby(),
     );
 
     const first = await useCase.execute({ query: '  Praça da  Sé ', mode: 'full' });
@@ -84,6 +91,7 @@ describe('SearchPlacesUseCase', () => {
       ),
       noStops(),
       new InMemoryKnownPlaceRepository(),
+      nearby(),
     );
     const first = await useCase.execute({ query: 'Estádio do Morumbis', mode: 'full' });
     const second = await useCase.execute({ query: 'estádio do morumbis', mode: 'full' });
@@ -100,6 +108,7 @@ describe('SearchPlacesUseCase', () => {
       geocoder,
       noStops(),
       new InMemoryKnownPlaceRepository(),
+      nearby(),
     );
 
     await useCase.execute({ query: 'lugar que não existe', mode: 'full' });
@@ -116,6 +125,7 @@ describe('SearchPlacesUseCase', () => {
       new FakeGeocoder(),
       noStops(),
       new InMemoryKnownPlaceRepository(),
+      nearby(),
     ).execute({
       query: 'sé sé',
       mode: 'full',
@@ -130,6 +140,7 @@ describe('SearchPlacesUseCase', () => {
       geocoder,
       noStops(),
       new InMemoryKnownPlaceRepository(),
+      nearby(),
     );
     await expect(useCase.execute({ query: '  s  ', mode: 'full' })).rejects.toBeInstanceOf(
       InvalidPlaceQueryError,
@@ -144,6 +155,7 @@ describe('SearchPlacesUseCase', () => {
       new FakeGeocoder(new SourceUnavailableError('nominatim')),
       noStops(),
       new InMemoryKnownPlaceRepository(),
+      nearby(),
     );
     await expect(useCase.execute({ query: 'paulista', mode: 'full' })).rejects.toBeInstanceOf(
       SourceUnavailableError,
@@ -162,6 +174,7 @@ describe('SearchPlacesUseCase', () => {
         geocoder,
         stops(),
         new InMemoryKnownPlaceRepository(),
+        nearby(),
       );
 
       const { places } = await useCase.execute({ query: 'PAULISTA', mode: 'quick' });
@@ -205,6 +218,7 @@ describe('SearchPlacesUseCase', () => {
             importance: 3,
           },
         ]),
+        nearby(),
       );
       const jardim = await useCase.execute({ query: 'jardim bot', mode: 'quick' });
       expect(jardim.places).toEqual([botanico]);
@@ -222,12 +236,13 @@ describe('SearchPlacesUseCase', () => {
         new FakeGeocoder(),
         stops(),
         new InMemoryKnownPlaceRepository(),
+        nearby(),
       );
       const { places } = await useCase.execute({ query: 'ib', mode: 'quick' });
       expect(places.map((p) => p.id)).toEqual([`stop:${stopLiberdade.id}`]);
     });
 
-    it('full junta locais primeiro e Nominatim, sem duplicar o mesmo lugar', async () => {
+    it('full ordena locais e Nominatim juntos pela qualidade, sem duplicar o mesmo lugar', async () => {
       const duplicate = new Place({
         id: 'osm:node:9',
         name: 'Av. Paulista',
@@ -248,11 +263,14 @@ describe('SearchPlacesUseCase', () => {
         geocoder,
         stops(),
         new InMemoryKnownPlaceRepository(),
+        nearby(),
       );
 
       const { places } = await useCase.execute({ query: 'paulista', mode: 'full' });
 
-      expect(places.map((p) => p.id)).toEqual(['stop:4301848', 'osm:node:1', 'osm:node:10']);
+      // "Av. Paulista" (endereço) e a parada "Av. Paulista 1578" a menos de 200 m são o mesmo
+      // lugar; o endereço casa o nome inteiro e fica. Praça da Sé não casa "paulista".
+      expect(places.map((p) => p.id)).toEqual(['osm:node:9', 'osm:node:10', 'osm:node:1']);
       expect(geocoder.calls).toHaveLength(1);
     });
 
@@ -262,9 +280,160 @@ describe('SearchPlacesUseCase', () => {
         new FakeGeocoder(new SourceUnavailableError('nominatim')),
         stops(),
         new InMemoryKnownPlaceRepository(),
+        nearby(),
       );
       const { places } = await useCase.execute({ query: 'paulista', mode: 'full' });
       expect(places.map((p) => p.id)).toEqual(['stop:4301848']);
     });
+  });
+
+  it('só CEP: quick vazio; full vai ao Nominatim com chave própria e vazio fica vazio', async () => {
+    const cache = new InMemoryGeocodeCache();
+    const geocoder = new FakeGeocoder([]);
+    const useCase = new SearchPlacesUseCase(
+      cache,
+      geocoder,
+      new SearchStopsByNameUseCase(new InMemoryStopRepository()),
+      new InMemoryKnownPlaceRepository(),
+      nearby(),
+    );
+    expect((await useCase.execute({ query: '01310-200', mode: 'quick' })).places).toEqual([]);
+    expect(geocoder.calls).toHaveLength(0);
+    expect((await useCase.execute({ query: '01310200', mode: 'full' })).places).toEqual([]);
+    expect(geocoder.calls).toEqual([{ query: 'cep:01310-200', limit: SEARCH_PLACES_LIMIT }]);
+    expect(cache.entries.has('cep:01310-200')).toBe(true);
+  });
+
+  it('só CEP: resultado do Nominatim fora do município fica de fora', async () => {
+    const nazare = new Place({
+      id: 'osm:node:11',
+      name: '01310-200',
+      address: 'Nazaré Paulista',
+      kind: 'address',
+      location: { lat: -23.241, lon: -46.4176 },
+    });
+    const paulista = new Place({ ...nazare, id: 'osm:way:10', location: SE.location });
+    const useCase = new SearchPlacesUseCase(
+      new InMemoryGeocodeCache(),
+      new FakeGeocoder([nazare, paulista]),
+      noStops(),
+      new InMemoryKnownPlaceRepository([], (p) => p.lat < -23.35),
+      nearby(),
+    );
+    const { places } = await useCase.execute({ query: '01310-200', mode: 'full' });
+    expect(places.map((p) => p.id)).toEqual(['osm:way:10']);
+  });
+
+  describe('ranking com município e apelidos', () => {
+    // "Município" de teste: tudo ao norte de -23.8 e a leste de -46.85.
+    const inCity = (p: { lat: number; lon: number }) => p.lat > -23.8 && p.lon > -46.85;
+
+    it('estação vira kind station; parada de ônibus fica stop', async () => {
+      const repository = new InMemoryStopRepository();
+      repository.stationIds.add(stopLiberdade.id);
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new FakeGeocoder(),
+        new SearchStopsByNameUseCase(repository),
+        new InMemoryKnownPlaceRepository(),
+        nearby(),
+      );
+      const { places } = await useCase.execute({ query: 'av', mode: 'quick' });
+      expect(places.map((p) => [p.id, p.kind])).toEqual([
+        [`stop:${stopLiberdade.id}`, 'station'],
+        [`stop:${stopPaulista.id}`, 'stop'],
+      ]);
+    });
+
+    it('quick acha pelo apelido e joga para baixo o homônimo de outra cidade', async () => {
+      const mercadao = new Place({
+        id: 'osm:relation:4602996',
+        name: 'Mercado Municipal de São Paulo',
+        address: null,
+        kind: 'poi',
+        location: { lat: -23.5417, lon: -46.6297 },
+      });
+      const jundiai = new Place({
+        id: 'osm:way:398442647',
+        name: 'Mercadão Vila Arens',
+        address: null,
+        kind: 'poi',
+        location: { lat: -23.19, lon: -46.89 },
+      });
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new FakeGeocoder(),
+        noStops(),
+        new InMemoryKnownPlaceRepository(
+          [
+            { place: jundiai, importance: 5 },
+            { place: mercadao, importance: 7, aliases: ['Mercado Municipal', 'Mercadão'] },
+          ],
+          inCity,
+        ),
+        nearby(),
+      );
+      const { places } = await useCase.execute({ query: 'Mercadão', mode: 'quick' });
+      expect(places.map((p) => p.id)).toEqual([mercadao.id, jundiai.id]);
+    });
+
+    it('full: endereço do Nominatim com o mesmo número acima da parada de outro número', async () => {
+      const vergueiro = new Place({
+        id: 'osm:node:3185',
+        name: 'Rua Vergueiro, 3185',
+        address: 'Rua Vergueiro, 3185, Vila Mariana, São Paulo',
+        kind: 'address',
+        location: { lat: -23.588, lon: -46.634 },
+      });
+      const stop356 = new Stop({
+        ...stopPaulista,
+        id: '1000',
+        name: 'R. Vergueiro, 356',
+        location: { lat: -23.567, lon: -46.64 },
+      });
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new FakeGeocoder([vergueiro]),
+        new SearchStopsByNameUseCase(new InMemoryStopRepository([stop356])),
+        new InMemoryKnownPlaceRepository([], inCity),
+        nearby(),
+      );
+      const { places } = await useCase.execute({ query: 'R. Vergueiro, 3185', mode: 'full' });
+      expect(places[0]?.id).toBe(vergueiro.id);
+    });
+  });
+
+  it('lugar grande (aeroporto) usa a parada mais próxima do centroide como coordenada', async () => {
+    const congonhas = new Place({
+      id: 'osm:way:7',
+      name: 'Aeroporto de Congonhas',
+      address: null,
+      kind: 'poi',
+      location: { lat: -23.6273, lon: -46.6566 },
+    });
+    // Parada no terminal, a ~600 m do centroide (meio da pista).
+    const terminal = new Stop({
+      ...stopPaulista,
+      id: '2000',
+      name: 'Aeroporto de Congonhas',
+      location: { lat: -23.6265, lon: -46.6614 },
+    });
+    const museum = new Place({ ...congonhas, id: 'osm:way:8', name: 'Aeroporto Museu' });
+    const useCase = new SearchPlacesUseCase(
+      new InMemoryGeocodeCache(),
+      new FakeGeocoder(),
+      noStops(),
+      new InMemoryKnownPlaceRepository([
+        { place: congonhas, importance: 11, category: 'aeroway=aerodrome' },
+        { place: museum, importance: 6, category: 'tourism=museum' },
+      ]),
+      nearby([terminal]),
+    );
+    const { places } = await useCase.execute({ query: 'aeroporto', mode: 'quick' });
+    expect(places.find((p) => p.id === congonhas.id)).toEqual(
+      new Place({ ...congonhas, location: terminal.location }),
+    );
+    // Museu não é lugar grande: fica no centroide.
+    expect(places.find((p) => p.id === museum.id)?.location).toEqual(congonhas.location);
   });
 });

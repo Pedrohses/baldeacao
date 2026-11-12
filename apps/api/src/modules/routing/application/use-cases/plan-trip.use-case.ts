@@ -1,14 +1,22 @@
 import { Injectable } from '@nestjs/common';
+import { GetServicePeriodUseCase } from '../../../transit/application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
-import type { Coordinates } from '../../domain/entities/itinerary.entity';
+import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
+import type { Coordinates, Itinerary } from '../../domain/entities/itinerary.entity';
 import { InvalidTripRequestError } from '../../domain/errors/invalid-trip-request.error';
+import { Clock } from '../../domain/ports/clock.port';
 import { TripPlanner } from '../../domain/ports/trip-planner.port';
-import { groupItineraries } from '../../domain/value-objects/itinerary-grouping';
+import {
+  dominantModeFamily,
+  groupItineraries,
+  pickAlternative,
+} from '../../domain/value-objects/itinerary-grouping';
 import {
   type PlanTripNotice,
   SERVICE_AREA_RADIUS_M,
 } from '../../domain/value-objects/plan-trip-notice';
-import type { TripTime } from '../../domain/value-objects/trip-plan-query';
+import { movePastTimeForward, serviceDateOf } from '../../domain/value-objects/trip-date';
+import type { TripPlanQuery, TripTime } from '../../domain/value-objects/trip-plan-query';
 import type { PlanTripInput, PlanTripOutput } from '../dto/plan-trip.dto';
 
 export const PLAN_TRIP_DEFAULT_ITINERARIES = 3;
@@ -50,6 +58,8 @@ export class PlanTripUseCase {
   constructor(
     private readonly planner: TripPlanner,
     private readonly hasNearbyStop: HasNearbyStopUseCase,
+    private readonly servicePeriod: GetServicePeriodUseCase,
+    private readonly clock: Clock,
   ) {}
 
   async execute(input: PlanTripInput): Promise<PlanTripOutput> {
@@ -59,28 +69,70 @@ export class PlanTripUseCase {
       throw new InvalidTripRequestError('Informe só a hora de saída ou só a de chegada.');
     }
 
+    const now = this.clock.now();
+    const timeNotices: PlanTripNotice[] = [];
+    // Hora que já passou vai para o mesmo horário no dia seguinte, com aviso.
+    const forward = (iso: string): string => {
+      const moved = movePastTimeForward(iso, now);
+      if (!moved) return iso;
+      timeNotices.push('time_in_past_moved');
+      return moved;
+    };
     let time: TripTime = null;
     if (input.departAt) {
       assertDateTime(input.departAt, 'saída');
-      time = { departAt: input.departAt };
+      time = { departAt: forward(input.departAt) };
     } else if (input.arriveBy) {
       assertDateTime(input.arriveBy, 'chegada');
-      time = { arriveBy: input.arriveBy };
+      time = { arriveBy: forward(input.arriveBy) };
     }
+    const requestedIso = time ? ('departAt' in time ? time.departAt : time.arriveBy) : null;
 
     const requested = Math.trunc(input.maxItineraries ?? PLAN_TRIP_DEFAULT_ITINERARIES);
     const maxItineraries = Math.min(Math.max(1, requested), PLAN_TRIP_MAX_ITINERARIES);
 
     // Antes do OTP: sem parada a 1 km, avisa (o OTP ainda pode achar rota longa a pé).
-    const notices = await this.serviceAreaNotices(input.from, input.to);
-    const itineraries = await this.planner.plan({
+    const [areaNotices, dateNotices] = await Promise.all([
+      this.serviceAreaNotices(input.from, input.to),
+      this.serviceDateNotices(serviceDateOf(requestedIso, now)),
+    ]);
+    const notices = [...timeNotices, ...dateNotices, ...areaNotices];
+    const query = {
       from: input.from,
       to: input.to,
       time,
       maxItineraries,
       candidates: planTripCandidates(maxItineraries),
-    });
-    return { itineraries: groupItineraries(itineraries, maxItineraries), notices };
+    };
+    const grouped = groupItineraries(await this.planner.plan(query), maxItineraries);
+    return { itineraries: await this.withAlternative(grouped, query), notices };
+  }
+
+  /**
+   * Só uma opção (ex.: metrô direto): consulta de novo sem o modo dominante e acrescenta a
+   * melhor alternativa se durar até 1,5x. Falha nessa segunda consulta não derruba a primeira.
+   */
+  private async withAlternative(grouped: Itinerary[], query: TripPlanQuery): Promise<Itinerary[]> {
+    const [best] = grouped;
+    if (grouped.length !== 1 || !best || query.maxItineraries < 2) return grouped;
+    const excludeModes = dominantModeFamily(best);
+    if (!excludeModes) return grouped;
+    let others: Itinerary[];
+    try {
+      others = await this.planner.plan({ ...query, excludeModes });
+    } catch (error) {
+      if (error instanceof SourceUnavailableError) return grouped;
+      throw error;
+    }
+    const alternative = pickAlternative(best, others);
+    return alternative ? [best, alternative] : grouped;
+  }
+
+  /** Data fora da validade do GTFS: o OTP não acha viagens nela (ou acha só caminhada). */
+  private async serviceDateNotices(date: string): Promise<PlanTripNotice[]> {
+    const { period } = await this.servicePeriod.execute();
+    if (!period) return [];
+    return date < period.startDate || date > period.endDate ? ['date_outside_service'] : [];
   }
 
   private async serviceAreaNotices(from: Coordinates, to: Coordinates): Promise<PlanTripNotice[]> {

@@ -25,6 +25,8 @@ const CATEGORIES: ReadonlyArray<{
   { key: 'amenity', values: new Set(['college']), importance: 4 },
   { key: 'landuse', values: new Set(['cemetery']), importance: 4 },
   { key: 'historic', values: '*', importance: 3 },
+  // Bairros: "Centro", "Pinheiros", "Tatuapé".
+  { key: 'place', values: new Set(['suburb', 'quarter', 'neighbourhood']), importance: 5 },
 ];
 
 /** Bônus para lugares com verbete no Wikidata (em geral os mais conhecidos). */
@@ -34,6 +36,55 @@ export interface OsmPoiCategory {
   /** Tag que classificou, ex.: "leisure=park". */
   category: string;
   importance: number;
+  /** Estação de metrô/trem, bairro (endereço) ou ponto de interesse. */
+  kind: 'poi' | 'station' | 'address';
+}
+
+function kindOf(key: string): OsmPoiCategory['kind'] {
+  if (key === 'railway') return 'station';
+  if (key === 'place') return 'address';
+  return 'poi';
+}
+
+/**
+ * Lugares grandes (aeroporto, parque, campus, zoológico, estádio, cemitério): o centroide pode
+ * ficar no meio do pátio, longe de qualquer entrada. Na busca, a coordenada deles vira a da
+ * parada ou estação mais próxima do centroide (a até ACCESS_POINT_RADIUS_M), para a rota não
+ * terminar com quilômetros de caminhada até o meio da área.
+ */
+export const LARGE_PLACE_CATEGORIES: ReadonlySet<string> = new Set([
+  'aeroway=aerodrome',
+  'leisure=park',
+  'leisure=garden',
+  'leisure=stadium',
+  'tourism=zoo',
+  'amenity=university',
+  'amenity=college',
+  'amenity=hospital',
+  'landuse=cemetery',
+]);
+export const ACCESS_POINT_RADIUS_M = 1500;
+/** Parada a menos disso do centroide: o centroide já é acessível e fica como está. */
+export const ACCESS_POINT_MIN_OFFSET_M = 250;
+
+// Tags com outros nomes do lugar; valores com ";" são vários nomes.
+const ALIAS_KEYS = ['alt_name', 'short_name', 'official_name', 'old_name', 'loc_name'];
+
+/** Nomes alternativos do objeto (ex.: "MASP", "Mercadão", "Allianz Parque"), sem repetir o nome. */
+export function osmPoiAliases(tags: OsmTags): string[] {
+  const name = tags.name?.trim().toLocaleLowerCase('pt-BR');
+  const aliases: string[] = [];
+  for (const key of ALIAS_KEYS) {
+    for (const raw of tags[key]?.split(';') ?? []) {
+      const alias = raw.trim().replace(/\s+/g, ' ');
+      const lower = alias.toLocaleLowerCase('pt-BR');
+      if (!alias || lower === name || aliases.some((a) => a.toLocaleLowerCase('pt-BR') === lower)) {
+        continue;
+      }
+      aliases.push(alias);
+    }
+  }
+  return aliases;
 }
 
 /** Categoria do lugar pelas tags, ou null quando não é uma das importadas. */
@@ -43,7 +94,7 @@ export function classifyOsmPoi(tags: OsmTags): OsmPoiCategory | null {
     if (!value || value === 'no') continue;
     if (values !== '*' && !values.has(value)) continue;
     const bonus = tags.wikidata?.trim() ? WIKIDATA_BONUS : 0;
-    return { category: `${key}=${value}`, importance: importance + bonus };
+    return { category: `${key}=${value}`, importance: importance + bonus, kind: kindOf(key) };
   }
   return null;
 }

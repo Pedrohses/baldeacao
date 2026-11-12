@@ -3,6 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { cityInput, resolveCity, unsupportedCityMessage } from '../../../../mcp/city';
 import { McpTool } from '../../../../mcp/mcp-tool';
+import { parseToolInput, relaxShape } from '../../../../mcp/tool-input';
 import { runTool, toolError, toolText } from '../../../../mcp/tool-result';
 import { SearchLinesUseCase } from '../../application/use-cases/search-lines.use-case';
 import { routeTypeLabel } from './transit-mcp-format';
@@ -58,12 +59,15 @@ export class SearchLinesTool extends McpTool {
         description:
           'Busca linhas de ônibus, metrô e trem pelo número ou pelo nome (ex.: "Qual linha vai para o Aeroporto?"). ' +
           'Devolve o código de cada linha, usado em onibus_da_linha e previsao_chegada.',
-        inputSchema,
+        inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
       },
-      ({ texto, limite, cidade }) =>
+      (args) =>
         runTool(this.logger, this.name, async () => {
+          const input = parseToolInput(inputSchema, args);
+          if (!input.ok) return input.result;
+          const { texto, limite, cidade } = input.data;
           const city = resolveCity(cidade);
           if (!city) return toolError(unsupportedCityMessage(cidade));
 

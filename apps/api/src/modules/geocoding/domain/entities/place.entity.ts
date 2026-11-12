@@ -3,8 +3,11 @@ export interface Coordinates {
   lon: number;
 }
 
-/** Tipo do lugar: endereço, ponto de interesse, parada de transporte ou coordenada solta. */
-export type PlaceKind = 'address' | 'poi' | 'stop' | 'coordinates';
+/**
+ * Tipo do lugar: endereço, ponto de interesse, parada de ônibus (`stop`), estação de metrô ou
+ * trem (`station`) ou coordenada solta.
+ */
+export type PlaceKind = 'address' | 'poi' | 'stop' | 'station' | 'coordinates';
 
 export interface PlaceProps {
   id: string;

@@ -3,6 +3,8 @@ import { Arrival } from '../../domain/entities/arrival.entity';
 import { InvalidTransitQueryError } from '../../domain/errors/invalid-transit-query.error';
 import { ArrivalsCache } from '../../domain/ports/arrivals-cache.port';
 import { ArrivalsProvider } from '../../domain/ports/arrivals-provider.port';
+import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
+import { StopNotFoundError } from '../../domain/errors/stop-not-found.error';
 import { ARRIVALS_CACHE_TTL_SECONDS, GetStopArrivalsUseCase } from './get-stop-arrivals.use-case';
 
 const arrival = (vehicleId: string, expectedAt: string) =>
@@ -55,7 +57,7 @@ describe('GetStopArrivalsUseCase', () => {
   it('busca na fonte, ordena por expectedAt e guarda no cache curto', async () => {
     const provider = new InMemoryArrivalsProvider([late, soon]);
     const cache = new InMemoryArrivalsCache();
-    const useCase = new GetStopArrivalsUseCase(provider, cache);
+    const useCase = new GetStopArrivalsUseCase(provider, cache, new InMemoryStopRepository());
 
     const result = await useCase.execute({ stopId: '4301848' });
 
@@ -69,7 +71,7 @@ describe('GetStopArrivalsUseCase', () => {
   it('serve do cache sem chamar a fonte', async () => {
     const provider = new InMemoryArrivalsProvider([late]);
     const cache = new InMemoryArrivalsCache();
-    const useCase = new GetStopArrivalsUseCase(provider, cache);
+    const useCase = new GetStopArrivalsUseCase(provider, cache, new InMemoryStopRepository());
 
     await useCase.execute({ stopId: '4301848' });
     await useCase.execute({ stopId: '4301848' });
@@ -79,7 +81,11 @@ describe('GetStopArrivalsUseCase', () => {
 
   it('segue sem cache quando o Redis falha', async () => {
     const provider = new InMemoryArrivalsProvider([soon]);
-    const useCase = new GetStopArrivalsUseCase(provider, new InMemoryArrivalsCache(true));
+    const useCase = new GetStopArrivalsUseCase(
+      provider,
+      new InMemoryArrivalsCache(true),
+      new InMemoryStopRepository(),
+    );
 
     await expect(useCase.execute({ stopId: '4301848' })).resolves.toEqual({
       stopId: '4301848',
@@ -92,6 +98,7 @@ describe('GetStopArrivalsUseCase', () => {
     const useCase = new GetStopArrivalsUseCase(
       new InMemoryArrivalsProvider(new SourceUnavailableError('olho-vivo')),
       cache,
+      new InMemoryStopRepository(),
     );
 
     await expect(useCase.execute({ stopId: '4301848' })).rejects.toBeInstanceOf(
@@ -104,9 +111,20 @@ describe('GetStopArrivalsUseCase', () => {
     const useCase = new GetStopArrivalsUseCase(
       new InMemoryArrivalsProvider([]),
       new InMemoryArrivalsCache(),
+      new InMemoryStopRepository(),
     );
     await expect(useCase.execute({ stopId: '  ' })).rejects.toBeInstanceOf(
       InvalidTransitQueryError,
     );
+  });
+
+  it('parada que não existe no GTFS vira StopNotFoundError sem consultar a fonte', async () => {
+    const provider = new InMemoryArrivalsProvider([]);
+    const useCase = new GetStopArrivalsUseCase(
+      provider,
+      new InMemoryArrivalsCache(),
+      new InMemoryStopRepository(),
+    );
+    await expect(useCase.execute({ stopId: 'nope123' })).rejects.toBeInstanceOf(StopNotFoundError);
   });
 });

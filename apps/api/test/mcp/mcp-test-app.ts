@@ -14,6 +14,7 @@ import { KnownPlaceRepository } from '../../src/modules/geocoding/domain/ports/k
 import { GeocodingModule } from '../../src/modules/geocoding/geocoding.module';
 import { PlanTripUseCase } from '../../src/modules/routing/application/use-cases/plan-trip.use-case';
 import type { Itinerary } from '../../src/modules/routing/domain/entities/itinerary.entity';
+import { Clock } from '../../src/modules/routing/domain/ports/clock.port';
 import { TripPlanner } from '../../src/modules/routing/domain/ports/trip-planner.port';
 import type { TripPlanQuery } from '../../src/modules/routing/domain/value-objects/trip-plan-query';
 import { RoutingModule } from '../../src/modules/routing/routing.module';
@@ -23,17 +24,25 @@ import { RealtimeModule } from '../../src/modules/realtime/realtime.module';
 import { FindNearbyStopsUseCase } from '../../src/modules/transit/application/use-cases/find-nearby-stops.use-case';
 import { GetLineDetailsUseCase } from '../../src/modules/transit/application/use-cases/get-line-details.use-case';
 import { GetStopArrivalsUseCase } from '../../src/modules/transit/application/use-cases/get-stop-arrivals.use-case';
+import { GetServicePeriodUseCase } from '../../src/modules/transit/application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from '../../src/modules/transit/application/use-cases/has-nearby-stop.use-case';
+import { LineExistsUseCase } from '../../src/modules/transit/application/use-cases/line-exists.use-case';
 import { SearchLinesUseCase } from '../../src/modules/transit/application/use-cases/search-lines.use-case';
 import type { Arrival } from '../../src/modules/transit/domain/entities/arrival.entity';
 import { ArrivalsCache } from '../../src/modules/transit/domain/ports/arrivals-cache.port';
 import { ArrivalsProvider } from '../../src/modules/transit/domain/ports/arrivals-provider.port';
 import { RouteRepository } from '../../src/modules/transit/domain/ports/route-repository.port';
+import { ServiceCalendarRepository } from '../../src/modules/transit/domain/ports/service-calendar.port';
 import { StopRepository } from '../../src/modules/transit/domain/ports/stop-repository.port';
 import { TransitModule } from '../../src/modules/transit/transit.module';
 import { InMemoryPositionsStore } from '../realtime/in-memory-realtime';
+import { FixedClock } from '../support/routing-in-memory';
 import { InMemoryGeocodeCache, InMemoryKnownPlaceRepository } from '../support/geocoding-in-memory';
-import { InMemoryRouteRepository, InMemoryStopRepository } from '../support/transit-in-memory';
+import {
+  InMemoryRouteRepository,
+  InMemoryServiceCalendar,
+  InMemoryStopRepository,
+} from '../support/transit-in-memory';
 
 /** Previsões por parada; uma parada mapeada para Error faz a fonte falhar. */
 export class InMemoryArrivalsProvider extends ArrivalsProvider {
@@ -126,6 +135,7 @@ function buildTestingModule(fakes: McpFakes) {
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
       HasNearbyStopUseCase,
+      LineExistsUseCase,
       { provide: RouteRepository, useValue: new InMemoryRouteRepository() },
       { provide: StopRepository, useValue: fakes.stops },
       { provide: ArrivalsProvider, useValue: fakes.arrivals },
@@ -138,6 +148,7 @@ function buildTestingModule(fakes: McpFakes) {
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
       HasNearbyStopUseCase,
+      LineExistsUseCase,
     ],
   })
   class FakeTransitModule {}
@@ -155,6 +166,7 @@ function buildTestingModule(fakes: McpFakes) {
     providers: [
       SearchPlacesUseCase,
       SearchStopsByNameUseCase,
+      FindNearbyStopsUseCase,
       { provide: StopRepository, useValue: new InMemoryStopRepository() },
       { provide: Geocoder, useValue: fakes.geocoder },
       { provide: GeocodeCache, useValue: fakes.geocodeCache },
@@ -168,8 +180,12 @@ function buildTestingModule(fakes: McpFakes) {
     providers: [
       PlanTripUseCase,
       HasNearbyStopUseCase,
+      GetServicePeriodUseCase,
       { provide: StopRepository, useValue: fakes.stops },
       { provide: TripPlanner, useValue: fakes.planner },
+      { provide: ServiceCalendarRepository, useValue: new InMemoryServiceCalendar() },
+      // Relógio parado antes das datas das fixtures (12/11/2026 às 07:00).
+      { provide: Clock, useValue: new FixedClock() },
     ],
     exports: [PlanTripUseCase],
   })
