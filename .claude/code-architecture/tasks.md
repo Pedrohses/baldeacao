@@ -69,9 +69,10 @@ Só o orquestrador, em sequência.
 
 **Portão 0:** contratos v1 e fixtures na `main`, CI verde.
 
-**Registro da Onda 0 (2026-11-12):** O-01 a O-07 integradas na `main`; lint, typecheck, testes (api 49, web 23) e build passando localmente. Pendente para fechar o portão: CI verde no GitHub (push) e subir a api com Postgres e Redis.
+**Registro da Onda 0 (2026-11-12):** O-01 a O-07 integradas na `main`; lint, typecheck, testes (api 49, web 23) e build passando localmente. **Portão 0 fechado:** CI verde em 75c4ddf; api sobe com os módulos novos e `/health` responde 200 com Postgres e Redis.
 
 Decisões tomadas na Onda 0, fora dos documentos:
+- Node 26 LTS (antes 22): o Jest só carrega o Nest 12 (ESM) via `require` a partir do Node 24.9; o CI falhava desde a fase 1 por isso.
 - `packages/types` compila para `dist/` (ESM com `.d.ts`); a api (CommonJS) carrega via `require(esm)` do Node; a turbo roda `^build` antes de `dev`, `lint`, `typecheck` e `test`; o Jest da api mapeia `@baldeacao/types` para o código-fonte.
 - Contratos: coordenadas em `{lat, lon}` (`toLonLat` para o MapLibre), datas ISO com fuso, ids sempre string, sentido 0/1 do GTFS; canal por linha usa o `route_id`; cada ciclo envia a foto completa do canal; dado atrasado a partir de 90 s (3 ciclos).
 - http client: 4xx volta como resposta, sem retry; 5xx, rede e timeout repetem com backoff exponencial e, esgotados, viram `SourceUnavailableError`; timeout por tentativa.
