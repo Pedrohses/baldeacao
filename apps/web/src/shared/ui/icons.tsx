@@ -159,6 +159,15 @@ export function StopSignIcon(props: IconProps) {
   );
 }
 
+export function StationIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="5" y="3" width="14" height="14" rx="3" />
+      <path d="M5 11h14M9 14h.01M15 14h.01M8 21l2-4M16 21l-2-4" />
+    </Svg>
+  );
+}
+
 export function CheckIcon(props: IconProps) {
   return (
     <Svg {...props}>
