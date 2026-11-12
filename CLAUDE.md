@@ -13,7 +13,7 @@ packages/types  contratos compartilhados
 infra/          docker-compose e configs (OTP, Caddy)
 ```
 
-Gerenciador: pnpm workspaces + Turborepo. Node 22. Nome do repositório e do pacote raiz: `baldeacao`.
+Gerenciador: pnpm workspaces + Turborepo. Node 26 (LTS). Nome do repositório e do pacote raiz: `baldeacao`.
 
 ## Comandos
 
