@@ -96,6 +96,23 @@ describe('TripScreen', () => {
     expect(spy.mock.calls[0]?.[0]).toMatchObject({ from: paulista, to: se });
   });
 
+  it('GPS negado avisa e põe o foco na origem, sem deixá-la vazia em silêncio', async () => {
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        getCurrentPosition: (_ok: unknown, fail: (e: unknown) => void) =>
+          fail({ code: 1, PERMISSION_DENIED: 1 }),
+      },
+    });
+    const spy = vi.spyOn(tripPlannerService, 'plan');
+    renderScreen(buildTripHref({ from: 'current-location', focus: 'destination' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Não conseguimos sua localização. Ative a permissão ou escolha a origem.',
+    );
+    expect(screen.getByRole('combobox', { name: 'Origem' })).toHaveFocus();
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it('sem pontas na URL não busca e orienta', () => {
     const spy = vi.spyOn(tripPlannerService, 'plan');
     renderScreen('/viagem?foco=destino');

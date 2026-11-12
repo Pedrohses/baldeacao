@@ -4,6 +4,8 @@ import type { LngLatBoundsLike } from 'maplibre-gl';
 import { useEffect, useMemo } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
+import { fitPaddingFor } from '@/shared/ui/map/fit-padding';
+
 import { useLineDetails } from '../hooks';
 import { shapesToGeoJson } from '../utils/shapes-geojson';
 
@@ -47,7 +49,12 @@ export function RouteShapeLayer({ routeId, fitPadding }: RouteShapeLayerProps) {
   useEffect(() => {
     if (!map || !data || fitPadding === undefined) return;
     const bounds = shapeBounds(data.shapes.flatMap((shape) => shape.points));
-    if (bounds) map.fitBounds(bounds, { padding: fitPadding, maxZoom: 15, duration: 600 });
+    if (bounds)
+      map.fitBounds(bounds, {
+        padding: fitPaddingFor(map, fitPadding),
+        maxZoom: 15,
+        duration: 600,
+      });
   }, [map, data, fitPadding]);
 
   if (!data) return null;

@@ -5,6 +5,8 @@ import type { ExpressionSpecification } from 'maplibre-gl';
 import { useEffect, useMemo } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
+import { fitPaddingFor } from '@/shared/ui/map/fit-padding';
+
 import { itineraryBounds, itineraryToGeoJson } from '../utils/itinerary-geojson';
 
 export const ITINERARY_SOURCE_ID = 'itinerary';
@@ -47,7 +49,12 @@ export function ItineraryLayer({
     if (!map || !itinerary) return;
     const leg = focusedLeg === null ? null : itinerary.legs[focusedLeg];
     const bounds = itineraryBounds(itinerary, leg ? [leg] : undefined);
-    if (bounds) map.fitBounds(bounds, { padding: fitPadding, maxZoom: 16, duration: 600 });
+    if (bounds)
+      map.fitBounds(bounds, {
+        padding: fitPaddingFor(map, fitPadding),
+        maxZoom: 16,
+        duration: 600,
+      });
   }, [map, itinerary, focusedLeg, fitPadding]);
 
   if (!itinerary) return null;

@@ -66,7 +66,8 @@ function isAbort(error: unknown): boolean {
 
 /**
  * Campo de lugar no padrão combobox (WAI-ARIA). Aceita o que foi digitado: Enter sem item ativo
- * ou sair do campo escolhe a 1ª sugestão; sem sugestão, faz a busca completa de endereço.
+ * ou sair do campo faz a busca completa e só escolhe sozinho um resultado forte (todos os termos
+ * no nome ou endereço, em São Paulo); senão abre a lista com o 1º destacado.
  */
 export function PlaceAutocomplete({
   label,
@@ -153,14 +154,15 @@ export function PlaceAutocomplete({
         setResolve({ status: 'not-found', query });
         return;
       }
-      // Pedido explícito ("Buscar endereço") mostra a lista; o implícito escolhe o melhor.
+      // Pedido explícito ("Buscar endereço") mostra a lista; o implícito só escolhe sozinho um
+      // resultado forte. Na lista, o 1º vem destacado: Enter o confirma.
       const pick = explicit
         ? places.length === 1
           ? places[0]!
           : 'ambiguous'
-        : pickConfirmed(places);
+        : pickConfirmed(places, query);
       if (pick === 'ambiguous' || pick === null) {
-        setActiveIndex(-1);
+        setActiveIndex(0);
         setResolve({ status: 'choices', query, places });
       } else {
         select(pick);
@@ -171,13 +173,14 @@ export function PlaceAutocomplete({
     }
   }
 
-  /** Aceita o texto digitado: 1ª sugestão rápida ou, sem ela, a busca completa. */
+  /**
+   * Aceita o texto digitado pela busca completa (a rápida só tem paradas e estações e errava o
+   * lugar): escolhe sozinho só um resultado forte; senão abre a lista.
+   */
   function acceptTyped() {
     if (value || trimmed.length < PLACE_SEARCH_MIN_LENGTH) return;
     if (resolve.status === 'resolving' || resolve.status === 'choices') return;
-    const first = search.status === 'success' && search.query === trimmed ? search.places[0] : null;
-    if (first) select(first);
-    else void runFullSearch(trimmed, false);
+    void runFullSearch(trimmed, false);
   }
 
   async function chooseMyLocation() {

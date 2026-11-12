@@ -24,27 +24,35 @@ vi.mock('react-map-gl/maplibre', () => ({
 }));
 
 // Mapa sem WebGL: o toque longo vira um botão de teste e o alfinete mostra só o cartão.
-vi.mock('@/shared/ui/map', () => ({
-  MapLayers: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
-  MAP_COLORS: { brand: '#C7361F' },
-  useMapColors: () => ({
-    brand: '#C7361F',
-    brandRgb: '199, 54, 31',
-    text: '#000',
-    surface: '#fff',
-  }),
-  MapFlyTo: () => null,
-  LocateButton: () => <button type="button">Minha localização</button>,
-  UserLocationLayer: () => null,
-  MapLongPress: ({ onLongPress }: { onLongPress: (c: Coordinates) => void }) => (
-    <button type="button" onClick={() => onLongPress({ lat: -23.55, lon: -46.63 })}>
-      simular toque longo
-    </button>
-  ),
-  DroppedPin: ({ title, children }: { title: string; children: ReactNode }) => (
-    <section aria-label={title}>{children}</section>
-  ),
-}));
+vi.mock('@/shared/ui/map', async () => {
+  const { useEffect } = await import('react');
+  return {
+    MapLayers: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
+    MAP_COLORS: { brand: '#C7361F' },
+    useMapColors: () => ({
+      brand: '#C7361F',
+      brandRgb: '199, 54, 31',
+      text: '#000',
+      surface: '#fff',
+    }),
+    MapFlyTo: () => null,
+    LocateButton: () => <button type="button">Minha localização</button>,
+    UserLocationLayer: () => null,
+    // Centro da área visível (fora do painel), diferente do centro do canvas.
+    VisibleCenterSync: ({ onChange }: { onChange: (c: Coordinates) => void }) => {
+      useEffect(() => onChange({ lat: -23.56123, lon: -46.65789 }), [onChange]);
+      return null;
+    },
+    MapLongPress: ({ onLongPress }: { onLongPress: (c: Coordinates) => void }) => (
+      <button type="button" onClick={() => onLongPress({ lat: -23.55, lon: -46.63 })}>
+        simular toque longo
+      </button>
+    ),
+    DroppedPin: ({ title, children }: { title: string; children: ReactNode }) => (
+      <section aria-label={title}>{children}</section>
+    ),
+  };
+});
 
 const nearby: NearbyStop = { ...stopExample, distanceM: 120 };
 
@@ -138,6 +146,15 @@ describe('MapScreen', () => {
     expect(
       query(within(card).getByRole('link', { name: 'Ir para cá' }).getAttribute('href')),
     ).toMatchObject({ para: '-23.550000,-46.630000', paraNome: 'Praça da Sé' });
+  });
+
+  it('"Paradas perto do centro do mapa" consulta o centro da área visível, não o do canvas', async () => {
+    renderScreen();
+    await screen.findByRole('button', { name: /Av. Paulista 1578/ });
+    expect(vi.mocked(stopsService.getNearby).mock.lastCall?.[0]).toMatchObject({
+      lat: -23.561,
+      lon: -46.658,
+    });
   });
 
   it('a parada escolhida na lista abre no painel com as ações do planejador', async () => {

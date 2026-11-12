@@ -1,7 +1,7 @@
 import type { Place } from '@baldeacao/types';
 import { describe, expect, it } from 'vitest';
 
-import { placeSubtitle, stopKindLabel } from './place-subtitle';
+import { placeSubtitle } from './place-subtitle';
 
 const base: Place = {
   id: 'x',
@@ -16,10 +16,10 @@ describe('placeSubtitle', () => {
     expect(placeSubtitle(base)).toBe('Consolação, São Paulo');
   });
 
-  it('ponto de ônibus vira "Parada" e estação vira "Estação"', () => {
-    expect(stopKindLabel('R. Augusta, 304')).toBe('Parada');
-    expect(stopKindLabel('Av. Paulista, 1578')).toBe('Parada');
-    expect(stopKindLabel('Paulista')).toBe('Estação');
+  it('kind stop vira "Parada" e kind station vira "Estação", sem olhar o nome', () => {
+    expect(placeSubtitle({ ...base, kind: 'stop', name: 'Consolação', address: null })).toBe(
+      'Parada',
+    );
     expect(
       placeSubtitle({
         ...base,
@@ -28,9 +28,12 @@ describe('placeSubtitle', () => {
         address: 'Ref.: Rua Martinho Prado',
       }),
     ).toBe('Parada · Ref.: Rua Martinho Prado');
-    expect(placeSubtitle({ ...base, kind: 'stop', name: 'Consolação', address: null })).toBe(
+    expect(placeSubtitle({ ...base, kind: 'station', name: 'Consolação', address: null })).toBe(
       'Estação',
     );
+    expect(
+      placeSubtitle({ ...base, kind: 'station', name: 'Paulista', address: 'Linha 4-Amarela' }),
+    ).toBe('Estação · Linha 4-Amarela');
   });
 
   it('ponto sem endereço mostra as coordenadas', () => {

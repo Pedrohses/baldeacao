@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, useEffect } from 'react';
+import { type CSSProperties, useEffect, useState } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
 import { locate, locateIfPermitted, useGeolocation } from '@/shared/hooks/use-geolocation';
@@ -10,6 +10,9 @@ import { useMapColors } from './map-colors';
 
 export const USER_LOCATION_SOURCE_ID = 'user-location';
 export const USER_LOCATION_ZOOM = 15;
+export const LOCATE_FAILED_MESSAGE =
+  'Não conseguimos sua localização. Ative a permissão de localização do navegador.';
+const LOCATE_FAILED_MS = 8000;
 
 // O mapa persiste entre as abas: centralizar no usuário só na primeira abertura, não a cada volta.
 let centeredOnce = false;
@@ -56,10 +59,19 @@ export interface LocateButtonProps {
   centerOnMount?: boolean;
 }
 
-/** Botão flutuante "Minha localização" (48 px). Fica dentro do BaseMap. */
+/**
+ * Botão flutuante "Minha localização" (48 px), com aviso acima dele quando não dá para localizar.
+ * Fica dentro do BaseMap.
+ */
 export function LocateButton({ className = '', style, centerOnMount = true }: LocateButtonProps) {
   const { current: map } = useMap();
   const { status } = useGeolocation();
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!failed) return;
+    const id = setTimeout(() => setFailed(false), LOCATE_FAILED_MS);
+    return () => clearTimeout(id);
+  }, [failed]);
   useEffect(() => {
     if (!map || !centerOnMount || centeredOnce) return;
     centeredOnce = true;
@@ -69,7 +81,10 @@ export function LocateButton({ className = '', style, centerOnMount = true }: Lo
   }, [map, centerOnMount]);
 
   async function handleClick() {
+    setFailed(false);
     const position = await locate();
+    // Permissão negada ou GPS indisponível: avisa em vez de não fazer nada.
+    if (!position) setFailed(true);
     if (position && map) {
       map.flyTo({
         center: [position.lon, position.lat],
@@ -87,16 +102,28 @@ export function LocateButton({ className = '', style, centerOnMount = true }: Lo
         : 'Minha localização';
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      aria-label={label}
-      title={label}
-      aria-busy={status === 'locating'}
+    <div
       style={style}
-      className={`surface-float absolute z-10 inline-flex size-12 items-center justify-center rounded-full text-brand ${className}`}
+      className={`pointer-events-none absolute z-10 flex flex-col items-end gap-2 ${className}`}
     >
-      <LocateIcon className={`size-6 ${status === 'locating' ? 'animate-pulse' : ''}`} />
-    </button>
+      <p
+        role="alert"
+        className={
+          failed ? 'surface-float pointer-events-auto max-w-64 rounded-md p-3 text-sm' : 'sr-only'
+        }
+      >
+        {failed ? LOCATE_FAILED_MESSAGE : ''}
+      </p>
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label={label}
+        title={label}
+        aria-busy={status === 'locating'}
+        className="surface-float pointer-events-auto inline-flex size-12 items-center justify-center rounded-full text-brand"
+      >
+        <LocateIcon className={`size-6 ${status === 'locating' ? 'animate-pulse' : ''}`} />
+      </button>
+    </div>
   );
 }

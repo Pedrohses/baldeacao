@@ -25,7 +25,11 @@ export interface ItineraryListProps {
   onEditField?: (field: TripField) => void;
 }
 
-const NOTICE_COPY: Record<PlanTripNotice, { field: TripField; text: string; action: string }> = {
+// field null: o aviso é sobre o horário, não sobre origem ou destino.
+const NOTICE_COPY: Record<
+  PlanTripNotice,
+  { field: TripField | null; text: string; action: string | null }
+> = {
   origin_outside_service_area: {
     field: 'origin',
     text: 'A origem fica fora da área atendida pela SPTrans (nenhuma parada a até 1 km). Confira se escolheu o lugar certo.',
@@ -35,6 +39,16 @@ const NOTICE_COPY: Record<PlanTripNotice, { field: TripField; text: string; acti
     field: 'destination',
     text: 'O destino fica fora da área atendida pela SPTrans (nenhuma parada a até 1 km). Confira se escolheu o lugar certo.',
     action: 'Editar destino',
+  },
+  date_outside_service: {
+    field: null,
+    text: 'Não há horários da SPTrans para essa data.',
+    action: null,
+  },
+  time_in_past_moved: {
+    field: null,
+    text: 'Esse horário já passou; mostramos as opções de amanhã.',
+    action: null,
   },
 };
 
@@ -49,13 +63,14 @@ function Notices({
     <ul aria-label="Avisos" className="space-y-2">
       {notices.map((notice) => {
         const copy = NOTICE_COPY[notice];
+        const field = copy.field;
         return (
           <li key={notice} role="alert" className="rounded-md border border-warn/40 bg-warn/10 p-3">
             <p>{copy.text}</p>
-            {onEditField ? (
+            {onEditField && field && copy.action ? (
               <button
                 type="button"
-                onClick={() => onEditField(copy.field)}
+                onClick={() => onEditField(field)}
                 className={`${SECONDARY_BUTTON} mt-2 bg-surface`}
               >
                 {copy.action}

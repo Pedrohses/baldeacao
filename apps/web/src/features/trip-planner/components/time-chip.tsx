@@ -10,6 +10,7 @@ import {
   type TripDay,
   type TripTime,
   type TripTimeMode,
+  effectiveTripTime,
   nextSlot,
   tripTimeLabel,
 } from '../utils/trip-time';
@@ -66,11 +67,13 @@ function Segmented<T extends string>({
 }
 
 /** Chip "Sair agora" que abre o seletor Sair às | Chegar até, Hoje | Amanhã e hora 24 h. */
-export function TimeChip({ value, onChange, open, onOpenChange, now }: TimeChipProps) {
+export function TimeChip({ value, onChange, open, onOpenChange, now = new Date() }: TimeChipProps) {
   const baseId = useId();
   const panelId = `${baseId}-panel`;
-  const current =
-    value.kind === 'now' ? { kind: 'depart' as const, ...nextSlot(now ?? new Date()) } : value;
+  const current = value.kind === 'now' ? { kind: 'depart' as const, ...nextSlot(now) } : value;
+  // "Hoje" num horário que já passou vale para amanhã: o seletor mostra o dia que vale.
+  const effective = effectiveTripTime(current, now);
+  const movedToTomorrow = effective.kind !== 'now' && effective.day !== current.day;
 
   function update(patch: Partial<Extract<TripTime, { kind: TripTimeMode }>>) {
     onChange({ ...current, ...patch });
@@ -90,7 +93,7 @@ export function TimeChip({ value, onChange, open, onOpenChange, now }: TimeChipP
         }`}
       >
         <ClockIcon className="size-4" />
-        {tripTimeLabel(value)}
+        {tripTimeLabel(value, now)}
         <ChevronDownIcon className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       <div
@@ -113,13 +116,16 @@ export function TimeChip({ value, onChange, open, onOpenChange, now }: TimeChipP
         <Segmented
           name={`${baseId}-day`}
           legend="Dia"
-          value={current.day}
+          value={movedToTomorrow ? 'tomorrow' : current.day}
           onChange={(day: TripDay) => update({ day })}
           options={[
             { value: 'today', label: 'Hoje' },
             { value: 'tomorrow', label: 'Amanhã' },
           ]}
         />
+        {movedToTomorrow ? (
+          <p className="text-sm text-muted">Esse horário já passou hoje; vale para amanhã.</p>
+        ) : null}
         <div className="flex items-end gap-2">
           <label className="flex flex-1 flex-col gap-1 text-sm text-muted">
             Hora

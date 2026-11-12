@@ -170,4 +170,19 @@ describe('TripForm e busca automática', () => {
       'false',
     );
   });
+
+  it('hoje num horário que já passou vira amanhã no chip e no seletor', () => {
+    renderHarness();
+    fireEvent.click(screen.getByRole('button', { name: /Sair agora/ }));
+    // O relógio do chip está em 08:02 de São Paulo.
+    fireEvent.change(screen.getByLabelText('Hora'), { target: { value: '7' } });
+
+    expect(screen.getByRole('button', { name: /Sair às 07:05 amanhã/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Amanhã' })).toBeChecked();
+    expect(screen.getByText('Esse horário já passou hoje; vale para amanhã.')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Hora'), { target: { value: '9' } });
+    expect(screen.getByRole('button', { name: /Sair às 09:05$/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: 'Hoje' })).toBeChecked();
+  });
 });

@@ -59,5 +59,11 @@ describe('formatação do itinerário', () => {
     });
     expect(formatDeparture('2026-11-12T08:04:00-03:00', now).text).toBe('Sai em 4 min');
     expect(formatDeparture('2026-11-12T10:30:00-03:00', now).text).toBe('Sai às 10:30');
+    expect(formatDeparture('2026-11-13T07:00:00-03:00', now).text).toBe('Sai amanhã às 07:00');
+    // Minutos negativos não são "Sai agora".
+    expect(formatDeparture('2026-11-12T07:50:00-03:00', now)).toEqual({
+      text: 'Saiu às 07:50',
+      tone: 'past',
+    });
   });
 });

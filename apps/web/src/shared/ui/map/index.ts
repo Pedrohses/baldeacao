@@ -22,3 +22,5 @@ export {
   UserLocationLayer,
 } from './user-location';
 export { MapLayers, MapLayersOutlet, resetMapLayers } from './map-layers';
+export { type PaddingBox, clampPadding, fitPaddingFor, visibleCenterPoint } from './fit-padding';
+export { VisibleCenterSync, type VisibleCenterSyncProps } from './visible-center-sync';

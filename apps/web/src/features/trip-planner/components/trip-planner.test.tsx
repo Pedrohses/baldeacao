@@ -206,6 +206,24 @@ describe('cartão de itinerário', () => {
     expect(await screen.findByRole('button', { name: /Das 08:00/ })).toBeInTheDocument();
   });
 
+  it('mostra os avisos de data fora da validade e de horário que já passou, sem botão de editar', () => {
+    render(
+      <ItineraryList
+        status="success"
+        itineraries={[itineraryExample]}
+        selectedIndex={0}
+        onSelect={() => {}}
+        now={NOW}
+        notices={['time_in_past_moved', 'date_outside_service']}
+        onEditField={() => {}}
+      />,
+    );
+    const avisos = screen.getByRole('list', { name: 'Avisos' });
+    expect(avisos).toHaveTextContent('Esse horário já passou; mostramos as opções de amanhã.');
+    expect(avisos).toHaveTextContent('Não há horários da SPTrans para essa data.');
+    expect(within(avisos).queryByRole('button')).not.toBeInTheDocument();
+  });
+
   it('sem pedido não consulta nem desenha', () => {
     const spy = vi.spyOn(tripPlannerService, 'plan');
     const { container } = renderHarness(null);

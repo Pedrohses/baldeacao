@@ -27,7 +27,11 @@ export interface MapPadding {
   right: number;
 }
 
-/** Folga para fitBounds: o que o painel cobre não conta como área útil do mapa. */
+/**
+ * Folga para fitBounds: o que o painel cobre não conta como área útil do mapa. No desktop o canvas
+ * já começa depois do trilho (72 px), então a folga esquerda é o painel (400 px) mais a margem.
+ * Quem enquadra limita a folga ao canvas (shared/ui/map/fit-padding).
+ */
 export function mapPaddingFor(
   isDesktop: boolean,
   snap: PanelSnap,

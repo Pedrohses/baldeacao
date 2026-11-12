@@ -21,6 +21,13 @@ const augusta: Place = {
   kind: 'address',
   location: { lat: -23.556, lon: -46.659 },
 };
+const allianz: Place = {
+  id: 'osm:way:4',
+  name: 'Allianz Parque',
+  address: 'Avenida Francisco Matarazzo, 1705, Água Branca, São Paulo',
+  kind: 'poi',
+  location: { lat: -23.5275, lon: -46.6783 },
+};
 const flores1: Place = { ...augusta, id: 'osm:way:2', name: 'Rua das Flores', address: 'Lapa' };
 const flores2: Place = { ...augusta, id: 'osm:way:3', name: 'Rua das Flores', address: 'Penha' };
 
@@ -197,16 +204,71 @@ describe('PlaceAutocomplete: autocompletar', () => {
 });
 
 describe('PlaceAutocomplete: aceita o que foi digitado', () => {
-  it('Enter sem item ativo escolhe a 1ª sugestão', async () => {
-    mockSearch({ quick: [placeOriginExample, placeDestinationExample] });
+  it('Enter usa a busca completa, não a 1ª sugestão rápida: "Allianz Parque" escolhe sozinho', async () => {
+    const stop: Place = { ...augusta, id: 'stop:1', name: 'Parque Dom Pedro II', kind: 'stop' };
+    const spy = mockSearch({ quick: [stop], full: [allianz, stop] });
     const input = renderAutocomplete();
 
-    type(input, 'estadio');
+    type(input, 'Allianz Parque');
     await advance(300);
     await advance(0);
     fireEvent.keyDown(input, { key: 'Enter' });
+    await advance(0);
 
-    expect(onChange).toHaveBeenLastCalledWith(placeOriginExample);
+    expect(spy).toHaveBeenLastCalledWith('Allianz Parque', 'full', expect.anything());
+    expect(onChange).toHaveBeenLastCalledWith(allianz);
+  });
+
+  it('"Mercadão" sem resultado forte abre a lista com o 1º destacado', async () => {
+    const mercado: Place = { ...allianz, id: 'osm:way:9', name: 'Mercado Municipal Paulistano' };
+    mockSearch({ quick: [], full: [mercado, allianz] });
+    const input = renderAutocomplete();
+
+    type(input, 'Mercadão');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await advance(0);
+
+    expect(onChange).not.toHaveBeenCalled();
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(2);
+    expect(options[0]).toHaveAttribute('aria-selected', 'true');
+    expect(input).toHaveAttribute('aria-activedescendant', options[0]!.id);
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onChange).toHaveBeenLastCalledWith(mercado);
+  });
+
+  it('"Rua Vergueiro 3185" só escolhe sozinho se o número bate', async () => {
+    const vergueiro: Place = {
+      ...augusta,
+      id: 'osm:node:5',
+      name: 'Rua Vergueiro, 3185',
+      address: 'Vila Mariana, São Paulo',
+    };
+    const semNumero: Place = { ...vergueiro, id: 'osm:way:6', name: 'Rua Vergueiro' };
+    mockSearch({ full: [semNumero, vergueiro] });
+    const input = renderAutocomplete();
+
+    type(input, 'Rua Vergueiro 3185');
+    fireEvent.blur(input);
+    await advance(0);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getAllByRole('option')).toHaveLength(2);
+  });
+
+  it('"Rua Vergueiro 3185" com o número no 1º resultado escolhe sozinho', async () => {
+    const vergueiro: Place = {
+      ...augusta,
+      id: 'osm:node:5',
+      name: 'Rua Vergueiro, 3185',
+      address: 'Vila Mariana, São Paulo',
+    };
+    mockSearch({ full: [vergueiro, { ...vergueiro, id: 'osm:way:6', name: 'Rua Vergueiro' }] });
+    const input = renderAutocomplete();
+
+    type(input, 'Rua Vergueiro 3185');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await advance(0);
+    expect(onChange).toHaveBeenLastCalledWith(vergueiro);
   });
 
   it('Enter sem sugestão faz a busca completa e escolhe o 1º resultado', async () => {
@@ -321,7 +383,7 @@ describe('PlaceAutocomplete: atalhos', () => {
     type(input, 'Morumbis');
     await advance(300);
     await advance(0);
-    fireEvent.keyDown(input, { key: 'Enter' });
+    fireEvent.click(screen.getByRole('option', { name: /Estádio do Morumbis/ }));
 
     const stored = JSON.parse(localStorage.getItem('baldeacao:recent-places') ?? '[]');
     expect(stored).toEqual([placeOriginExample]);

@@ -60,6 +60,17 @@ describe('LineSearch', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Nenhuma linha encontrada para "xyz".');
   });
 
+  it('no limite de 20 linhas pede para refinar a busca', async () => {
+    const lines = Array.from({ length: 20 }, (_, i) => ({ ...routeExample, id: `L${i}` }));
+    vi.spyOn(linesService, 'search').mockResolvedValue(lines);
+    const input = renderSearch();
+    fireEvent.change(input, { target: { value: 'Lapa' } });
+    await advance(300);
+    await advance(0);
+    expect(screen.getByRole('status')).toHaveTextContent('Mais de 20 linhas; refine a busca.');
+    expect(screen.getByRole('status')).not.toHaveTextContent('encontradas');
+  });
+
   it('erro de rede oferece "Tentar de novo"', async () => {
     const spy = vi.spyOn(linesService, 'search').mockRejectedValue(new Error('offline'));
     const input = renderSearch();

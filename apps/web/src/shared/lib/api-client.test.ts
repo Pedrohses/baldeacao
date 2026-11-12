@@ -34,6 +34,26 @@ describe('api-client', () => {
     expect((error as ApiError).payload).toEqual({ message: 'boom' });
   });
 
+  it('usa a mensagem do corpo { code, message } quando vem em português', async () => {
+    const pt = client(() =>
+      Response.json(
+        { code: 'TRIP_INVALID', message: 'Origem e destino precisam ser diferentes.' },
+        { status: 400 },
+      ),
+    );
+    await expect(pt.api.get('/x', schema)).rejects.toMatchObject({
+      status: 400,
+      message: 'Origem e destino precisam ser diferentes.',
+    });
+
+    const en = client(() =>
+      Response.json({ code: 'BAD_REQUEST', message: 'q must be longer' }, { status: 400 }),
+    );
+    await expect(en.api.get('/x', schema)).rejects.toMatchObject({
+      message: 'Não foi possível concluir o pedido com esses dados.',
+    });
+  });
+
   it('converte falha de rede em ApiError', async () => {
     const fetchFn = vi.fn<typeof fetch>().mockRejectedValue(new TypeError('failed'));
     const api = createApiClient({ baseUrl: 'http://api.test', fetchFn });
