@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AppConfig } from '../../config';
 import { OlhoVivoModule } from '../../shared/infrastructure/olho-vivo/olho-vivo.module';
+import { BuildChannelUpdatesUseCase } from './application/use-cases/build-channel-updates.use-case';
 import { GetVehicleSnapshotUseCase } from './application/use-cases/get-vehicle-snapshot.use-case';
 import { RefreshVehiclePositionsUseCase } from './application/use-cases/refresh-vehicle-positions.use-case';
 import { ClockPort } from './domain/ports/clock.port';
@@ -16,6 +17,7 @@ import { VehiclePositionsController } from './presentation/http/vehicle-position
 import { REALTIME_QUEUE } from './presentation/jobs/realtime-queue';
 import { RefreshPositionsProcessor } from './presentation/jobs/refresh-positions.processor';
 import { RefreshPositionsScheduler } from './presentation/jobs/refresh-positions.scheduler';
+import { PositionsGateway } from './presentation/ws/positions.gateway';
 
 @Module({
   imports: [
@@ -31,12 +33,14 @@ import { RefreshPositionsScheduler } from './presentation/jobs/refresh-positions
   providers: [
     RefreshVehiclePositionsUseCase,
     GetVehicleSnapshotUseCase,
+    BuildChannelUpdatesUseCase,
     { provide: VehiclePositionsSourcePort, useClass: OlhoVivoVehiclePositionsAdapter },
     { provide: VehiclePositionsStorePort, useClass: RedisVehiclePositionsStoreAdapter },
     { provide: PositionsCycleNotifierPort, useClass: RedisPositionsCycleNotifierAdapter },
     { provide: ClockPort, useClass: SystemClockAdapter },
     RefreshPositionsProcessor,
     RefreshPositionsScheduler,
+    PositionsGateway,
   ],
 })
 export class RealtimeModule {}

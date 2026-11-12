@@ -1,10 +1,20 @@
 import { Logger, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { API_PATHS, VehiclePositionSchema, VehicleSnapshotSchema } from '@baldeacao/types';
+import {
+  API_PATHS,
+  PositionsUpdateSchema,
+  REALTIME_EVENTS,
+  VehiclePositionSchema,
+  VehicleSnapshotSchema,
+  positionsLineChannel,
+  type PositionsUpdate,
+} from '@baldeacao/types';
+import { io } from 'socket.io-client';
 import Redis from 'ioredis';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { GenericContainer, type StartedTestContainer } from 'testcontainers';
+import { RefreshVehiclePositionsUseCase } from '../../src/modules/realtime/application/use-cases/refresh-vehicle-positions.use-case';
 import { RealtimeModule } from '../../src/modules/realtime/realtime.module';
 import { mapOlhoVivoPositions } from '../../src/modules/realtime/infrastructure/adapters/olho-vivo-position.mapper';
 import { RedisPositionsCycleNotifierAdapter } from '../../src/modules/realtime/infrastructure/adapters/redis-positions-cycle-notifier.adapter';
@@ -128,7 +138,7 @@ describe('tempo real no Redis (Testcontainers)', () => {
         .useValue(client)
         .compile();
       app = moduleRef.createNestApplication({ logger: false });
-      await app.init();
+      await app.listen(0, '127.0.0.1');
       return app;
     }
 
@@ -157,6 +167,31 @@ describe('tempo real no Redis (Testcontainers)', () => {
       const snapshot = VehicleSnapshotSchema.parse(response.body);
       expect(snapshot).toMatchObject({ sourceId: 'sptrans', routeId: '875A-10', updatedAt });
       expect(snapshot.vehicles.map((v) => v.vehicleId).sort()).toEqual(['11433', '11502', '11611']);
+    });
+
+    it('cada ciclo do worker chega ao cliente Socket.IO pelo pub/sub do Redis', async () => {
+      const running = await boot(fakeOlhoVivoClient());
+      const first = await waitFor(() => redis.get('realtime:sptrans:updated_at'));
+      const socket = io(await running.getUrl(), { transports: ['websocket'], forceNew: true });
+      const updates: PositionsUpdate[] = [];
+      socket.on(REALTIME_EVENTS.update, (payload: unknown) =>
+        updates.push(PositionsUpdateSchema.parse(payload)),
+      );
+      try {
+        const channel = positionsLineChannel('875A-10');
+        await socket.emitWithAck(REALTIME_EVENTS.subscribe, { channel });
+
+        const cycle = await running.get(RefreshVehiclePositionsUseCase).execute();
+        const update = await waitFor(() =>
+          Promise.resolve(updates.find((u) => u.updatedAt === cycle.updatedAt) ?? null),
+        );
+
+        expect(updates[0]?.updatedAt).toBe(first);
+        expect(update).toMatchObject({ channel, routeId: '875A-10', sourceId: 'sptrans' });
+        expect(update.vehicles).toHaveLength(3);
+      } finally {
+        socket.disconnect();
+      }
     });
 
     it('token recusado vira log e o app continua de pé', async () => {
