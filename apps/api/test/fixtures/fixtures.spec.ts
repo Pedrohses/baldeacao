@@ -20,7 +20,7 @@ import {
   stopExample,
   vehiclePositionExample,
   vehicleSnapshotExample,
-} from '../../../../packages/types/src/__examples__';
+} from '@baldeacao/types/examples';
 
 const GTFS_DIR = join(__dirname, 'gtfs', 'sptrans-mini');
 const OLHO_VIVO_DIR = join(__dirname, 'olho-vivo');
