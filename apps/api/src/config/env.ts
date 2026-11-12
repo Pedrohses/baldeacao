@@ -28,6 +28,7 @@ export const envSchema = z.object({
   // Toda segunda às 4h (horário de São Paulo, ver o job).
   GTFS_REFRESH_CRON: z.string().min(1).default('0 4 * * 1'),
   NOMINATIM_USER_AGENT: optionalString,
+  NOMINATIM_URL: z.url().default('https://nominatim.openstreetmap.org'),
 });
 
 export type Env = z.infer<typeof envSchema>;

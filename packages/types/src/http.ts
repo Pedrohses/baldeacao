@@ -1,7 +1,8 @@
 // Contrato HTTP v1 da API REST (Onda 1). Back implementa estas rotas; front consome via api-client.
-// Todas as rotas são GET e devolvem JSON validado pelos schemas abaixo.
+// Rotas GET devolvem JSON validado pelos schemas abaixo; planTrip é POST (corpo TripRequest).
 import { z } from 'zod';
 import { ArrivalSchema, LineShapeSchema, RouteSchema, StopSchema } from './transit.js';
+import { ItinerarySchema, PlaceSchema } from './trip.js';
 
 export const API_PATHS = {
   /** Busca de linhas por texto (código ou nome). Query: `q` (mínimo 2 caracteres). */
@@ -14,6 +15,10 @@ export const API_PATHS = {
   stopArrivals: (stopId: string) => `/stops/${encodeURIComponent(stopId)}/arrivals`,
   /** Snapshot de posições. Query opcional: `routeId`; sem ela, todas as linhas. */
   vehiclePositions: '/vehicles/positions',
+  /** v2: busca de lugar (Nominatim com cache). Query: `q` (mínimo 3 caracteres). */
+  searchPlaces: '/places/search',
+  /** v2: planejar viagem (OpenTripPlanner). POST com corpo TripRequest. */
+  planTrip: '/trips/plan',
 } as const;
 
 export const NEARBY_STOPS_DEFAULT_RADIUS_M = 500;
@@ -65,3 +70,15 @@ export const ApiErrorBodySchema = z.object({
   message: z.string().min(1),
 });
 export type ApiErrorBody = z.infer<typeof ApiErrorBodySchema>;
+
+// ---- v2 (Onda 2) ----
+
+export const SearchPlacesQuerySchema = z.object({ q: z.string().trim().min(3) });
+export type SearchPlacesQuery = z.infer<typeof SearchPlacesQuerySchema>;
+
+export const SearchPlacesResponseSchema = z.object({ places: z.array(PlaceSchema) });
+export type SearchPlacesResponse = z.infer<typeof SearchPlacesResponseSchema>;
+
+// O corpo de planTrip é TripRequestSchema (trip.ts).
+export const PlanTripResponseSchema = z.object({ itineraries: z.array(ItinerarySchema) });
+export type PlanTripResponse = z.infer<typeof PlanTripResponseSchema>;

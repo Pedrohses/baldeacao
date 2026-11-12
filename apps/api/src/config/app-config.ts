@@ -42,4 +42,16 @@ export class AppConfig {
   get gtfsRefreshCron(): string {
     return this.env.GTFS_REFRESH_CRON;
   }
+
+  get otpUrl(): string | undefined {
+    return this.env.OTP_URL;
+  }
+
+  get nominatimUrl(): string {
+    return this.env.NOMINATIM_URL;
+  }
+
+  get nominatimUserAgent(): string | undefined {
+    return this.env.NOMINATIM_USER_AGENT;
+  }
 }
