@@ -13,3 +13,6 @@ next-env.d.ts
 
 *.log
 .DS_Store
+
+# worktrees dos agentes
+.claude/worktrees/
