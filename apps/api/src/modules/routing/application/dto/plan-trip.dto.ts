@@ -1,4 +1,5 @@
 import type { Coordinates, Itinerary } from '../../domain/entities/itinerary.entity';
+import type { PlanTripNotice } from '../../domain/value-objects/plan-trip-notice';
 
 export interface PlanTripInput {
   from: Coordinates;
@@ -13,4 +14,6 @@ export interface PlanTripInput {
 
 export interface PlanTripOutput {
   itineraries: Itinerary[];
+  /** Avisos de área de atendimento; vazio quando origem e destino têm parada perto. */
+  notices: PlanTripNotice[];
 }

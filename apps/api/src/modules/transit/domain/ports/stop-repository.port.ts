@@ -10,4 +10,7 @@ export abstract class StopRepository {
    * Estações de metrô/trem primeiro (uma por nome), depois nomes mais curtos.
    */
   abstract searchByName(text: string, limit: number): Promise<StopNameMatch[]>;
+
+  /** Se há pelo menos uma parada a até `radiusM` metros de `center`. */
+  abstract existsWithin(center: Coordinates, radiusM: number): Promise<boolean>;
 }

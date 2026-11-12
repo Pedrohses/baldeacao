@@ -5,17 +5,33 @@ import { tripRequestExample } from '@baldeacao/types/examples';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import { fakeOtpFetch, readOtpFixture } from '../../../../../test/support/routing-in-memory';
+import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
+import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
+import { Stop } from '../../../transit/domain/entities/stop.entity';
+import { StopRepository } from '../../../transit/domain/ports/stop-repository.port';
 import { PlanTripUseCase } from '../../application/use-cases/plan-trip.use-case';
 import { TripPlanner } from '../../domain/ports/trip-planner.port';
 import { OtpClient } from '../../infrastructure/adapters/otp.client';
 import { OtpTripPlannerAdapter } from '../../infrastructure/adapters/otp-trip-planner.adapter';
 import { TripsController } from './trips.controller';
 
+// Só a origem do exemplo tem parada perto: o destino fica fora da área atendida.
+const ORIGIN_STOP = new Stop({
+  id: 'A',
+  sourceId: 'sptrans',
+  code: null,
+  name: 'Parada A',
+  description: null,
+  location: tripRequestExample.from,
+});
+
 async function appWith(client: OtpClient): Promise<INestApplication<App>> {
   const moduleRef = await Test.createTestingModule({
     controllers: [TripsController],
     providers: [
       PlanTripUseCase,
+      HasNearbyStopUseCase,
+      { provide: StopRepository, useValue: new InMemoryStopRepository([ORIGIN_STOP]) },
       { provide: OtpClient, useValue: client },
       { provide: TripPlanner, useClass: OtpTripPlannerAdapter },
     ],
@@ -50,6 +66,7 @@ describe('HTTP do routing (contrato v2)', () => {
       'walk',
     ]);
     expect(body.itineraries[0]?.legs[1]?.routeId).toBe('7725-10');
+    expect(body.notices).toEqual(['destination_outside_service_area']);
   });
 
   it('maxItineraries limita a resposta (padrão do contrato aplicado)', async () => {

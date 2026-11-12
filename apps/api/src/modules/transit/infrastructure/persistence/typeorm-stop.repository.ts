@@ -62,6 +62,13 @@ const SEARCH_BY_NAME_SQL = `
   ORDER BY is_station DESC, rank, length(name), name, stop_id
   LIMIT $2`;
 
+// EXISTS para no primeiro achado; ST_DWithin usa o índice GIST de stops.location.
+const EXISTS_WITHIN_SQL = `
+  SELECT EXISTS (
+    SELECT 1 FROM stops s
+    WHERE ST_DWithin(s.location, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3)
+  ) AS found`;
+
 @Injectable()
 export class TypeormStopRepository extends StopRepository {
   constructor(private readonly dataSource: DataSource) {
@@ -87,5 +94,14 @@ export class TypeormStopRepository extends StopRepository {
       [text, limit, text.length < 3],
     );
     return rows.map((row) => ({ stop: StopMapper.toDomain(row), isStation: row.is_station }));
+  }
+
+  async existsWithin(center: Coordinates, radiusM: number): Promise<boolean> {
+    const [row] = await this.dataSource.query<Array<{ found: boolean }>>(EXISTS_WITHIN_SQL, [
+      center.lon,
+      center.lat,
+      radiusM,
+    ]);
+    return row?.found === true;
   }
 }

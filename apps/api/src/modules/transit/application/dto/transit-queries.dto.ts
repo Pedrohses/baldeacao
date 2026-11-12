@@ -45,3 +45,13 @@ export interface SearchStopsByNameOutput {
   /** Ids (de `stops`) que são estações de metrô ou trem. */
   stationIds: string[];
 }
+
+export interface HasNearbyStopInput {
+  center: Coordinates;
+  /** Em metros, maior que zero e no máximo 5000. */
+  radiusM: number;
+}
+
+export interface HasNearbyStopOutput {
+  hasStop: boolean;
+}

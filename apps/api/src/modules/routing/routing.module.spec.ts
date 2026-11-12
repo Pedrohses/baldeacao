@@ -1,14 +1,24 @@
 import { Global, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { DataSource } from 'typeorm';
 import { AppConfig } from '../../config';
+import { REDIS_CLIENT } from '../../shared/infrastructure/redis/redis.module';
 import { PlanTripUseCase } from './application/use-cases/plan-trip.use-case';
 import { RoutingModule } from './routing.module';
 
-// No app AppConfig vem do ConfigModule global; aqui um falso basta para ligar as portas.
+// No app DataSource, Redis e AppConfig vêm de módulos globais; aqui falsos bastam para ligar
+// as portas (o routing importa o transit, para os avisos de área de atendimento).
 @Global()
 @Module({
-  providers: [{ provide: AppConfig, useValue: { otpUrl: undefined } }],
-  exports: [AppConfig],
+  providers: [
+    { provide: DataSource, useValue: { getRepository: () => ({}) } },
+    { provide: REDIS_CLIENT, useValue: {} },
+    {
+      provide: AppConfig,
+      useValue: { otpUrl: undefined, olhoVivoToken: undefined, olhoVivoUserAgent: 'test' },
+    },
+  ],
+  exports: [DataSource, REDIS_CLIENT, AppConfig],
 })
 class FakeConfigModule {}
 

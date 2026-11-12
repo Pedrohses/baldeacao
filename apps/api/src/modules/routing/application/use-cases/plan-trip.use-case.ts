@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
 import type { Coordinates } from '../../domain/entities/itinerary.entity';
 import { InvalidTripRequestError } from '../../domain/errors/invalid-trip-request.error';
 import { TripPlanner } from '../../domain/ports/trip-planner.port';
 import { groupItineraries } from '../../domain/value-objects/itinerary-grouping';
+import {
+  type PlanTripNotice,
+  SERVICE_AREA_RADIUS_M,
+} from '../../domain/value-objects/plan-trip-notice';
 import type { TripTime } from '../../domain/value-objects/trip-plan-query';
 import type { PlanTripInput, PlanTripOutput } from '../dto/plan-trip.dto';
 
@@ -42,7 +47,10 @@ function assertDateTime(value: string, label: string): void {
  */
 @Injectable()
 export class PlanTripUseCase {
-  constructor(private readonly planner: TripPlanner) {}
+  constructor(
+    private readonly planner: TripPlanner,
+    private readonly hasNearbyStop: HasNearbyStopUseCase,
+  ) {}
 
   async execute(input: PlanTripInput): Promise<PlanTripOutput> {
     assertCoordinates(input.from, 'origem');
@@ -63,6 +71,8 @@ export class PlanTripUseCase {
     const requested = Math.trunc(input.maxItineraries ?? PLAN_TRIP_DEFAULT_ITINERARIES);
     const maxItineraries = Math.min(Math.max(1, requested), PLAN_TRIP_MAX_ITINERARIES);
 
+    // Antes do OTP: sem parada a 1 km, avisa (o OTP ainda pode achar rota longa a pé).
+    const notices = await this.serviceAreaNotices(input.from, input.to);
     const itineraries = await this.planner.plan({
       from: input.from,
       to: input.to,
@@ -70,6 +80,17 @@ export class PlanTripUseCase {
       maxItineraries,
       candidates: planTripCandidates(maxItineraries),
     });
-    return { itineraries: groupItineraries(itineraries, maxItineraries) };
+    return { itineraries: groupItineraries(itineraries, maxItineraries), notices };
+  }
+
+  private async serviceAreaNotices(from: Coordinates, to: Coordinates): Promise<PlanTripNotice[]> {
+    const [origin, destination] = await Promise.all([
+      this.hasNearbyStop.execute({ center: from, radiusM: SERVICE_AREA_RADIUS_M }),
+      this.hasNearbyStop.execute({ center: to, radiusM: SERVICE_AREA_RADIUS_M }),
+    ]);
+    const notices: PlanTripNotice[] = [];
+    if (!origin.hasStop) notices.push('origin_outside_service_area');
+    if (!destination.hasStop) notices.push('destination_outside_service_area');
+    return notices;
   }
 }

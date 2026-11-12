@@ -132,6 +132,11 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
     it('respeita o limite', async () => {
       expect(await stops.findNearby(paulista, 50_000, 3)).toHaveLength(3);
     });
+
+    it('existsWithin diz se há parada no raio', async () => {
+      expect(await stops.existsWithin({ lat: -23.565, lon: -46.6559 }, 1000)).toBe(true);
+      expect(await stops.existsWithin({ lat: -24.2, lon: -46.6559 }, 1000)).toBe(false);
+    });
   });
 
   describe('TypeormStopRepository.searchByName (pg_trgm + unaccent)', () => {

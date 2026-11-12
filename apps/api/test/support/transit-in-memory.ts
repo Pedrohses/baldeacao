@@ -105,6 +105,10 @@ export class InMemoryStopRepository extends StopRepository {
     return Promise.resolve(found);
   }
 
+  existsWithin(center: Coordinates, radiusM: number): Promise<boolean> {
+    return Promise.resolve(this.stops.some((stop) => haversineM(center, stop.location) <= radiusM));
+  }
+
   readonly searchCalls: Array<{ text: string; limit: number }> = [];
 
   /** Ids tratados como estação de metrô ou trem. */

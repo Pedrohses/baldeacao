@@ -23,6 +23,7 @@ import { RealtimeModule } from '../../src/modules/realtime/realtime.module';
 import { FindNearbyStopsUseCase } from '../../src/modules/transit/application/use-cases/find-nearby-stops.use-case';
 import { GetLineDetailsUseCase } from '../../src/modules/transit/application/use-cases/get-line-details.use-case';
 import { GetStopArrivalsUseCase } from '../../src/modules/transit/application/use-cases/get-stop-arrivals.use-case';
+import { HasNearbyStopUseCase } from '../../src/modules/transit/application/use-cases/has-nearby-stop.use-case';
 import { SearchLinesUseCase } from '../../src/modules/transit/application/use-cases/search-lines.use-case';
 import type { Arrival } from '../../src/modules/transit/domain/entities/arrival.entity';
 import { ArrivalsCache } from '../../src/modules/transit/domain/ports/arrivals-cache.port';
@@ -96,12 +97,23 @@ export class ControllableTripPlanner extends TripPlanner {
   }
 }
 
+/** Paradas do transit com área de atendimento controlável (pontos fora do raio de propósito). */
+export class ServiceAreaStopRepository extends InMemoryStopRepository {
+  /** Coordenadas ("lat,lon") tratadas como sem parada perto. */
+  readonly outside = new Set<string>();
+
+  override existsWithin(center: { lat: number; lon: number }): Promise<boolean> {
+    return Promise.resolve(!this.outside.has(`${center.lat},${center.lon}`));
+  }
+}
+
 export interface McpFakes {
   arrivals: InMemoryArrivalsProvider;
   positions: FlakyPositionsStore;
   geocoder: InMemoryGeocoder;
   geocodeCache: InMemoryGeocodeCache;
   planner: ControllableTripPlanner;
+  stops: ServiceAreaStopRepository;
 }
 
 /** Monta o McpModule real com os módulos de contexto trocados por versões em memória. */
@@ -113,8 +125,9 @@ function buildTestingModule(fakes: McpFakes) {
       FindNearbyStopsUseCase,
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
+      HasNearbyStopUseCase,
       { provide: RouteRepository, useValue: new InMemoryRouteRepository() },
-      { provide: StopRepository, useValue: new InMemoryStopRepository() },
+      { provide: StopRepository, useValue: fakes.stops },
       { provide: ArrivalsProvider, useValue: fakes.arrivals },
       { provide: ArrivalsCache, useValue: new NoopArrivalsCache() },
     ],
@@ -124,6 +137,7 @@ function buildTestingModule(fakes: McpFakes) {
       FindNearbyStopsUseCase,
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
+      HasNearbyStopUseCase,
     ],
   })
   class FakeTransitModule {}
@@ -151,7 +165,12 @@ function buildTestingModule(fakes: McpFakes) {
   class FakeGeocodingModule {}
 
   @Module({
-    providers: [PlanTripUseCase, { provide: TripPlanner, useValue: fakes.planner }],
+    providers: [
+      PlanTripUseCase,
+      HasNearbyStopUseCase,
+      { provide: StopRepository, useValue: fakes.stops },
+      { provide: TripPlanner, useValue: fakes.planner },
+    ],
     exports: [PlanTripUseCase],
   })
   class FakeRoutingModule {}
@@ -179,6 +198,7 @@ export async function startMcpApp(): Promise<{
     geocoder: new InMemoryGeocoder(),
     geocodeCache: new InMemoryGeocodeCache(),
     planner: new ControllableTripPlanner(),
+    stops: new ServiceAreaStopRepository(),
   };
   const moduleRef = await buildTestingModule(fakes).compile();
   const app = moduleRef.createNestApplication({ logger: false });
