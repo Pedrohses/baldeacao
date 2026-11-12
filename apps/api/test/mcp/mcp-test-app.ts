@@ -5,6 +5,16 @@ import { Test } from '@nestjs/testing';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { McpModule } from '../../src/mcp/mcp.module';
+import { SearchPlacesUseCase } from '../../src/modules/geocoding/application/use-cases/search-places.use-case';
+import type { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
+import { GeocodeCache } from '../../src/modules/geocoding/domain/ports/geocode-cache.port';
+import { Geocoder } from '../../src/modules/geocoding/domain/ports/geocoder.port';
+import { GeocodingModule } from '../../src/modules/geocoding/geocoding.module';
+import { PlanTripUseCase } from '../../src/modules/routing/application/use-cases/plan-trip.use-case';
+import type { Itinerary } from '../../src/modules/routing/domain/entities/itinerary.entity';
+import { TripPlanner } from '../../src/modules/routing/domain/ports/trip-planner.port';
+import type { TripPlanQuery } from '../../src/modules/routing/domain/value-objects/trip-plan-query';
+import { RoutingModule } from '../../src/modules/routing/routing.module';
 import { GetVehicleSnapshotUseCase } from '../../src/modules/realtime/application/use-cases/get-vehicle-snapshot.use-case';
 import { VehiclePositionsStorePort } from '../../src/modules/realtime/domain/ports/vehicle-positions-store.port';
 import { RealtimeModule } from '../../src/modules/realtime/realtime.module';
@@ -19,6 +29,7 @@ import { RouteRepository } from '../../src/modules/transit/domain/ports/route-re
 import { StopRepository } from '../../src/modules/transit/domain/ports/stop-repository.port';
 import { TransitModule } from '../../src/modules/transit/transit.module';
 import { InMemoryPositionsStore } from '../realtime/in-memory-realtime';
+import { InMemoryGeocodeCache } from '../support/geocoding-in-memory';
 import { InMemoryRouteRepository, InMemoryStopRepository } from '../support/transit-in-memory';
 
 /** Previsões por parada; uma parada mapeada para Error faz a fonte falhar. */
@@ -49,12 +60,45 @@ export class FlakyPositionsStore extends InMemoryPositionsStore {
   }
 }
 
+/** Geocodificador falso: o primeiro termo cadastrado contido na consulta decide o resultado. */
+export class InMemoryGeocoder extends Geocoder {
+  readonly byTerm = new Map<string, Place[] | Error>();
+  readonly queries: string[] = [];
+
+  search(query: string, limit: number): Promise<Place[]> {
+    this.queries.push(query);
+    for (const [term, result] of this.byTerm) {
+      if (!query.includes(term)) continue;
+      return result instanceof Error
+        ? Promise.reject(result)
+        : Promise.resolve(result.slice(0, limit));
+    }
+    return Promise.resolve([]);
+  }
+}
+
+/** Planejador falso com resultado trocável e registro das consultas. */
+export class ControllableTripPlanner extends TripPlanner {
+  result: Itinerary[] | Error = [];
+  readonly queries: TripPlanQuery[] = [];
+
+  plan(query: TripPlanQuery): Promise<Itinerary[]> {
+    this.queries.push(query);
+    return this.result instanceof Error
+      ? Promise.reject(this.result)
+      : Promise.resolve(this.result);
+  }
+}
+
 export interface McpFakes {
   arrivals: InMemoryArrivalsProvider;
   positions: FlakyPositionsStore;
+  geocoder: InMemoryGeocoder;
+  geocodeCache: InMemoryGeocodeCache;
+  planner: ControllableTripPlanner;
 }
 
-/** Monta o McpModule real com TransitModule e RealtimeModule trocados por versões em memória. */
+/** Monta o McpModule real com os módulos de contexto trocados por versões em memória. */
 function buildTestingModule(fakes: McpFakes) {
   @Module({
     providers: [
@@ -85,7 +129,27 @@ function buildTestingModule(fakes: McpFakes) {
   })
   class FakeRealtimeModule {}
 
+  @Module({
+    providers: [
+      SearchPlacesUseCase,
+      { provide: Geocoder, useValue: fakes.geocoder },
+      { provide: GeocodeCache, useValue: fakes.geocodeCache },
+    ],
+    exports: [SearchPlacesUseCase],
+  })
+  class FakeGeocodingModule {}
+
+  @Module({
+    providers: [PlanTripUseCase, { provide: TripPlanner, useValue: fakes.planner }],
+    exports: [PlanTripUseCase],
+  })
+  class FakeRoutingModule {}
+
   return Test.createTestingModule({ imports: [McpModule] })
+    .overrideModule(GeocodingModule)
+    .useModule(FakeGeocodingModule)
+    .overrideModule(RoutingModule)
+    .useModule(FakeRoutingModule)
     .overrideModule(TransitModule)
     .useModule(FakeTransitModule)
     .overrideModule(RealtimeModule)
@@ -101,6 +165,9 @@ export async function startMcpApp(): Promise<{
   const fakes: McpFakes = {
     arrivals: new InMemoryArrivalsProvider(),
     positions: new FlakyPositionsStore(),
+    geocoder: new InMemoryGeocoder(),
+    geocodeCache: new InMemoryGeocodeCache(),
+    planner: new ControllableTripPlanner(),
   };
   const moduleRef = await buildTestingModule(fakes).compile();
   const app = moduleRef.createNestApplication({ logger: false });
