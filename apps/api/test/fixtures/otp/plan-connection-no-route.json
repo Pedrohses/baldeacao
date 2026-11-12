@@ -1,0 +1,13 @@
+{
+  "data": {
+    "planConnection": {
+      "routingErrors": [
+        {
+          "code": "NO_TRANSIT_CONNECTION",
+          "description": "No transit connection was found between the origin and destination."
+        }
+      ],
+      "edges": []
+    }
+  }
+}

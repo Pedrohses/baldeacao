@@ -1,0 +1,455 @@
+{
+  "data": {
+    "planConnection": {
+      "routingErrors": [],
+      "edges": [
+        {
+          "node": {
+            "start": "2026-11-12T08:00:00-03:00",
+            "end": "2026-11-12T08:52:00-03:00",
+            "duration": 3120,
+            "walkDistance": 750.4,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 300,
+                "distance": 350.2,
+                "headsign": null,
+                "start": {
+                  "scheduledTime": "2026-11-12T08:00:00-03:00",
+                  "estimated": null
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T08:05:00-03:00",
+                  "estimated": null
+                },
+                "from": {
+                  "name": "Origem",
+                  "lat": -23.6,
+                  "lon": -46.7202,
+                  "stop": null
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 4990",
+                  "lat": -23.6012,
+                  "lon": -46.7225,
+                  "stop": {
+                    "gtfsId": "1:1906488"
+                  }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": {
+                  "points": "~j`oCf`d|GvBnFvBzE"
+                }
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": true,
+                "duration": 1080,
+                "distance": 4200.3,
+                "headsign": "Rio Pequeno",
+                "start": {
+                  "scheduledTime": "2026-11-12T08:07:00-03:00",
+                  "estimated": {
+                    "time": "2026-11-12T08:08:00-03:00"
+                  }
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T08:25:00-03:00",
+                  "estimated": {
+                    "time": "2026-11-12T08:26:00-03:00"
+                  }
+                },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 4990",
+                  "lat": -23.6012,
+                  "lon": -46.7225,
+                  "stop": {
+                    "gtfsId": "1:1906488"
+                  }
+                },
+                "to": {
+                  "name": "Estação Butantã",
+                  "lat": -23.5719,
+                  "lon": -46.7081,
+                  "stop": {
+                    "gtfsId": "1:60016726"
+                  }
+                },
+                "route": {
+                  "gtfsId": "1:7725-10",
+                  "shortName": "7725-10",
+                  "longName": "Rio Pequeno - Term. Campo Limpo",
+                  "color": "509E2F"
+                },
+                "intermediateStops": [
+                  {
+                    "gtfsId": "1:190651"
+                  },
+                  {
+                    "gtfsId": "1:190652"
+                  },
+                  {
+                    "gtfsId": "1:190653"
+                  },
+                  {
+                    "gtfsId": "1:190654"
+                  },
+                  {
+                    "gtfsId": "1:190655"
+                  },
+                  {
+                    "gtfsId": "1:190656"
+                  },
+                  {
+                    "gtfsId": "1:190657"
+                  },
+                  {
+                    "gtfsId": "1:190658"
+                  },
+                  {
+                    "gtfsId": "1:190659"
+                  }
+                ],
+                "legGeometry": {
+                  "points": "nr`oCrnd|Gsq@oUsv@w[{kAwe@"
+                }
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 240,
+                "distance": 120,
+                "headsign": null,
+                "start": {
+                  "scheduledTime": "2026-11-12T08:26:00-03:00",
+                  "estimated": null
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T08:30:00-03:00",
+                  "estimated": null
+                },
+                "from": {
+                  "name": "Estação Butantã",
+                  "lat": -23.5719,
+                  "lon": -46.7081,
+                  "stop": {
+                    "gtfsId": "1:60016726"
+                  }
+                },
+                "to": {
+                  "name": "Butantã",
+                  "lat": -23.5721,
+                  "lon": -46.7078,
+                  "stop": {
+                    "gtfsId": "1:18853"
+                  }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": {
+                  "points": "j{znCrta|Gf@{@"
+                }
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 960,
+                "distance": 9800.7,
+                "headsign": "Luz",
+                "start": {
+                  "scheduledTime": "2026-11-12T08:31:00-03:00",
+                  "estimated": null
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T08:47:00-03:00",
+                  "estimated": null
+                },
+                "from": {
+                  "name": "Butantã",
+                  "lat": -23.5721,
+                  "lon": -46.7078,
+                  "stop": {
+                    "gtfsId": "1:18853"
+                  }
+                },
+                "to": {
+                  "name": "Luz",
+                  "lat": -23.5365,
+                  "lon": -46.6334,
+                  "stop": {
+                    "gtfsId": "1:18845"
+                  }
+                },
+                "route": {
+                  "gtfsId": "1:L4",
+                  "shortName": "L4",
+                  "longName": "Linha 4 - Amarela",
+                  "color": "#ffd400"
+                },
+                "intermediateStops": [
+                  {
+                    "gtfsId": "1:18841"
+                  },
+                  {
+                    "gtfsId": "1:18842"
+                  },
+                  {
+                    "gtfsId": "1:18843"
+                  },
+                  {
+                    "gtfsId": "1:18844"
+                  },
+                  {
+                    "gtfsId": "1:18845"
+                  },
+                  {
+                    "gtfsId": "1:18846"
+                  },
+                  {
+                    "gtfsId": "1:18847"
+                  }
+                ],
+                "legGeometry": {
+                  "points": "r|znCvra|Gs]cwAwmAsbEk_Ak{Bwo@{w@"
+                }
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 300,
+                "distance": 280.2,
+                "headsign": null,
+                "start": {
+                  "scheduledTime": "2026-11-12T08:47:00-03:00",
+                  "estimated": null
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T08:52:00-03:00",
+                  "estimated": null
+                },
+                "from": {
+                  "name": "Luz",
+                  "lat": -23.5365,
+                  "lon": -46.6334,
+                  "stop": {
+                    "gtfsId": "1:18845"
+                  }
+                },
+                "to": {
+                  "name": "Destino",
+                  "lat": -23.5342,
+                  "lon": -46.6339,
+                  "stop": null
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": {
+                  "points": "b~snCvas{GcGz@gEf@"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T08:03:00-03:00",
+            "end": "2026-11-12T09:10:00-03:00",
+            "duration": 4020,
+            "walkDistance": 1450,
+            "numberOfTransfers": 0,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 720,
+                "distance": 950,
+                "headsign": null,
+                "start": {
+                  "scheduledTime": "2026-11-12T08:03:00-03:00",
+                  "estimated": null
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T08:15:00-03:00",
+                  "estimated": null
+                },
+                "from": {
+                  "name": "Origem",
+                  "lat": -23.6,
+                  "lon": -46.7202,
+                  "stop": null
+                },
+                "to": {
+                  "name": "R. Dr. Luís Migliano",
+                  "lat": -23.6034,
+                  "lon": -46.7311,
+                  "stop": {
+                    "gtfsId": "1:4301848"
+                  }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": {
+                  "points": "~j`oCf`d|GfTbcA"
+                }
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 2700,
+                "distance": 11800,
+                "headsign": "Metrô Ana Rosa",
+                "start": {
+                  "scheduledTime": "2026-11-12T08:15:00-03:00",
+                  "estimated": null
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T09:00:00-03:00",
+                  "estimated": null
+                },
+                "from": {
+                  "name": "R. Dr. Luís Migliano",
+                  "lat": -23.6034,
+                  "lon": -46.7311,
+                  "stop": {
+                    "gtfsId": "1:4301848"
+                  }
+                },
+                "to": {
+                  "name": "Av. Paulista, 2000",
+                  "lat": -23.5605,
+                  "lon": -46.6575,
+                  "stop": {
+                    "gtfsId": "1:1010021"
+                  }
+                },
+                "route": {
+                  "gtfsId": "1:875A-10",
+                  "shortName": "875A-10",
+                  "longName": "Perdizes - Metrô Ana Rosa",
+                  "color": null
+                },
+                "intermediateStops": [
+                  {
+                    "gtfsId": "1:430181"
+                  },
+                  {
+                    "gtfsId": "1:430182"
+                  },
+                  {
+                    "gtfsId": "1:430183"
+                  },
+                  {
+                    "gtfsId": "1:430184"
+                  },
+                  {
+                    "gtfsId": "1:430185"
+                  },
+                  {
+                    "gtfsId": "1:430186"
+                  },
+                  {
+                    "gtfsId": "1:430187"
+                  },
+                  {
+                    "gtfsId": "1:430188"
+                  },
+                  {
+                    "gtfsId": "1:430189"
+                  },
+                  {
+                    "gtfsId": "1:4301810"
+                  },
+                  {
+                    "gtfsId": "1:4301811"
+                  },
+                  {
+                    "gtfsId": "1:4301812"
+                  },
+                  {
+                    "gtfsId": "1:4301813"
+                  },
+                  {
+                    "gtfsId": "1:4301814"
+                  },
+                  {
+                    "gtfsId": "1:4301815"
+                  },
+                  {
+                    "gtfsId": "1:4301816"
+                  },
+                  {
+                    "gtfsId": "1:4301817"
+                  },
+                  {
+                    "gtfsId": "1:4301818"
+                  },
+                  {
+                    "gtfsId": "1:4301819"
+                  },
+                  {
+                    "gtfsId": "1:4301820"
+                  },
+                  {
+                    "gtfsId": "1:4301821"
+                  },
+                  {
+                    "gtfsId": "1:4301822"
+                  }
+                ],
+                "legGeometry": {
+                  "points": "f`aoCjdf|GkoCs~FwzBkkE"
+                }
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 600,
+                "distance": 500,
+                "headsign": null,
+                "start": {
+                  "scheduledTime": "2026-11-12T09:00:00-03:00",
+                  "estimated": null
+                },
+                "end": {
+                  "scheduledTime": "2026-11-12T09:10:00-03:00",
+                  "estimated": null
+                },
+                "from": {
+                  "name": "Av. Paulista, 2000",
+                  "lat": -23.5605,
+                  "lon": -46.6575,
+                  "stop": {
+                    "gtfsId": "1:1010021"
+                  }
+                },
+                "to": {
+                  "name": "Destino",
+                  "lat": -23.5342,
+                  "lon": -46.6339,
+                  "stop": null
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": {
+                  "points": "btxnCjxw{GkcDorC"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
