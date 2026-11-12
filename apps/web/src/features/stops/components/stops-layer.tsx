@@ -4,12 +4,16 @@ import type { NearbyStop } from '@baldeacao/types';
 import { useEffect, useMemo, useRef } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
+import { MAP_COLORS } from '@/shared/ui/map';
+
 import { useNearbyStops, type NearbyStopsCenter } from '../hooks';
 import { stopsToGeoJson } from '../utils/stops-geojson';
 
 export const STOPS_SOURCE_ID = 'stops';
 export const STOPS_LAYER_ID = 'stops-circles';
 export const STOPS_SELECTED_LAYER_ID = 'stops-selected';
+/** Paradas só aparecem de perto: abaixo disso seriam ruído sobre os ônibus. */
+export const STOPS_MIN_ZOOM = 14;
 
 export interface StopsLayerProps {
   /** Centro da busca (normalmente o centro do mapa ou a posição do usuário). */
@@ -62,13 +66,15 @@ export function StopsLayer({ center, radius, selectedStopId = null, onSelectStop
 
   return (
     <Source id={STOPS_SOURCE_ID} type="geojson" data={geojson}>
+      {/* Parada é oca (miolo branco, anel escuro) para não se confundir com o ônibus cheio. */}
       <Layer
         id={STOPS_LAYER_ID}
         type="circle"
+        minzoom={STOPS_MIN_ZOOM}
         paint={{
-          'circle-radius': 6,
-          'circle-color': '#ffffff',
-          'circle-stroke-color': '#1d4ed8',
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], STOPS_MIN_ZOOM, 4, 17, 7],
+          'circle-color': MAP_COLORS.surface,
+          'circle-stroke-color': MAP_COLORS.text,
           'circle-stroke-width': 2,
         }}
       />
@@ -78,8 +84,8 @@ export function StopsLayer({ center, radius, selectedStopId = null, onSelectStop
         filter={['==', ['get', 'id'], selectedStopId ?? '']}
         paint={{
           'circle-radius': 9,
-          'circle-color': '#1d4ed8',
-          'circle-stroke-color': '#ffffff',
+          'circle-color': MAP_COLORS.brand,
+          'circle-stroke-color': MAP_COLORS.surface,
           'circle-stroke-width': 3,
         }}
       />

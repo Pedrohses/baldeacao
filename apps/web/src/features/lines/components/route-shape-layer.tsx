@@ -10,7 +10,7 @@ export const ROUTE_SHAPE_SOURCE_ID = 'route-shape';
 export const ROUTE_SHAPE_OUTBOUND_LAYER_ID = 'route-shape-0';
 export const ROUTE_SHAPE_INBOUND_LAYER_ID = 'route-shape-1';
 
-const FALLBACK_COLOR = '#1d4ed8';
+const FALLBACK_COLOR = '#0B4F5C';
 
 export interface RouteShapeLayerProps {
   /** route_id da linha cujo traçado será desenhado; null não desenha nada. */

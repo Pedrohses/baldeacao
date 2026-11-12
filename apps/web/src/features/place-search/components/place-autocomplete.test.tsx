@@ -1,14 +1,28 @@
-import type { Place } from '@baldeacao/types';
+import type { Place, SearchPlacesMode } from '@baldeacao/types';
 import { placeDestinationExample, placeOriginExample } from '@baldeacao/types/examples';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { resetGeolocation } from '@/shared/hooks/use-geolocation';
+
+import { addRecentPlace, resetRecentPlacesCache } from '../hooks';
 import { placesService } from '../services';
 import { PlaceAutocomplete } from './place-autocomplete';
 
 const onChange = vi.fn<(place: Place | null) => void>();
+const onPickOnMap = vi.fn();
+
+const augusta: Place = {
+  id: 'osm:way:1',
+  name: 'Rua Augusta, 1500',
+  address: 'Consolação, São Paulo',
+  kind: 'address',
+  location: { lat: -23.556, lon: -46.659 },
+};
+const flores1: Place = { ...augusta, id: 'osm:way:2', name: 'Rua das Flores', address: 'Lapa' };
+const flores2: Place = { ...augusta, id: 'osm:way:3', name: 'Rua das Flores', address: 'Penha' };
 
 function Harness({ initial = null }: { initial?: Place | null }) {
   const [value, setValue] = useState<Place | null>(initial);
@@ -16,6 +30,7 @@ function Harness({ initial = null }: { initial?: Place | null }) {
     <PlaceAutocomplete
       label="Origem"
       value={value}
+      onPickOnMap={onPickOnMap}
       onChange={(place) => {
         onChange(place);
         setValue(place);
@@ -43,19 +58,33 @@ function type(input: HTMLElement, value: string) {
   fireEvent.change(input, { target: { value } });
 }
 
+/** quick e full com respostas diferentes. */
+function mockSearch(results: Partial<Record<SearchPlacesMode, Place[] | Error>>) {
+  return vi.spyOn(placesService, 'search').mockImplementation(async (_q, mode) => {
+    const result = results[mode] ?? [];
+    if (result instanceof Error) throw result;
+    return result;
+  });
+}
+
 beforeEach(() => {
   vi.useFakeTimers();
   onChange.mockReset();
+  onPickOnMap.mockReset();
+  localStorage.clear();
+  resetRecentPlacesCache();
+  resetGeolocation();
 });
 
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
-describe('PlaceAutocomplete', () => {
-  it('espera 300 ms sem digitação antes de buscar, uma vez só', async () => {
-    const spy = vi.spyOn(placesService, 'search').mockResolvedValue([placeOriginExample]);
+describe('PlaceAutocomplete: autocompletar', () => {
+  it('espera 300 ms sem digitação e busca no modo quick, uma vez só', async () => {
+    const spy = mockSearch({ quick: [placeOriginExample] });
     const input = renderAutocomplete();
 
     type(input, 'Mor');
@@ -69,15 +98,19 @@ describe('PlaceAutocomplete', () => {
 
     await advance(1);
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy.mock.calls[0]?.[0]).toBe('Morumbis');
+    expect(spy.mock.calls[0]?.slice(0, 2)).toEqual(['Morumbis', 'quick']);
 
     await advance(0);
-    expect(screen.getByRole('option', { name: /Estádio do Morumbis/ })).toBeInTheDocument();
+    const option = screen.getByRole('option', { name: /Estádio do Morumbis/ });
+    expect(option).toBeInTheDocument();
+    // Trecho digitado em negrito.
+    expect(option.querySelector('strong')).toHaveTextContent('Morumbis');
+    expect(screen.getByRole('option', { name: /Buscar endereço "Morumbis"/ })).toBeInTheDocument();
     expect(input).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('não busca com menos de 2 caracteres e avisa o mínimo', async () => {
-    const spy = vi.spyOn(placesService, 'search');
+    const spy = mockSearch({});
     const input = renderAutocomplete();
 
     type(input, 'M');
@@ -87,10 +120,7 @@ describe('PlaceAutocomplete', () => {
   });
 
   it('navega pelas sugestões com as setas e escolhe com Enter', async () => {
-    vi.spyOn(placesService, 'search').mockResolvedValue([
-      placeOriginExample,
-      placeDestinationExample,
-    ]);
+    mockSearch({ quick: [placeOriginExample, placeDestinationExample] });
     const input = renderAutocomplete();
 
     type(input, 'terminal');
@@ -103,7 +133,9 @@ describe('PlaceAutocomplete', () => {
     expect(second).toHaveAttribute('aria-selected', 'true');
     expect(input).toHaveAttribute('aria-activedescendant', second.id);
 
+    fireEvent.keyDown(input, { key: 'ArrowDown' }); // "Buscar endereço"
     fireEvent.keyDown(input, { key: 'ArrowDown' }); // volta ao começo
+    fireEvent.keyDown(input, { key: 'ArrowUp' });
     fireEvent.keyDown(input, { key: 'ArrowUp' });
     fireEvent.keyDown(input, { key: 'Enter' });
 
@@ -114,7 +146,7 @@ describe('PlaceAutocomplete', () => {
   });
 
   it('Escape fecha a lista sem escolher', async () => {
-    vi.spyOn(placesService, 'search').mockResolvedValue([placeOriginExample]);
+    mockSearch({ quick: [placeOriginExample] });
     const input = renderAutocomplete();
 
     type(input, 'Morumbis');
@@ -126,8 +158,8 @@ describe('PlaceAutocomplete', () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('escolhe com clique', async () => {
-    vi.spyOn(placesService, 'search').mockResolvedValue([placeOriginExample]);
+  it('escolhe com clique e mostra o ícone do tipo com o endereço', async () => {
+    mockSearch({ quick: [placeOriginExample] });
     const input = renderAutocomplete();
 
     type(input, 'Morumbis');
@@ -138,33 +170,8 @@ describe('PlaceAutocomplete', () => {
     expect(onChange).toHaveBeenLastCalledWith(placeOriginExample);
   });
 
-  it('mostra estado vazio', async () => {
-    vi.spyOn(placesService, 'search').mockResolvedValue([]);
-    const input = renderAutocomplete();
-
-    type(input, 'xyzxyz');
-    await advance(300);
-    await advance(0);
-
-    expect(screen.getByRole('status')).toHaveTextContent('Nenhum lugar encontrado.');
-    expect(screen.queryByRole('option')).not.toBeInTheDocument();
-  });
-
-  it('mostra erro quando a busca falha', async () => {
-    vi.spyOn(placesService, 'search').mockRejectedValue(new Error('falhou'));
-    const input = renderAutocomplete();
-
-    type(input, 'Morumbis');
-    await advance(300);
-    await advance(0);
-
-    expect(screen.getByRole('alert')).toHaveTextContent(
-      'Não foi possível buscar lugares. Tente de novo.',
-    );
-  });
-
   it('editar o texto de um lugar escolhido limpa a escolha e não busca o nome escolhido', async () => {
-    const spy = vi.spyOn(placesService, 'search').mockResolvedValue([]);
+    const spy = mockSearch({});
     const input = renderAutocomplete(placeOriginExample);
     expect(input).toHaveValue('Estádio do Morumbis');
 
@@ -176,6 +183,159 @@ describe('PlaceAutocomplete', () => {
     expect(onChange).toHaveBeenLastCalledWith(null);
     expect(input).toHaveValue('Estádio do Morumbi');
     await advance(300);
-    expect(spy).toHaveBeenCalledWith('Estádio do Morumbi', expect.anything());
+    expect(spy).toHaveBeenCalledWith('Estádio do Morumbi', 'quick', expect.anything());
+  });
+});
+
+describe('PlaceAutocomplete: aceita o que foi digitado', () => {
+  it('Enter sem item ativo escolhe a 1ª sugestão', async () => {
+    mockSearch({ quick: [placeOriginExample, placeDestinationExample] });
+    const input = renderAutocomplete();
+
+    type(input, 'estadio');
+    await advance(300);
+    await advance(0);
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    expect(onChange).toHaveBeenLastCalledWith(placeOriginExample);
+  });
+
+  it('Enter sem sugestão faz a busca completa e escolhe o 1º resultado', async () => {
+    const spy = mockSearch({ quick: [], full: [augusta] });
+    const input = renderAutocomplete();
+
+    type(input, 'Rua Augusta 1500');
+    await advance(300);
+    await advance(0);
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await advance(0);
+
+    expect(spy).toHaveBeenCalledWith('Rua Augusta 1500', 'full', expect.anything());
+    expect(onChange).toHaveBeenLastCalledWith(augusta);
+    expect(input).toHaveValue('Rua Augusta, 1500');
+  });
+
+  it('sair do campo antes das sugestões chegarem também resolve pela busca completa', async () => {
+    const spy = mockSearch({ quick: [], full: [augusta] });
+    const input = renderAutocomplete();
+
+    type(input, 'Rua Augusta 1500');
+    fireEvent.blur(input);
+    await advance(0);
+
+    expect(spy).toHaveBeenCalledWith('Rua Augusta 1500', 'full', expect.anything());
+    expect(onChange).toHaveBeenLastCalledWith(augusta);
+  });
+
+  it('com homônimos abre a lista para a pessoa escolher', async () => {
+    mockSearch({ quick: [], full: [flores1, flores2] });
+    const input = renderAutocomplete();
+
+    type(input, 'Rua das Flores');
+    fireEvent.blur(input);
+    await advance(0);
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('status')).toHaveTextContent('2 endereços encontrados');
+    const options = screen.getAllByRole('option');
+    expect(options).toHaveLength(2);
+    fireEvent.click(options[1]!);
+    expect(onChange).toHaveBeenLastCalledWith(flores2);
+  });
+
+  it('"Buscar endereço" chama a busca completa', async () => {
+    const spy = mockSearch({ quick: [placeOriginExample], full: [augusta] });
+    const input = renderAutocomplete();
+
+    type(input, 'Augusta');
+    await advance(300);
+    await advance(0);
+    fireEvent.click(screen.getByRole('option', { name: /Buscar endereço "Augusta"/ }));
+    await advance(0);
+
+    expect(spy).toHaveBeenLastCalledWith('Augusta', 'full', expect.anything());
+    expect(onChange).toHaveBeenLastCalledWith(augusta);
+  });
+
+  it('mostra a mensagem de não encontrado com os atalhos', async () => {
+    mockSearch({ quick: [], full: [] });
+    const input = renderAutocomplete();
+
+    type(input, 'xyzxyz');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await advance(0);
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Não achamos "xyzxyz". Tente rua e número, por exemplo Rua Augusta, 1500, ou o nome de uma estação.',
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Escolher no mapa' }));
+    expect(onPickOnMap).toHaveBeenCalledOnce();
+  });
+
+  it('erro de rede mostra "Sem conexão" e tenta de novo', async () => {
+    const spy = mockSearch({ quick: [], full: new Error('offline') });
+    const input = renderAutocomplete();
+
+    type(input, 'Rua Augusta');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    await advance(0);
+
+    expect(screen.getByRole('alert')).toHaveTextContent('Sem conexão com a busca. Tente de novo.');
+    spy.mockImplementation(async (_q, mode) => (mode === 'full' ? [augusta] : []));
+    fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
+    await advance(0);
+    expect(onChange).toHaveBeenLastCalledWith(augusta);
+  });
+});
+
+describe('PlaceAutocomplete: atalhos', () => {
+  it('com o campo vazio mostra Minha localização, Escolher no mapa e os recentes', () => {
+    addRecentPlace(placeDestinationExample);
+    const input = renderAutocomplete();
+    fireEvent.focus(input);
+
+    const options = screen.getAllByRole('option');
+    expect(options.map((o) => o.textContent)).toEqual([
+      expect.stringContaining('Minha localização'),
+      expect.stringContaining('Escolher no mapa'),
+      expect.stringContaining('Terminal Rodoviário Tietê'),
+    ]);
+    expect(screen.getByText('Recentes')).toBeInTheDocument();
+
+    fireEvent.click(options[1]!);
+    expect(onPickOnMap).toHaveBeenCalledOnce();
+  });
+
+  it('escolher um lugar o guarda nos recentes', async () => {
+    mockSearch({ quick: [placeOriginExample] });
+    const input = renderAutocomplete();
+    type(input, 'Morumbis');
+    await advance(300);
+    await advance(0);
+    fireEvent.keyDown(input, { key: 'Enter' });
+
+    const stored = JSON.parse(localStorage.getItem('baldeacao:recent-places') ?? '[]');
+    expect(stored).toEqual([placeOriginExample]);
+  });
+
+  it('Minha localização usa o GPS e vira um lugar do tipo coordenadas', async () => {
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        getCurrentPosition: (ok: (p: unknown) => void) =>
+          ok({ coords: { latitude: -23.5, longitude: -46.6 } }),
+      },
+    });
+    const input = renderAutocomplete();
+    fireEvent.focus(input);
+    fireEvent.click(screen.getByRole('option', { name: /Minha localização/ }));
+    await advance(0);
+
+    expect(onChange).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        name: 'Minha localização',
+        kind: 'coordinates',
+        location: { lat: -23.5, lon: -46.6 },
+      }),
+    );
   });
 });

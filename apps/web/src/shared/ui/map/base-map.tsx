@@ -6,6 +6,6 @@ import dynamic from 'next/dynamic';
 export const BaseMap = dynamic(() => import('./base-map-client'), {
   ssr: false,
   loading: () => (
-    <div className="h-full w-full animate-pulse bg-neutral-200" aria-label="Carregando mapa" />
+    <div className="h-full w-full animate-pulse bg-surface-2" aria-label="Carregando mapa" />
   ),
 });

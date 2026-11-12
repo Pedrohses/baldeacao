@@ -2,7 +2,9 @@
 
 import type { Arrival } from '@baldeacao/types';
 
-import { useNow, useStopArrivals } from '../hooks';
+import { useNow } from '@/shared/hooks/use-now';
+
+import { useStopArrivals } from '../hooks';
 import { formatMinutes, minutesUntil } from '../utils/arrival-time';
 
 export interface ArrivalsListViewProps {
@@ -13,28 +15,33 @@ export interface ArrivalsListViewProps {
 /** Apresentação pura: lista de previsões com minutos e origem (tempo real ou tabela). */
 export function ArrivalsListView({ arrivals, now }: ArrivalsListViewProps) {
   if (arrivals.length === 0) {
-    return <p className="text-sm text-neutral-600">Nenhuma chegada prevista no momento.</p>;
+    return <p className="text-muted">Nenhuma chegada prevista no momento.</p>;
   }
   return (
-    <ul className="divide-y divide-neutral-200" aria-label="Próximas chegadas">
+    <ul className="divide-y divide-border" aria-label="Próximas chegadas">
       {arrivals.map((arrival, index) => {
         const minutes = minutesUntil(arrival.expectedAt, now);
         return (
           <li
             key={`${arrival.routeId}-${arrival.directionId}-${index}`}
-            className="flex items-center justify-between gap-3 py-2"
+            className="flex min-h-14 items-center justify-between gap-3 py-2"
           >
             <div className="min-w-0">
-              <p className="font-semibold">{arrival.routeShortName}</p>
+              <p className="inline-flex rounded-[6px] bg-surface-2 px-1.5 font-mono font-bold">
+                {arrival.routeShortName}
+              </p>
               {arrival.headsign ? (
-                <p className="truncate text-sm text-neutral-600">{arrival.headsign}</p>
+                <p className="truncate text-sm text-muted">{arrival.headsign}</p>
               ) : null}
             </div>
             <div className="shrink-0 text-right">
-              <p className="font-semibold tabular-nums">{formatMinutes(minutes)}</p>
+              <p className="font-mono text-xl font-bold">{formatMinutes(minutes)}</p>
               <p
-                className={arrival.isRealtime ? 'text-xs text-green-800' : 'text-xs text-neutral-600'}
+                className={`inline-flex items-center gap-1 text-xs ${arrival.isRealtime ? 'font-bold text-live' : 'text-muted'}`}
               >
+                {arrival.isRealtime ? (
+                  <span aria-hidden="true" className="size-1.5 rounded-full bg-live" />
+                ) : null}
                 {arrival.isRealtime ? 'Tempo real' : 'Tabela'}
               </p>
             </div>
@@ -56,14 +63,14 @@ export function ArrivalsList({ stopId }: ArrivalsListProps) {
 
   if (isPending) {
     return (
-      <p role="status" className="text-sm text-neutral-600">
+      <p role="status" className="text-muted">
         Carregando previsões...
       </p>
     );
   }
   if (isError) {
     return (
-      <p role="alert" className="text-sm text-red-700">
+      <p role="alert" className="text-danger">
         Não foi possível carregar as previsões desta parada.
       </p>
     );

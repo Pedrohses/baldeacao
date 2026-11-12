@@ -1,3 +1,14 @@
-export { StopsLayer, StopSheet, ArrivalsList } from './components';
-export type { StopsLayerProps, StopSheetProps, ArrivalsListProps } from './components';
+export {
+  ArrivalsList,
+  NearbyStopsList,
+  STOPS_MIN_ZOOM,
+  StopSheet,
+  StopsLayer,
+} from './components';
+export type {
+  ArrivalsListProps,
+  NearbyStopsListProps,
+  StopSheetProps,
+  StopsLayerProps,
+} from './components';
 export { useNearbyStops, useStopArrivals } from './hooks';

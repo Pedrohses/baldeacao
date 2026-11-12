@@ -1,7 +1,24 @@
 import type { Metadata, Viewport } from 'next';
+import { Atkinson_Hyperlegible_Mono, Atkinson_Hyperlegible_Next } from 'next/font/google';
 import type { ReactNode } from 'react';
+
 import { Providers } from '@/shared/lib/providers';
 import './globals.css';
+
+// Interface e números: fontes pensadas para leitura com baixa visão.
+const atkinson = Atkinson_Hyperlegible_Next({
+  subsets: ['latin', 'latin-ext'],
+  weight: ['400', '700', '800'],
+  variable: '--font-atkinson',
+  display: 'swap',
+});
+
+const atkinsonMono = Atkinson_Hyperlegible_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-atkinson-mono',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Baldeação',
@@ -11,12 +28,17 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0B4F5C' },
+    { media: '(prefers-color-scheme: dark)', color: '#0E1418' },
+  ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR">
-      <body className="h-full antialiased">
+    <html lang="pt-BR" className={`${atkinson.variable} ${atkinsonMono.variable}`}>
+      <body className="h-full font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

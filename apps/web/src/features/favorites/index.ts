@@ -1,1 +1,1 @@
-export {};
+export { FavoritesEmptyState } from './components';

@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  formatDeparture,
   formatDistance,
   formatDuration,
   formatTime,
   formatTransfers,
   legColor,
+  placeLabel,
   readableTextColor,
+  shortRouteName,
 } from './format';
 
 describe('formatação do itinerário', () => {
@@ -31,10 +34,30 @@ describe('formatação do itinerário', () => {
   });
 
   it('resolve a cor do trecho e um texto legível sobre ela', () => {
-    expect(legColor({ mode: 'walk', routeColor: null })).toBe('#525252');
+    expect(legColor({ mode: 'walk', routeColor: null })).toBe('#4F5D67');
     expect(legColor({ mode: 'bus', routeColor: '509e2f' })).toBe('#509E2F');
-    expect(legColor({ mode: 'bus', routeColor: null })).toBe('#1D4ED8');
+    expect(legColor({ mode: 'bus', routeColor: null })).toBe('#0B4F5C');
     expect(readableTextColor('#FFD700')).toBe('#000000');
-    expect(readableTextColor('#1D4ED8')).toBe('#FFFFFF');
+    expect(readableTextColor('#0B4F5C')).toBe('#FFFFFF');
+  });
+
+  it('encurta nomes de metrô e trem e troca os nomes genéricos do OTP', () => {
+    expect(shortRouteName('METRÔ L4')).toBe('L4');
+    expect(shortRouteName('CPTM L9')).toBe('L9');
+    expect(shortRouteName('746H-10')).toBe('746H-10');
+    expect(shortRouteName(null)).toBeNull();
+    expect(placeLabel('Destino')).toBe('o destino');
+    expect(placeLabel('Origem')).toBe('a origem');
+    expect(placeLabel('Sé')).toBe('Sé');
+  });
+
+  it('diz quando sai: agora, em minutos ou o horário', () => {
+    const now = new Date('2026-11-12T08:00:00-03:00');
+    expect(formatDeparture('2026-11-12T08:01:00-03:00', now)).toEqual({
+      text: 'Sai agora',
+      tone: 'now',
+    });
+    expect(formatDeparture('2026-11-12T08:04:00-03:00', now).text).toBe('Sai em 4 min');
+    expect(formatDeparture('2026-11-12T10:30:00-03:00', now).text).toBe('Sai às 10:30');
   });
 });
