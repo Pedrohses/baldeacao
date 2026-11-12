@@ -63,14 +63,31 @@ export function placeLabel(name: string): string {
   return name;
 }
 
-export type DepartureTone = 'now' | 'soon' | 'later';
+export type DepartureTone = 'past' | 'now' | 'soon' | 'later';
 
-/** "Sai agora" (menos de 2 min), "Sai em 4 min" (até 1 h) ou "Sai às 08:30". */
+const cityDateFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: CITY_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/** Data "AAAA-MM-DD" em São Paulo. */
+export function cityDate(date: Date): string {
+  return cityDateFormatter.format(date);
+}
+
+/**
+ * "Saiu às 07:50" (já passou), "Sai agora" (menos de 2 min), "Sai em 4 min" (até 1 h),
+ * "Sai às 08:30" ou "Sai amanhã às 07:00" (outro dia).
+ */
 export function formatDeparture(startAt: string, now: Date): { text: string; tone: DepartureTone } {
   const minutes = Math.floor((Date.parse(startAt) - now.getTime()) / 60_000);
+  if (minutes < 0) return { text: `Saiu às ${formatTime(startAt)}`, tone: 'past' };
   if (minutes < 2) return { text: 'Sai agora', tone: 'now' };
   if (minutes <= 60) return { text: `Sai em ${minutes} min`, tone: 'soon' };
-  return { text: `Sai às ${formatTime(startAt)}`, tone: 'later' };
+  const otherDay = cityDate(new Date(startAt)) !== cityDate(now);
+  return { text: `Sai ${otherDay ? 'amanhã ' : ''}às ${formatTime(startAt)}`, tone: 'later' };
 }
 
 /** Minutos entre o fim de um trecho e o começo de outro (espera da baldeação). */

@@ -152,6 +152,7 @@ export function TripScreen({ initial }: TripScreenProps) {
             onChange={trip.setTime}
             open={timeOpen}
             onOpenChange={setTimeOpen}
+            now={now}
           />
         </div>
         <div className="mt-4">

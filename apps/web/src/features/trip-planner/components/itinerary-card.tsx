@@ -116,7 +116,15 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
             <span className="sr-only">ao vivo,</span>
           </span>
         ) : null}
-        <span className={departure.tone === 'now' ? 'font-bold text-warn' : ''}>
+        <span
+          className={
+            departure.tone === 'now'
+              ? 'font-bold text-warn'
+              : departure.tone === 'past'
+                ? 'text-muted'
+                : ''
+          }
+        >
           {departure.text}
         </span>
         <span aria-hidden="true">·</span>
