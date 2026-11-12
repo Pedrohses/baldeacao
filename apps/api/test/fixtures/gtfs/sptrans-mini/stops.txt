@@ -1,0 +1,14 @@
+stop_id,stop_name,stop_desc,stop_lat,stop_lon
+4200953,Term. Pq. D. Pedro II,Plataforma 3,-23.544800,-46.629300
+4200961,Av. Liberdade 400,Proximo ao metro Liberdade,-23.556500,-46.635500
+4200972,R. Vergueiro 1200,Esquina com R. Pires da Mota,-23.571200,-46.641100
+4200980,Av. Domingos de Morais 2000,Em frente ao metro Santa Cruz,-23.590500,-46.638000
+4200991,Av. Jabaquara 1800,Proximo a R. Gabriele D Annunzio,-23.629000,-46.642000
+4201003,Jd. Angela,Ponto final,-23.702000,-46.749000
+4301801,R. Cardoso de Almeida 800,Proximo a PUC-SP,-23.535000,-46.675000
+4301848,Av. Paulista 1578,Em frente ao MASP,-23.561400,-46.655900
+4301870,Av. Indianopolis 1000,Proximo ao Parque Ibirapuera,-23.607000,-46.660000
+4301885,Aeroporto de Congonhas,Desembarque,-23.626100,-46.656400
+4400110,Metro Tatuape,Saida Av. Radial Leste,-23.540500,-46.576000
+4400125,Av. Celso Garcia 1500,Proximo a R. Tuiuti,-23.541000,-46.592000
+4400140,Av. Celso Garcia 300,Proximo ao Mercado Municipal do Braz,-23.543500,-46.615000

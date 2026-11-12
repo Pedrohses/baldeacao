@@ -1,4 +1,5 @@
 // Exemplos válidos de cada contrato: o typecheck garante a forma, o teste do web roda o parse.
+// Usam os mesmos ids e coordenadas das fixtures em apps/api/test/fixtures (gtfs/sptrans-mini e olho-vivo).
 import type {
   Arrival,
   LineShape,
@@ -21,10 +22,10 @@ export const routeExample = {
 } satisfies Route;
 
 export const stopExample = {
-  id: '18848',
+  id: '4301848',
   sourceId: 'sptrans',
   code: null,
-  name: 'Av. Paulista, 1578',
+  name: 'Av. Paulista 1578',
   description: 'Em frente ao MASP',
   location: { lat: -23.5614, lon: -46.6559 },
 } satisfies Stop;
@@ -35,19 +36,19 @@ export const lineShapeExample = {
   directionId: 0,
   shapeId: '84609',
   points: [
-    { lat: -23.5614, lon: -46.6559 },
-    { lat: -23.5631, lon: -46.6544 },
+    { lat: -23.535, lon: -46.675 },
+    { lat: -23.5455, lon: -46.6685 },
   ],
 } satisfies LineShape;
 
 export const arrivalExample = {
-  stopId: '18848',
+  stopId: '4301848',
   routeId: '875A-10',
   routeShortName: '875A-10',
   directionId: 0,
   headsign: 'Aeroporto',
   vehicleId: '11433',
-  expectedAt: '2026-11-12T08:42:00-03:00',
+  expectedAt: '2026-11-12T12:36:00-03:00',
   isRealtime: true,
   accessible: true,
   vehicleLocation: { lat: -23.559, lon: -46.6612 },
@@ -61,13 +62,13 @@ export const vehiclePositionExample = {
   directionId: 0,
   location: { lat: -23.559, lon: -46.6612 },
   accessible: true,
-  recordedAt: '2026-11-12T11:39:52Z',
+  recordedAt: '2026-11-12T15:34:10Z',
 } satisfies VehiclePosition;
 
 export const vehicleSnapshotExample = {
   sourceId: 'sptrans',
   routeId: null,
-  updatedAt: '2026-11-12T11:40:00Z',
+  updatedAt: '2026-11-12T15:34:30Z',
   vehicles: [vehiclePositionExample],
 } satisfies VehicleSnapshot;
 
