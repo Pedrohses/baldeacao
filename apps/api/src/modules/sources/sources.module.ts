@@ -1,16 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ImportGtfsFeedUseCase } from './application/use-cases/import-gtfs-feed.use-case';
-import { GtfsFeedReader } from './domain/ports/gtfs-feed-reader.port';
-import { GtfsFeedStore } from './domain/ports/gtfs-feed-store.port';
-import { CsvGtfsFeedReader } from './infrastructure/adapters/csv-gtfs-feed-reader.adapter';
-import { PostgresGtfsFeedStore } from './infrastructure/persistence/postgres-gtfs-feed-store.adapter';
+import { BullModule } from '@nestjs/bullmq';
+import { GTFS_REFRESH_QUEUE } from './presentation/jobs/gtfs-refresh-queue';
+import { RefreshGtfsProcessor } from './presentation/jobs/refresh-gtfs.processor';
+import { RefreshGtfsScheduler } from './presentation/jobs/refresh-gtfs.scheduler';
+import { SourcesCoreModule } from './sources-core.module';
 
+// A conexão do BullMQ (forRoot) vem do RealtimeModule, que é global.
 @Module({
-  providers: [
-    ImportGtfsFeedUseCase,
-    { provide: GtfsFeedReader, useClass: CsvGtfsFeedReader },
-    { provide: GtfsFeedStore, useClass: PostgresGtfsFeedStore },
-  ],
-  exports: [ImportGtfsFeedUseCase],
+  imports: [SourcesCoreModule, BullModule.registerQueue({ name: GTFS_REFRESH_QUEUE })],
+  providers: [RefreshGtfsProcessor, RefreshGtfsScheduler],
+  exports: [SourcesCoreModule],
 })
 export class SourcesModule {}
