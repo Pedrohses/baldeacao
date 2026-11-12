@@ -1,3 +1,4 @@
+import { VehiclesLayer } from '@/features/live-map';
 import { BaseMap, type MapViewState } from '@/shared/ui/map';
 
 // Centro de São Paulo (Praça da Sé).
@@ -11,7 +12,9 @@ export default function MapPage() {
   return (
     <main className="h-dvh w-full">
       <h1 className="sr-only">Baldeação - mapa de São Paulo</h1>
-      <BaseMap initialViewState={SAO_PAULO_VIEW} />
+      <BaseMap initialViewState={SAO_PAULO_VIEW}>
+        <VehiclesLayer />
+      </BaseMap>
     </main>
   );
 }
