@@ -97,7 +97,8 @@ Quatro agentes em paralelo (fases 2 e 3 do roadmap).
 | F2-01 ✅ | F2 | Feature `stops`: `StopsLayer`, `StopSheet` e `ArrivalsList` sobre o contrato | Portão 0 | Testes com fixture passam |
 | F2-02 ✅ | F2 | Feature `lines`: `LineHeader` e `RouteShapeLayer` | Portão 0 | Traçado de fixture aparece no mapa de teste |
 
-**Registro da Onda 1 (2026-11-12):** as 11 tasks integradas na `main` (api 162 testes, web 57). Pendente para o Portão 1: compor as camadas na tela do mapa, `WEB_ORIGIN` na config (hoje fixo no gateway), build do web sem `.env` e a verificação ponta a ponta.
+**Registro da Onda 1 (2026-11-12):** as 11 tasks integradas na `main` (api 162 testes, web 57). Integração do Portão 1 (orquestrador): camadas compostas em `app/(map)/map-screen.tsx` (paradas a partir do zoom 14, veículos por cima, painel da parada com previsão); CORS do REST e do Socket.IO via `WEB_ORIGIN` na config. Verificado em 2026-11-12 com dados reais: worker gravando ~11 mil ônibus da Olho Vivo a cada 30 s, socket por linha entregando a foto, mapa no Chrome headless com os ônibus e sem erro no console.
+Falta para fechar o portão: importar o GTFS completo da SPTrans (download no portal, com login do Pedro) e conferir o toque numa parada real mostrando a previsão; o recorte de fixture tem paradas sintéticas. O build do web exige as `NEXT_PUBLIC_*` (validação estrita mantida de propósito).
 
 Decisões da Onda 1 fora dos documentos:
 - Entrada de HTTP validada com os schemas Zod do contrato, não com class-validator (que não está instalado); a regra do backend precisa ser atualizada ou o class-validator adotado.
