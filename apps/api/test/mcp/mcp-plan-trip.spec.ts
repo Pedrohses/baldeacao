@@ -42,6 +42,7 @@ describe('Tool MCP planejar_viagem', () => {
     fakes.geocoder.byTerm.set('morumbis', [new Place(placeOriginExample)]);
     fakes.geocoder.byTerm.set('tietê', [new Place(placeDestinationExample)]);
     fakes.planner.result = [itineraryExample];
+    fakes.stops.outside.clear();
   });
 
   it('geocodifica origem e destino e descreve o itinerário em português', async () => {
@@ -97,6 +98,41 @@ describe('Tool MCP planejar_viagem', () => {
         },
       ],
     });
+  });
+
+  it('cita as saídas seguintes com as mesmas linhas ("também às")', async () => {
+    fakes.planner.result = [
+      itineraryExample,
+      { ...itineraryExample, startAt: '2026-11-12T08:10:00-03:00' },
+      { ...itineraryExample, startAt: '2026-11-12T08:20:00-03:00' },
+    ];
+    const result = await plan({ origem: 'Morumbis', destino: 'Tietê' });
+    expect(textOf(result)).toContain(
+      'Opção 1: 1 h 4 min, saída 08:00, chegada 09:04, 1 baldeação, 650 m a pé. ' +
+        'Também às 08:10 e 08:20, com as mesmas linhas.',
+    );
+    expect(result.structuredContent).toMatchObject({
+      avisos: [],
+      itinerarios: [{ tambem_as: ['2026-11-12T08:10:00-03:00', '2026-11-12T08:20:00-03:00'] }],
+    });
+  });
+
+  it('explica em português quando origem ou destino ficam longe de qualquer parada', async () => {
+    const { lat, lon } = placeDestinationExample.location;
+    fakes.stops.outside.add(`${lat},${lon}`);
+    const result = await plan({ origem: 'Morumbis', destino: 'Tietê' });
+    expect(result.isError).toBeFalsy();
+    expect(textOf(result)).toMatch(
+      /^Atenção: não há parada de ônibus, metrô ou trem a até 1 km do destino \(Terminal Rodoviário Tietê\)\. O lugar pode estar fora da área atendida em São Paulo/,
+    );
+    expect(textOf(result)).toContain('1 opção de Estádio do Morumbis');
+    expect(result.structuredContent).toMatchObject({
+      avisos: ['destination_outside_service_area'],
+    });
+
+    fakes.planner.result = [];
+    const empty = await plan({ origem: 'Morumbis', destino: 'Tietê' });
+    expect(textOf(empty)).toContain('Escolha um ponto mais perto de uma linha.');
   });
 
   it('aceita hora de chegada no formato HH:MM e coordenada como origem', async () => {
