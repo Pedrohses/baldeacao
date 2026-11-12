@@ -26,6 +26,7 @@
     "@nestjs/websockets": "12.4.2",
     "bullmq": "6.7.5",
     "csv-parse": "7.0.3",
+    "fflate": "0.8.3",
     "ioredis": "6.0.0",
     "pg": "8.23.1",
     "reflect-metadata": "0.2.2",

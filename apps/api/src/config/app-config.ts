@@ -30,4 +30,16 @@ export class AppConfig {
   get webOrigin(): string {
     return this.env.WEB_ORIGIN;
   }
+
+  get gtfsSptransUrl(): string {
+    return this.env.GTFS_SPTRANS_URL;
+  }
+
+  get gtfsSptransFallbackUrl(): string {
+    return this.env.GTFS_SPTRANS_FALLBACK_URL;
+  }
+
+  get gtfsRefreshCron(): string {
+    return this.env.GTFS_REFRESH_CRON;
+  }
 }
