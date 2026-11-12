@@ -40,13 +40,70 @@ export function highlightMatch(name: string, query: string): TextSegment[] {
   ].filter((segment) => segment.text.length > 0);
 }
 
+// Palavras que não identificam o lugar: preposições e tipos de logradouro (abreviados ou não).
+const IGNORED_TERMS = new Set([
+  'a',
+  'o',
+  'e',
+  'de',
+  'da',
+  'do',
+  'das',
+  'dos',
+  'r',
+  'rua',
+  'av',
+  'avenida',
+  'al',
+  'alameda',
+  'pca',
+  'praca',
+  'tv',
+  'travessa',
+  'estr',
+  'estrada',
+  'lgo',
+  'largo',
+  'rod',
+  'rodovia',
+]);
+
+// Caixa do município de São Paulo (aproximada): resultado fora dela não é escolhido sozinho.
+const SAO_PAULO_BOUNDS = { south: -24.01, north: -23.35, west: -46.83, east: -46.36 };
+
+/** Termos que identificam o lugar no texto digitado, já normalizados. */
+export function significantTerms(query: string): string[] {
+  return normalize(query)
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((term) => term.length > 0 && !IGNORED_TERMS.has(term));
+}
+
+export function isInSaoPaulo(place: Place): boolean {
+  const { lat, lon } = place.location;
+  const b = SAO_PAULO_BOUNDS;
+  return lat >= b.south && lat <= b.north && lon >= b.west && lon <= b.east;
+}
+
 /**
- * Resultado da busca confirmada: escolhe o primeiro, a não ser que haja homônimos (mesmo nome,
- * ex.: a mesma rua em dois bairros). Aí a pessoa escolhe na lista.
+ * Resultado "forte" para o texto digitado: todos os termos aparecem no nome ou no endereço (sem
+ * acento) e o lugar fica em São Paulo. Só esse é escolhido sem perguntar.
  */
-export function pickConfirmed(places: readonly Place[]): Place | 'ambiguous' | null {
+export function isStrongMatch(place: Place, query: string): boolean {
+  const terms = significantTerms(query);
+  if (terms.length === 0 || !isInSaoPaulo(place)) return false;
+  const haystack = normalize(`${place.name} ${place.address ?? ''}`);
+  return terms.every((term) => haystack.includes(term));
+}
+
+/**
+ * Resultado da busca confirmada para o texto digitado: escolhe o primeiro só se ele for forte
+ * (ver `isStrongMatch`) e não tiver homônimo (mesmo nome, ex.: a mesma rua em dois bairros).
+ * Senão devolve 'ambiguous' e a pessoa escolhe na lista.
+ */
+export function pickConfirmed(places: readonly Place[], query: string): Place | 'ambiguous' | null {
   const [first, second] = places;
   if (!first) return null;
+  if (!isStrongMatch(first, query)) return 'ambiguous';
   if (second && normalize(second.name) === normalize(first.name)) return 'ambiguous';
   return first;
 }
