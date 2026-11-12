@@ -6,7 +6,7 @@ import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 import { locate, locateIfPermitted, useGeolocation } from '@/shared/hooks/use-geolocation';
 
 import { LocateIcon } from '../icons';
-import { MAP_COLORS } from './map-colors';
+import { useMapColors } from './map-colors';
 
 export const USER_LOCATION_SOURCE_ID = 'user-location';
 export const USER_LOCATION_ZOOM = 15;
@@ -14,6 +14,7 @@ export const USER_LOCATION_ZOOM = 15;
 /** Ponto azul do usuário (anel claro + miolo da marca). Fica dentro do BaseMap. */
 export function UserLocationLayer() {
   const { position } = useGeolocation();
+  const colors = useMapColors();
   if (!position) return null;
   return (
     <Source
@@ -28,15 +29,15 @@ export function UserLocationLayer() {
       <Layer
         id="user-location-halo"
         type="circle"
-        paint={{ 'circle-radius': 14, 'circle-color': MAP_COLORS.brand, 'circle-opacity': 0.18 }}
+        paint={{ 'circle-radius': 14, 'circle-color': colors.brand, 'circle-opacity': 0.18 }}
       />
       <Layer
         id="user-location-dot"
         type="circle"
         paint={{
           'circle-radius': 6,
-          'circle-color': MAP_COLORS.brand,
-          'circle-stroke-color': MAP_COLORS.surface,
+          'circle-color': colors.brand,
+          'circle-stroke-color': colors.surface,
           'circle-stroke-width': 2,
         }}
       />

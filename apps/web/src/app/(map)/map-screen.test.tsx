@@ -27,6 +27,12 @@ vi.mock('react-map-gl/maplibre', () => ({
 vi.mock('@/shared/ui/map', () => ({
   BaseMap: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
   MAP_COLORS: { brand: '#C7361F' },
+  useMapColors: () => ({
+    brand: '#C7361F',
+    brandRgb: '199, 54, 31',
+    text: '#000',
+    surface: '#fff',
+  }),
   MapFlyTo: () => null,
   LocateButton: () => <button type="button">Minha localização</button>,
   UserLocationLayer: () => null,

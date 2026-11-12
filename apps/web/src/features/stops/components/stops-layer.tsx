@@ -4,7 +4,7 @@ import type { NearbyStop } from '@baldeacao/types';
 import { useEffect, useMemo, useRef } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
-import { MAP_COLORS } from '@/shared/ui/map';
+import { useMapColors } from '@/shared/ui/map';
 
 import { useNearbyStops, type NearbyStopsCenter } from '../hooks';
 import { stopsToGeoJson } from '../utils/stops-geojson';
@@ -34,6 +34,7 @@ export function StopsLayer({
   onSelectStop,
 }: StopsLayerProps) {
   const { data: stops } = useNearbyStops(center, radius);
+  const colors = useMapColors();
   const { current: map } = useMap();
 
   const geojson = useMemo(() => stopsToGeoJson(stops ?? []), [stops]);
@@ -78,8 +79,8 @@ export function StopsLayer({
         minzoom={STOPS_MIN_ZOOM}
         paint={{
           'circle-radius': ['interpolate', ['linear'], ['zoom'], STOPS_MIN_ZOOM, 4, 17, 7],
-          'circle-color': MAP_COLORS.surface,
-          'circle-stroke-color': MAP_COLORS.text,
+          'circle-color': colors.surface,
+          'circle-stroke-color': colors.text,
           'circle-stroke-width': 2,
         }}
       />
@@ -89,8 +90,8 @@ export function StopsLayer({
         filter={['==', ['get', 'id'], selectedStopId ?? '']}
         paint={{
           'circle-radius': 9,
-          'circle-color': MAP_COLORS.brand,
-          'circle-stroke-color': MAP_COLORS.surface,
+          'circle-color': colors.brand,
+          'circle-stroke-color': colors.surface,
           'circle-stroke-width': 3,
         }}
       />
