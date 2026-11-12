@@ -34,11 +34,11 @@ describe('formatação do itinerário', () => {
   });
 
   it('resolve a cor do trecho e um texto legível sobre ela', () => {
-    expect(legColor({ mode: 'walk', routeColor: null })).toBe('#4F5D67');
+    expect(legColor({ mode: 'walk', routeColor: null })).toBe('#6F574A');
     expect(legColor({ mode: 'bus', routeColor: '509e2f' })).toBe('#509E2F');
-    expect(legColor({ mode: 'bus', routeColor: null })).toBe('#0B4F5C');
+    expect(legColor({ mode: 'bus', routeColor: null })).toBe('#C7361F');
     expect(readableTextColor('#FFD700')).toBe('#000000');
-    expect(readableTextColor('#0B4F5C')).toBe('#FFFFFF');
+    expect(readableTextColor('#C7361F')).toBe('#FFFFFF');
   });
 
   it('encurta nomes de metrô e trem e troca os nomes genéricos do OTP', () => {

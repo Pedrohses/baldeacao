@@ -177,7 +177,9 @@ describe('cartão de itinerário', () => {
     expect(mapMock.sources).toHaveLength(0);
     unmount();
 
-    spy.mockRejectedValue(new Error('O planejador está com problemas. Tente de novo em instantes.'));
+    spy.mockRejectedValue(
+      new Error('O planejador está com problemas. Tente de novo em instantes.'),
+    );
     renderHarness(tripRequestExample);
     expect(await screen.findByRole('alert')).toHaveTextContent('O planejador está com problemas');
     spy.mockResolvedValue([itineraryExample]);
@@ -201,7 +203,9 @@ describe('linha do tempo e camadas do itinerário', () => {
     renderHarness(tripRequestExample);
     const timeline = await screen.findByRole('list', { name: 'Trechos da viagem' });
 
-    expect(within(timeline).getByText('Caminhe 350 m (5 min) até Av. Giovanni Gronchi')).toBeInTheDocument();
+    expect(
+      within(timeline).getByText('Caminhe 350 m (5 min) até Av. Giovanni Gronchi'),
+    ).toBeInTheDocument();
     expect(within(timeline).getByText('sentido Rio Pequeno')).toBeInTheDocument();
     expect(within(timeline).getByText('Embarque em Av. Giovanni Gronchi')).toBeInTheDocument();
     expect(within(timeline).getByText(/9 paradas · 18 min/)).toBeInTheDocument();
@@ -213,7 +217,10 @@ describe('linha do tempo e camadas do itinerário', () => {
   });
 
   it('troca "Destino" do OTP por "o destino" no texto', async () => {
-    const lastWalk = { ...itineraryExample.legs[3]!, to: { ...itineraryExample.legs[3]!.to, name: 'Destino' } };
+    const lastWalk = {
+      ...itineraryExample.legs[3]!,
+      to: { ...itineraryExample.legs[3]!.to, name: 'Destino' },
+    };
     vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([
       { ...itineraryExample, legs: [...itineraryExample.legs.slice(0, 3), lastWalk] },
     ]);
@@ -230,10 +237,10 @@ describe('linha do tempo e camadas do itinerário', () => {
     expect(mapMock.sources.at(-1)?.id).toBe('itinerary');
     expect(data.features.map((f) => f.properties.mode)).toEqual(['walk', 'bus', 'subway', 'walk']);
     expect(data.features.map((f) => f.properties.color)).toEqual([
-      '#4F5D67',
+      '#6F574A',
       '#509E2F',
       '#FFD700',
-      '#4F5D67',
+      '#6F574A',
     ]);
     const layers = mapMock.layers.slice(-3);
     expect(layers.map((l) => l.id)).toEqual([

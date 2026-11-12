@@ -10,8 +10,8 @@ const timeFormatter = new Intl.DateTimeFormat('pt-BR', {
 });
 
 // Cinza "muted" do tema e petróleo da marca (o paint do mapa não lê variáveis CSS).
-export const WALK_COLOR = '#4F5D67';
-export const FALLBACK_TRANSIT_COLOR = '#0B4F5C';
+export const WALK_COLOR = '#6F574A';
+export const FALLBACK_TRANSIT_COLOR = '#C7361F';
 
 export const MODE_LABELS: Record<TripMode, string> = {
   walk: 'A pé',

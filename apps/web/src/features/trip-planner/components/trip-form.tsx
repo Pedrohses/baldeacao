@@ -50,7 +50,10 @@ export function TripForm({
       noValidate
     >
       <div className="flex items-center gap-1 rounded-md border border-border bg-surface p-1 pl-3">
-        <div aria-hidden="true" className="flex w-4 shrink-0 flex-col items-center self-stretch py-5">
+        <div
+          aria-hidden="true"
+          className="flex w-4 shrink-0 flex-col items-center self-stretch py-5"
+        >
           <span className="size-3.5 shrink-0 rounded-full border-[3px] border-text" />
           <span className="my-1 w-0 flex-1 border-l-2 border-dotted border-muted" />
           <svg viewBox="0 0 16 20" className="h-4 w-3.5 shrink-0 fill-brand">

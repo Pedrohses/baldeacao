@@ -57,8 +57,13 @@ export function TripScreen({ initial }: TripScreenProps) {
 
   // Seleção (itinerário e trecho em foco) volta ao começo a cada pedido novo.
   const requestKey = trip.request ? JSON.stringify(trip.request) : '';
-  const [selection, setSelection] = useState({ key: requestKey, index: 0, leg: null as number | null });
-  const current = selection.key === requestKey ? selection : { key: requestKey, index: 0, leg: null };
+  const [selection, setSelection] = useState({
+    key: requestKey,
+    index: 0,
+    leg: null as number | null,
+  });
+  const current =
+    selection.key === requestKey ? selection : { key: requestKey, index: 0, leg: null };
 
   // "Minha localização" vinda da URL: resolve pelo GPS ao abrir.
   useEffect(() => {
@@ -137,7 +142,12 @@ export function TripScreen({ initial }: TripScreenProps) {
           />
         </div>
         <div className="mt-3">
-          <TimeChip value={trip.time} onChange={trip.setTime} open={timeOpen} onOpenChange={setTimeOpen} />
+          <TimeChip
+            value={trip.time}
+            onChange={trip.setTime}
+            open={timeOpen}
+            onOpenChange={setTimeOpen}
+          />
         </div>
         <div className="mt-4">
           {status === 'idle' && !trip.error ? (

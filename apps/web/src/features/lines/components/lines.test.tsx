@@ -55,7 +55,7 @@ describe('LineHeader', () => {
 
   it('usa cores padrão quando a linha não tem cor', () => {
     render(<LineHeader line={{ ...routeExample, color: null, textColor: null }} />);
-    expect(screen.getByTestId('line-badge')).toHaveStyle({ backgroundColor: '#0B4F5C' });
+    expect(screen.getByTestId('line-badge')).toHaveStyle({ backgroundColor: '#C7361F' });
   });
 });
 

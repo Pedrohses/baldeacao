@@ -79,5 +79,9 @@ export function resetGeolocation() {
 }
 
 export function useGeolocation(): GeolocationState {
-  return useSyncExternalStore(subscribe, () => state, () => IDLE);
+  return useSyncExternalStore(
+    subscribe,
+    () => state,
+    () => IDLE,
+  );
 }

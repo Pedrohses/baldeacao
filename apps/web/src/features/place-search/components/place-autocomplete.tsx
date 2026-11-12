@@ -134,7 +134,11 @@ export function PlaceAutocomplete({
         return;
       }
       // Pedido explícito ("Buscar endereço") mostra a lista; o implícito escolhe o melhor.
-      const pick = explicit ? (places.length === 1 ? places[0]! : 'ambiguous') : pickConfirmed(places);
+      const pick = explicit
+        ? places.length === 1
+          ? places[0]!
+          : 'ambiguous'
+        : pickConfirmed(places);
       if (pick === 'ambiguous' || pick === null) {
         setActiveIndex(-1);
         setResolve({ status: 'choices', query, places });
@@ -243,8 +247,8 @@ export function PlaceAutocomplete({
     message = (
       <>
         <p className="text-sm">
-          Não achamos &quot;{resolve.query}&quot;. Tente rua e número, por exemplo Rua Augusta, 1500,
-          ou o nome de uma estação.
+          Não achamos &quot;{resolve.query}&quot;. Tente rua e número, por exemplo Rua Augusta,
+          1500, ou o nome de uma estação.
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
           {onPickOnMap ? (
@@ -373,7 +377,15 @@ interface OptionRowProps {
   onHover: () => void;
 }
 
-function OptionRow({ id, option, query, selected, groupLabel, onActivate, onHover }: OptionRowProps) {
+function OptionRow({
+  id,
+  option,
+  query,
+  selected,
+  groupLabel,
+  onActivate,
+  onHover,
+}: OptionRowProps) {
   let icon: ReactNode;
   let title: ReactNode;
   let subtitle: string | null = null;

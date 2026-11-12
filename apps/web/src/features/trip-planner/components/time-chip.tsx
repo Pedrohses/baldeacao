@@ -69,7 +69,8 @@ function Segmented<T extends string>({
 export function TimeChip({ value, onChange, open, onOpenChange, now }: TimeChipProps) {
   const baseId = useId();
   const panelId = `${baseId}-panel`;
-  const current = value.kind === 'now' ? { kind: 'depart' as const, ...nextSlot(now ?? new Date()) } : value;
+  const current =
+    value.kind === 'now' ? { kind: 'depart' as const, ...nextSlot(now ?? new Date()) } : value;
 
   function update(patch: Partial<Extract<TripTime, { kind: TripTimeMode }>>) {
     onChange({ ...current, ...patch });

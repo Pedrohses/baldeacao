@@ -25,7 +25,7 @@ vi.mock('react-map-gl/maplibre', () => ({
 // Mapa sem WebGL: o toque longo vira um botão de teste e o alfinete mostra só o cartão.
 vi.mock('@/shared/ui/map', () => ({
   BaseMap: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
-  MAP_COLORS: { brand: '#0B4F5C' },
+  MAP_COLORS: { brand: '#C7361F' },
   MapFlyTo: () => null,
   LocateButton: () => <button type="button">Minha localização</button>,
   UserLocationLayer: () => null,
@@ -73,12 +73,23 @@ describe('MapScreen', () => {
 
   it('mostra até 3 destinos recentes como atalhos', () => {
     for (const name of ['A', 'B', 'C', 'D']) {
-      addRecentPlace({ ...nearby, id: `stop:${name}`, name: `Parada ${name}`, address: null, kind: 'stop' });
+      addRecentPlace({
+        ...nearby,
+        id: `stop:${name}`,
+        name: `Parada ${name}`,
+        address: null,
+        kind: 'stop',
+      });
     }
     renderScreen();
-    const chips = within(screen.getByRole('list', { name: 'Destinos recentes' })).getAllByRole('link');
+    const chips = within(screen.getByRole('list', { name: 'Destinos recentes' })).getAllByRole(
+      'link',
+    );
     expect(chips.map((c) => c.textContent)).toEqual(['Parada D', 'Parada C', 'Parada B']);
-    expect(query(chips[0]!.getAttribute('href'))).toMatchObject({ paraNome: 'Parada D', paraTipo: 'stop' });
+    expect(query(chips[0]!.getAttribute('href'))).toMatchObject({
+      paraNome: 'Parada D',
+      paraTipo: 'stop',
+    });
   });
 
   it('toque longo solta um alfinete com "Ir para cá" e "Sair daqui"', () => {
@@ -86,13 +97,17 @@ describe('MapScreen', () => {
     fireEvent.click(screen.getByRole('button', { name: 'simular toque longo' }));
 
     const card = screen.getByRole('region', { name: 'Ponto no mapa' });
-    expect(query(within(card).getByRole('link', { name: 'Ir para cá' }).getAttribute('href'))).toEqual({
+    expect(
+      query(within(card).getByRole('link', { name: 'Ir para cá' }).getAttribute('href')),
+    ).toEqual({
       de: 'minha-localizacao',
       para: '-23.550000,-46.630000',
       paraNome: 'Ponto no mapa',
       paraTipo: 'coordinates',
     });
-    expect(query(within(card).getByRole('link', { name: 'Sair daqui' }).getAttribute('href'))).toEqual({
+    expect(
+      query(within(card).getByRole('link', { name: 'Sair daqui' }).getAttribute('href')),
+    ).toEqual({
       de: '-23.550000,-46.630000',
       deNome: 'Ponto no mapa',
       deTipo: 'coordinates',
@@ -102,10 +117,14 @@ describe('MapScreen', () => {
 
   it('a parada escolhida na lista abre no painel com as ações do planejador', async () => {
     renderScreen();
-    expect(screen.getByRole('heading', { name: 'Paradas perto do centro do mapa' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Paradas perto do centro do mapa' }),
+    ).toBeInTheDocument();
     fireEvent.click(await screen.findByRole('button', { name: /Av. Paulista 1578/ }));
 
-    expect(screen.getByRole('heading', { level: 2, name: 'Av. Paulista 1578' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'Av. Paulista 1578' }),
+    ).toBeInTheDocument();
     const goHere = screen.getByRole('link', { name: 'Ir para cá' });
     expect(query(goHere.getAttribute('href'))).toMatchObject({
       de: 'minha-localizacao',

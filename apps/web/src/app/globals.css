@@ -1,20 +1,20 @@
 @import 'tailwindcss';
 
-/* Tokens do sistema visual (redesign-ux.md). Claro por padrão, escuro por prefers-color-scheme. */
+/* Tokens do sistema visual: paleta quente (coral, creme e neutros terrosos). Claro por padrão, escuro por prefers-color-scheme. */
 :root {
-  --bg: #f4f6f7;
+  --bg: #fff7f0;
   --surface: #ffffff;
-  --surface-2: #ebeff1;
-  --border: #d3dadf;
-  --text: #101a20;
-  --muted: #4f5d67;
-  --brand: #0b4f5c;
+  --surface-2: #fdeee2;
+  --border: #f0d9c7;
+  --text: #2b1b14;
+  --muted: #6f574a;
+  --brand: #c7361f;
   --brand-fg: #ffffff;
-  --live: #0a7a3e;
-  --warn: #a85a00;
-  --danger: #b42318;
-  --focus: #0b4f5c;
-  --shadow-float-value: 0 -4px 24px rgb(16 26 32 / 0.12);
+  --live: #1b7f45;
+  --warn: #9a5b00;
+  --danger: #b3261e;
+  --focus: #c7361f;
+  --shadow-float-value: 0 -4px 24px rgb(120 50 20 / 0.14);
   --float-border: transparent;
   /* Barra inferior do celular: 64 px mais a área segura do aparelho. */
   --nav-h: calc(64px + env(safe-area-inset-bottom));
@@ -23,20 +23,20 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0e1418;
-    --surface: #162026;
-    --surface-2: #1f2b32;
-    --border: #2e3c44;
-    --text: #e6ecef;
-    --muted: #9cabb4;
-    --brand: #5cc3d2;
-    --brand-fg: #0e1418;
-    --live: #4ade80;
-    --warn: #fbbf24;
-    --danger: #f87171;
-    --focus: #5cc3d2;
+    --bg: #1b1411;
+    --surface: #251c17;
+    --surface-2: #30251e;
+    --border: #43342a;
+    --text: #f8ece3;
+    --muted: #c9b4a6;
+    --brand: #ff8a65;
+    --brand-fg: #1b1411;
+    --live: #5bd68a;
+    --warn: #ffc35c;
+    --danger: #ff8a80;
+    --focus: #ff8a65;
     --shadow-float-value: 0 -4px 24px rgb(0 0 0 / 0.5);
-    --float-border: #2e3c44;
+    --float-border: #43342a;
     color-scheme: dark;
   }
 }
@@ -55,7 +55,7 @@
   --color-danger: var(--danger);
   --color-focus: var(--focus);
 
-  --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-atkinson-mono), ui-monospace, monospace;
 
   /* Escala 12/14/16/20/28/40. */
@@ -66,9 +66,9 @@
   --text-2xl: 1.75rem;
   --text-4xl: 2.5rem;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
 
   --shadow-float: var(--shadow-float-value);
 

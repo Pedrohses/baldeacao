@@ -16,7 +16,14 @@ import { TimeChip } from './time-chip';
 import { TripForm } from './trip-form';
 
 // Campo de lugar falso: mostra o valor e oferece botões para escolher os lugares de fixture.
-const renderPlaceInput: RenderPlaceInput = ({ id, label, value, onChange, placeholder, autoFocus }) => (
+const renderPlaceInput: RenderPlaceInput = ({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  autoFocus,
+}) => (
   <div>
     <input
       id={id}
@@ -122,7 +129,9 @@ describe('TripForm e busca automática', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Origem: Morumbis' }));
     fireEvent.click(screen.getByRole('button', { name: 'Destino: Morumbis' }));
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Origem e destino precisam ser diferentes.');
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      'Origem e destino precisam ser diferentes.',
+    );
     expect(spy).not.toHaveBeenCalled();
   });
 

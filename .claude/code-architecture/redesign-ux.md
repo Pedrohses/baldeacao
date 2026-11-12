@@ -37,7 +37,7 @@ Especificação do agente de UX/UI, aprovada pelo orquestrador. Implementação 
 
 ## Sistema visual (`globals.css`, Tailwind v4)
 - Fontes via `next/font/google`: **Atkinson Hyperlegible Next** (interface) e **Atkinson Hyperlegible Mono** (horários, contagens, códigos). Se alguma não existir no `next/font`, usar **Atkinson Hyperlegible** e `ui-monospace`. Escala 12/14/16/20/28/40, pesos 400/700/800, corpo mínimo 16 px.
-- Tokens em `:root` com modo escuro por `prefers-color-scheme`, expostos com `@theme inline` (`bg-surface`, `text-muted`...):
+- Tokens em `:root` com modo escuro por `prefers-color-scheme`, expostos com `@theme inline`. **Paleta revista em 2026-11-12 a pedido do Pedro ("mais vivo, mais humano"): coral `#C7361F` (escuro `#FF8A65`), creme `#FFF7F0`, neutros terrosos; fonte de interface Nunito; raios 10/16/28 px. A tabela abaixo é a versão anterior.**
 
 | token | claro | escuro |
 |---|---|---|

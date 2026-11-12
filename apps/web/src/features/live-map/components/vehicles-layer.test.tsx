@@ -140,15 +140,44 @@ describe('VehiclesLayer', () => {
     expect(heat.type).toBe('heatmap');
     expect(heat.maxzoom).toBe('13.5');
     expect(heat.layout).toEqual({ visibility: 'visible' });
-    expect(heat.paint['heatmap-opacity']).toEqual(['interpolate', ['linear'], ['zoom'], 12.5, 0.35, 13.5, 0]);
-    expect(heat.paint['heatmap-radius']).toEqual(['interpolate', ['linear'], ['zoom'], 10, 8, 13, 14]);
-    expect(JSON.stringify(heat.paint['heatmap-color'])).toContain('rgba(11, 79, 92, 1)');
+    expect(heat.paint['heatmap-opacity']).toEqual([
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      12.5,
+      0.35,
+      13.5,
+      0,
+    ]);
+    expect(heat.paint['heatmap-radius']).toEqual([
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      10,
+      8,
+      13,
+      14,
+    ]);
+    expect(JSON.stringify(heat.paint['heatmap-color'])).toContain('rgba(199, 54, 31, 1)');
 
     const circles = layer(VEHICLES_LAYER_ID);
     expect(circles.minzoom).toBe('12.5');
-    expect(circles.paint['circle-color']).toBe('#0B4F5C');
-    expect(circles.paint['circle-stroke-color']).toEqual(['case', expect.anything(), '#101A20', '#FFFFFF']);
-    expect(circles.paint['circle-opacity']).toEqual(['interpolate', ['linear'], ['zoom'], 12.5, 0, 13.5, 1]);
+    expect(circles.paint['circle-color']).toBe('#C7361F');
+    expect(circles.paint['circle-stroke-color']).toEqual([
+      'case',
+      expect.anything(),
+      '#2B1B14',
+      '#FFFFFF',
+    ]);
+    expect(circles.paint['circle-opacity']).toEqual([
+      'interpolate',
+      ['linear'],
+      ['zoom'],
+      12.5,
+      0,
+      13.5,
+      1,
+    ]);
     expect(JSON.stringify(circles.paint['circle-radius'])).toContain('2.5');
     expect(screen.queryAllByTestId('layer').map((l) => l.getAttribute('data-id'))).not.toContain(
       VEHICLES_HIGHLIGHT_LAYER_ID,

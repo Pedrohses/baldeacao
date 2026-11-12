@@ -18,7 +18,11 @@ describe('useMapStore', () => {
 
   it('guarda o viewport', () => {
     useMapStore.getState().setViewport({ longitude: -46.7, latitude: -23.6, zoom: 15 });
-    expect(useMapStore.getState().viewport).toEqual({ longitude: -46.7, latitude: -23.6, zoom: 15 });
+    expect(useMapStore.getState().viewport).toEqual({
+      longitude: -46.7,
+      latitude: -23.6,
+      zoom: 15,
+    });
   });
 
   it('seleciona veículo ou parada, uma de cada vez, e limpa a seleção', () => {

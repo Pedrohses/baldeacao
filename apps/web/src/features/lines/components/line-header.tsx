@@ -4,7 +4,7 @@ export interface LineHeaderProps {
   line: Pick<Route, 'shortName' | 'longName' | 'color' | 'textColor'>;
 }
 
-const FALLBACK_COLOR = '0B4F5C';
+const FALLBACK_COLOR = 'C7361F';
 const FALLBACK_TEXT_COLOR = 'FFFFFF';
 
 /** Código da linha em selo com a cor da linha, seguido do nome. */

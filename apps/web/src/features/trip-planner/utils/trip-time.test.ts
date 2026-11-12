@@ -13,9 +13,9 @@ describe('hora da viagem', () => {
   });
 
   it('monta departAt e arriveBy no fuso de São Paulo, hoje ou amanhã', () => {
-    expect(
-      tripTimeFields({ kind: 'depart', day: 'today', hour: 8, minute: 30 }, MORNING),
-    ).toEqual({ departAt: '2026-11-12T08:30:00-03:00' });
+    expect(tripTimeFields({ kind: 'depart', day: 'today', hour: 8, minute: 30 }, MORNING)).toEqual({
+      departAt: '2026-11-12T08:30:00-03:00',
+    });
     // Às 23:58, "amanhã" é o dia 13 mesmo com o UTC já no dia 13.
     expect(tripTimeFields({ kind: 'arrive', day: 'tomorrow', hour: 7, minute: 5 }, LATE)).toEqual({
       arriveBy: '2026-11-13T07:05:00-03:00',
@@ -23,7 +23,9 @@ describe('hora da viagem', () => {
   });
 
   it('formata o chip e abre o seletor no próximo passo de 5 min', () => {
-    expect(tripTimeLabel({ kind: 'depart', day: 'today', hour: 8, minute: 5 })).toBe('Sair às 08:05');
+    expect(tripTimeLabel({ kind: 'depart', day: 'today', hour: 8, minute: 5 })).toBe(
+      'Sair às 08:05',
+    );
     expect(tripTimeLabel({ kind: 'arrive', day: 'tomorrow', hour: 19, minute: 0 })).toBe(
       'Chegar até 19:00 amanhã',
     );

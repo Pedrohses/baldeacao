@@ -24,8 +24,8 @@ const FADE_END = VEHICLES_POINTS_ZOOM + 0.5;
 export const DIMMED_VEHICLE_OPACITY = 0.12;
 
 const EMPTY_VEHICLES = toVehiclesFeatureCollection([]);
-// Cor da marca (#0B4F5C) transparente na densidade zero.
-const BRAND_RGB = '11, 79, 92';
+// Cor da marca (#C7361F) transparente na densidade zero.
+const BRAND_RGB = '199, 54, 31';
 
 export interface VehicleHighlight {
   /** route_id da linha em destaque. */

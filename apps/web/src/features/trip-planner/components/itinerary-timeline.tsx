@@ -32,7 +32,10 @@ function Rail({ leg, transfer }: { leg: Leg; transfer: boolean }) {
           style={{ borderColor: WALK_COLOR }}
         />
       ) : (
-        <span className="absolute top-2 -bottom-2 w-1.5 rounded-full" style={{ backgroundColor: color }} />
+        <span
+          className="absolute top-2 -bottom-2 w-1.5 rounded-full"
+          style={{ backgroundColor: color }}
+        />
       )}
       {transfer ? (
         <span

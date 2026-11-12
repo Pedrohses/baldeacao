@@ -115,7 +115,9 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
             <span className="sr-only">ao vivo,</span>
           </span>
         ) : null}
-        <span className={departure.tone === 'now' ? 'font-bold text-warn' : ''}>{departure.text}</span>
+        <span className={departure.tone === 'now' ? 'font-bold text-warn' : ''}>
+          {departure.text}
+        </span>
         <span aria-hidden="true">·</span>
         <span>{formatTransfers(itinerary.transfers)}</span>
         <span aria-hidden="true">·</span>

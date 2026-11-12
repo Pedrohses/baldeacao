@@ -27,7 +27,12 @@ export interface StopsLayerProps {
 }
 
 /** Paradas próximas como camada GeoJSON; deve ser filha do mapa. */
-export function StopsLayer({ center, radius, selectedStopId = null, onSelectStop }: StopsLayerProps) {
+export function StopsLayer({
+  center,
+  radius,
+  selectedStopId = null,
+  onSelectStop,
+}: StopsLayerProps) {
   const { data: stops } = useNearbyStops(center, radius);
   const { current: map } = useMap();
 

@@ -2,11 +2,7 @@ import type { Place } from '@baldeacao/types';
 
 /** Minúsculas e sem acento, para comparar o que foi digitado com o nome do lugar. */
 export function normalize(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLocaleLowerCase('pt-BR')
-    .trim();
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('pt-BR').trim();
 }
 
 export interface TextSegment {

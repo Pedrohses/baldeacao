@@ -62,9 +62,7 @@ describe('ArrivalsListView', () => {
   });
 
   it('indica tabela quando não é tempo real', () => {
-    render(
-      <ArrivalsListView arrivals={[{ ...arrivalExample, isRealtime: false }]} now={now} />,
-    );
+    render(<ArrivalsListView arrivals={[{ ...arrivalExample, isRealtime: false }]} now={now} />);
     expect(screen.getByText('Tabela')).toBeInTheDocument();
   });
 
@@ -108,7 +106,10 @@ describe('StopSheet', () => {
   });
 
   it('mostra as ações passadas por quem compõe a tela', () => {
-    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({ stopId: stopExample.id, arrivals: [] });
+    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
+      stopId: stopExample.id,
+      arrivals: [],
+    });
     const goHere = vi.fn();
     wrap(
       <StopSheet
@@ -130,7 +131,10 @@ describe('StopSheet', () => {
   });
 
   it('sem ações não reserva espaço para elas', () => {
-    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({ stopId: stopExample.id, arrivals: [] });
+    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
+      stopId: stopExample.id,
+      arrivals: [],
+    });
     wrap(<StopSheet stop={stopExample} onClose={vi.fn()} />);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.getAllByRole('button')).toHaveLength(1);
@@ -143,13 +147,20 @@ describe('NearbyStopsList', () => {
     vi.spyOn(stopsService, 'getNearby').mockResolvedValue({ stops: [far, nearby] });
     vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
       stopId: stopExample.id,
-      arrivals: [arrivalExample, { ...arrivalExample, routeShortName: '702U-10' }, { ...arrivalExample, routeShortName: '9999-10' }],
+      arrivals: [
+        arrivalExample,
+        { ...arrivalExample, routeShortName: '702U-10' },
+        { ...arrivalExample, routeShortName: '9999-10' },
+      ],
     });
     const onSelectStop = vi.fn();
     wrap(<NearbyStopsList center={{ lat: -23.56, lon: -46.65 }} onSelectStop={onSelectStop} />);
 
     const buttons = await screen.findAllByRole('button');
-    expect(buttons.map((b) => b.textContent?.slice(0, 12))).toEqual(['Av. Paulista', 'Parada longe']);
+    expect(buttons.map((b) => b.textContent?.slice(0, 12))).toEqual([
+      'Av. Paulista',
+      'Parada longe',
+    ]);
     expect(buttons[0]).toHaveTextContent('120 m');
     expect(await screen.findAllByText('702U-10')).not.toHaveLength(0);
     expect(screen.queryByText('9999-10')).not.toBeInTheDocument();

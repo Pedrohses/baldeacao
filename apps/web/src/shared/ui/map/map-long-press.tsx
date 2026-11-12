@@ -48,7 +48,8 @@ export function MapLongPress({ onLongPress }: MapLongPressProps) {
     };
     const onTouchStart = (event: PointerLikeEvent) => {
       cancel();
-      const touches = (event.originalEvent as { touches?: { length: number } } | undefined)?.touches;
+      const touches = (event.originalEvent as { touches?: { length: number } } | undefined)
+        ?.touches;
       if ((touches?.length ?? 1) !== 1) return;
       start = event.point;
       timer = setTimeout(() => {

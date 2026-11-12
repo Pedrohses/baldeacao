@@ -10,7 +10,7 @@ export const ROUTE_SHAPE_SOURCE_ID = 'route-shape';
 export const ROUTE_SHAPE_OUTBOUND_LAYER_ID = 'route-shape-0';
 export const ROUTE_SHAPE_INBOUND_LAYER_ID = 'route-shape-1';
 
-const FALLBACK_COLOR = '#0B4F5C';
+const FALLBACK_COLOR = '#C7361F';
 
 export interface RouteShapeLayerProps {
   /** route_id da linha cujo traçado será desenhado; null não desenha nada. */
@@ -39,7 +39,12 @@ export function RouteShapeLayer({ routeId }: RouteShapeLayerProps) {
         type="line"
         filter={['==', ['get', 'directionId'], 1]}
         layout={{ 'line-join': 'round' }}
-        paint={{ 'line-color': color, 'line-width': 4, 'line-dasharray': [2, 2], 'line-opacity': 0.8 }}
+        paint={{
+          'line-color': color,
+          'line-width': 4,
+          'line-dasharray': [2, 2],
+          'line-opacity': 0.8,
+        }}
       />
     </Source>
   );

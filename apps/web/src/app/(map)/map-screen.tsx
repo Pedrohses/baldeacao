@@ -5,12 +5,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { LineHeader, RouteShapeLayer, useLineDetails } from '@/features/lines';
-import {
-  MapViewportSync,
-  StaleDataNotice,
-  VehiclesLayer,
-  useMapStore,
-} from '@/features/live-map';
+import { MapViewportSync, StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
 import { PlaceKindIcon, useRecentPlaces } from '@/features/place-search';
 import { NearbyStopsList, STOPS_MIN_ZOOM, StopSheet, StopsLayer } from '@/features/stops';
 import { buildTripHref } from '@/features/trip-planner';
@@ -54,7 +49,10 @@ function stopPlace(stop: Stop): Place {
 function PlaceActions({ place }: { place: Place }) {
   return (
     <>
-      <Link href={buildTripHref({ from: 'current-location', to: place })} className={PRIMARY_ACTION}>
+      <Link
+        href={buildTripHref({ from: 'current-location', to: place })}
+        className={PRIMARY_ACTION}
+      >
         Ir para cá
       </Link>
       <Link
@@ -166,7 +164,10 @@ export function MapScreen() {
         <h2 className="mt-5 mb-1 text-base font-bold">
           {position ? 'Paradas perto de você' : 'Paradas perto do centro do mapa'}
         </h2>
-        <NearbyStopsList center={nearbyCenter} onSelectStop={(stop) => handleSelectStop(stop, true)} />
+        <NearbyStopsList
+          center={nearbyCenter}
+          onSelectStop={(stop) => handleSelectStop(stop, true)}
+        />
         <p className="mt-4 text-sm text-muted">
           {isDesktop
             ? 'Clique com o botão direito no mapa para sair ou ir até um ponto.'

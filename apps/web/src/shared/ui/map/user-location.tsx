@@ -53,11 +53,7 @@ export interface LocateButtonProps {
 }
 
 /** Botão flutuante "Minha localização" (48 px). Fica dentro do BaseMap. */
-export function LocateButton({
-  className = '',
-  style,
-  centerOnMount = true,
-}: LocateButtonProps) {
+export function LocateButton({ className = '', style, centerOnMount = true }: LocateButtonProps) {
   const { current: map } = useMap();
   const { status } = useGeolocation();
   const centeredRef = useRef(false);

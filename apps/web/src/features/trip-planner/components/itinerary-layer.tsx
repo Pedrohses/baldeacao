@@ -35,7 +35,11 @@ function legOpacity(focusedLeg: number | null): number | ExpressionSpecification
  * Trechos do itinerário no mapa: transporte na cor da linha (com contorno branco para destacar
  * do mapa) e caminhada tracejada. Enquadra o itinerário ao trocar a seleção. Filha do mapa.
  */
-export function ItineraryLayer({ itinerary, focusedLeg = null, fitPadding = 64 }: ItineraryLayerProps) {
+export function ItineraryLayer({
+  itinerary,
+  focusedLeg = null,
+  fitPadding = 64,
+}: ItineraryLayerProps) {
   const { current: map } = useMap();
   const geojson = useMemo(() => itineraryToGeoJson(itinerary), [itinerary]);
 

@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from 'next';
-import { Atkinson_Hyperlegible_Mono, Atkinson_Hyperlegible_Next } from 'next/font/google';
+import { Atkinson_Hyperlegible_Mono, Nunito } from 'next/font/google';
 import type { ReactNode } from 'react';
 
 import { Providers } from '@/shared/lib/providers';
 import './globals.css';
 
-// Interface e números: fontes pensadas para leitura com baixa visão.
-const atkinson = Atkinson_Hyperlegible_Next({
+// Interface: Nunito, arredondada e amigável. Números e horários: Atkinson Mono, legível.
+const nunito = Nunito({
   subsets: ['latin', 'latin-ext'],
   weight: ['400', '700', '800'],
-  variable: '--font-atkinson',
+  variable: '--font-nunito',
   display: 'swap',
 });
 
@@ -30,14 +30,14 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#0B4F5C' },
+    { media: '(prefers-color-scheme: light)', color: '#C7361F' },
     { media: '(prefers-color-scheme: dark)', color: '#0E1418' },
   ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${atkinson.variable} ${atkinsonMono.variable}`}>
+    <html lang="pt-BR" className={`${nunito.variable} ${atkinsonMono.variable}`}>
       <body className="h-full font-sans antialiased">
         <Providers>{children}</Providers>
       </body>
