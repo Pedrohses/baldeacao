@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ComponentType } from 'react';
 
-import { type IconProps, MapIcon, RouteIcon, StarIcon } from '../icons';
+import { BusIcon, type IconProps, MapIcon, RouteIcon, StarIcon } from '../icons';
 
 interface NavItem {
-  href: '/' | '/viagem' | '/favoritos';
+  href: '/' | '/viagem' | '/linhas' | '/favoritos';
   label: string;
   Icon: ComponentType<IconProps>;
 }
@@ -15,6 +15,7 @@ interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/', label: 'Mapa', Icon: MapIcon },
   { href: '/viagem', label: 'Viagem', Icon: RouteIcon },
+  { href: '/linhas', label: 'Linhas', Icon: BusIcon },
   { href: '/favoritos', label: 'Favoritos', Icon: StarIcon },
 ];
 

@@ -27,13 +27,13 @@ afterEach(() => {
 });
 
 describe('AppNav', () => {
-  it('mostra as três abas e marca a atual com aria-current', () => {
+  it('mostra as quatro abas e marca a atual com aria-current', () => {
     pathname.current = '/viagem';
     render(<AppNav />);
 
     const nav = screen.getByRole('navigation', { name: 'Navegação principal' });
     const links = Array.from(nav.querySelectorAll('a'));
-    expect(links.map((a) => a.textContent)).toEqual(['Mapa', 'Viagem', 'Favoritos']);
+    expect(links.map((a) => a.textContent)).toEqual(['Mapa', 'Viagem', 'Linhas', 'Favoritos']);
     expect(screen.getByRole('link', { name: 'Viagem' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: 'Mapa' })).not.toHaveAttribute('aria-current');
   });

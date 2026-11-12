@@ -82,7 +82,8 @@ export function MapScreen() {
 
   const activeStop =
     selection?.kind === 'stop' && selectedStop?.id === selection.stopId ? selectedStop : null;
-  const routeId = selection?.kind === 'vehicle' ? selection.routeId : null;
+  const routeId =
+    selection?.kind === 'vehicle' || selection?.kind === 'line' ? selection.routeId : null;
   const line = useLineDetails(routeId);
   const lineColor = line.data?.line.color ? `#${line.data.line.color}` : MAP_COLORS.brand;
 
