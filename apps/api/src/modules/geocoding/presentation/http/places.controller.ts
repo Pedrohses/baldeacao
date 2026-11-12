@@ -19,18 +19,21 @@ import { InvalidPlaceQueryError } from '../../domain/errors/invalid-place-query.
 export class PlacesController {
   constructor(private readonly searchPlaces: SearchPlacesUseCase) {}
 
-  /** Busca de lugar por texto na Grande SP (Nominatim com cache). */
+  /** Busca de lugar por texto: `mode=quick` (padrão) só paradas locais; `full` inclui o Nominatim. */
   @Get(API_PATHS.searchPlaces)
   async search(@Query() query: unknown): Promise<SearchPlacesResponse> {
     const parsed = SearchPlacesQuerySchema.safeParse(query);
     if (!parsed.success) {
       throw new BadRequestException({
         code: 'INVALID_QUERY',
-        message: 'Digite pelo menos 3 caracteres no parâmetro q para buscar um lugar.',
+        message: 'Digite pelo menos 2 caracteres no parâmetro q para buscar um lugar.',
       } satisfies ApiErrorBody);
     }
     try {
-      const { places } = await this.searchPlaces.execute({ query: parsed.data.q });
+      const { places } = await this.searchPlaces.execute({
+        query: parsed.data.q,
+        mode: parsed.data.mode,
+      });
       return {
         places: places.map((place) => ({
           id: place.id,

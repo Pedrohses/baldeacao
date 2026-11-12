@@ -133,4 +133,43 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
       expect(await stops.findNearby(paulista, 50_000, 3)).toHaveLength(3);
     });
   });
+
+  describe('TypeormStopRepository.searchByName (pg_trgm + unaccent)', () => {
+    beforeAll(async () => {
+      const q = (sql: string) => db.dataSource.query(sql);
+      await q(`INSERT INTO stops (source_id, stop_id, name, description, location) VALUES
+        ('sptrans', 'M1', 'Luz', NULL, ST_GeogFromText('POINT(-46.6336 -23.5361)')),
+        ('sptrans', 'T1', 'Luz', NULL, ST_GeogFromText('POINT(-46.6337 -23.5362)')),
+        ('sptrans', 'M2', 'Sé', NULL, ST_GeogFromText('POINT(-46.6339 -23.5503)')),
+        ('sptrans', 'B1', 'Pça. da Luz', 'Ref.: R. Prates', ST_GeogFromText('POINT(-46.634 -23.536)')),
+        ('sptrans', 'B2', 'R. Luzia da Conceição Moraes, 450', NULL, ST_GeogFromText('POINT(-46.7 -23.6)'))`);
+      await q(`INSERT INTO routes (source_id, route_id, short_name, long_name, route_type) VALUES
+        ('sptrans', 'L1', 'Azul', 'Linha 1', 1), ('sptrans', 'L7', 'Rubi', 'Linha 7', 2)`);
+      await q(`INSERT INTO trips (source_id, trip_id, route_id, service_id) VALUES
+        ('sptrans', 'L1-0', 'L1', 'U'), ('sptrans', 'L7-0', 'L7', 'U')`);
+      await q(`INSERT INTO stop_times (source_id, trip_id, stop_sequence, stop_id) VALUES
+        ('sptrans', 'L1-0', 1, 'M1'), ('sptrans', 'L1-0', 2, 'M2'), ('sptrans', 'L7-0', 1, 'T1')`);
+    });
+
+    it('acha por trecho do nome sem diferenciar acento nem caixa', async () => {
+      const found = await stops.searchByName('PAULISTA', 8);
+      expect(found.map((s) => s.id)).toEqual(['4301848']);
+      expect((await stops.searchByName('se', 8))[0]?.name).toBe('Sé');
+      expect((await stops.searchByName('conceicao', 8)).map((s) => s.id)).toEqual(['B2']);
+    });
+
+    it('estações primeiro, uma por nome, depois nomes mais curtos', async () => {
+      const found = await stops.searchByName('luz', 8);
+      expect(found.map((s) => s.id)).toEqual(['M1', 'B1', 'B2']);
+    });
+
+    it('tolera erro de digitação e respeita o limite', async () => {
+      expect((await stops.searchByName('paulistta', 8)).map((s) => s.id)).toContain('4301848');
+      expect(await stops.searchByName('av', 2)).toHaveLength(2);
+    });
+
+    it('trata % e _ como texto', async () => {
+      expect(await stops.searchByName('%%', 8)).toEqual([]);
+    });
+  });
 });

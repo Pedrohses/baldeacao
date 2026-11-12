@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppConfig } from '../../config/app-config';
+import { TransitModule } from '../transit/transit.module';
 import { SearchPlacesUseCase } from './application/use-cases/search-places.use-case';
 import { GeocodeCache } from './domain/ports/geocode-cache.port';
 import { Geocoder } from './domain/ports/geocoder.port';
@@ -9,6 +10,7 @@ import { TypeormGeocodeCacheRepository } from './infrastructure/persistence/type
 import { PlacesController } from './presentation/http/places.controller';
 
 @Module({
+  imports: [TransitModule],
   controllers: [PlacesController],
   providers: [
     SearchPlacesUseCase,

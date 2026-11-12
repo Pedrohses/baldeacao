@@ -2,6 +2,7 @@ import { Global, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { AppConfig } from '../../config';
+import { REDIS_CLIENT } from '../../shared/infrastructure/redis/redis.module';
 import { SearchPlacesUseCase } from './application/use-cases/search-places.use-case';
 import { GeocodingModule } from './geocoding.module';
 
@@ -9,13 +10,19 @@ import { GeocodingModule } from './geocoding.module';
 @Global()
 @Module({
   providers: [
-    { provide: DataSource, useValue: {} },
+    { provide: DataSource, useValue: { getRepository: () => ({}) } },
+    { provide: REDIS_CLIENT, useValue: {} },
     {
       provide: AppConfig,
-      useValue: { nominatimUrl: 'https://nominatim.test', nominatimUserAgent: 'test' },
+      useValue: {
+        nominatimUrl: 'https://nominatim.test',
+        nominatimUserAgent: 'test',
+        olhoVivoToken: undefined,
+        olhoVivoUserAgent: 'test',
+      },
     },
   ],
-  exports: [DataSource, AppConfig],
+  exports: [DataSource, REDIS_CLIENT, AppConfig],
 })
 class FakeInfraModule {}
 
