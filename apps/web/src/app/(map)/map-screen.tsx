@@ -11,7 +11,13 @@ import { NearbyStopsList, STOPS_MIN_ZOOM, StopSheet, StopsLayer } from '@/featur
 import { buildTripHref } from '@/features/trip-planner';
 import { useGeolocation } from '@/shared/hooks/use-geolocation';
 import { useIsDesktop } from '@/shared/hooks/use-media-query';
-import { AppPanel, LOW_SNAP_PX, type PanelSnap, SCREEN_CLASS } from '@/shared/ui/app-shell';
+import {
+  AppPanel,
+  LOW_SNAP_PX,
+  type PanelSnap,
+  SCREEN_CLASS,
+  useMapPadding,
+} from '@/shared/ui/app-shell';
 import { CloseIcon, SearchIcon } from '@/shared/ui/icons';
 import {
   DroppedPin,
@@ -21,6 +27,7 @@ import {
   MapLayers,
   MapLongPress,
   UserLocationLayer,
+  VisibleCenterSync,
 } from '@/shared/ui/map';
 
 const RECENT_CHIPS = 3;
@@ -78,6 +85,9 @@ export function MapScreen() {
   const [pin, setPin] = useState<Coordinates | null>(null);
   const [flyTarget, setFlyTarget] = useState<Coordinates | null>(null);
   const [snap, setSnap] = useState<PanelSnap>('low');
+  const padding = useMapPadding(snap);
+  // Centro da parte do mapa que o painel não cobre (o centro do canvas fica sob o painel).
+  const [visibleCenter, setVisibleCenter] = useState<Coordinates | null>(null);
   const pinPlace = useMapPointPlace(pin).place;
 
   const activeStop =
@@ -91,7 +101,9 @@ export function MapScreen() {
     viewport.zoom >= STOPS_MIN_ZOOM ? { lat: viewport.latitude, lon: viewport.longitude } : null;
   const nearbyCenter = position
     ? roundCenter(position.lat, position.lon)
-    : roundCenter(viewport.latitude, viewport.longitude);
+    : visibleCenter
+      ? roundCenter(visibleCenter.lat, visibleCenter.lon)
+      : roundCenter(viewport.latitude, viewport.longitude);
 
   function handleSelectStop(stop: Stop, fly: boolean) {
     setSelectedStop(stop);
@@ -181,6 +193,7 @@ export function MapScreen() {
   return (
     <main className={SCREEN_CLASS}>
       <MapLayers>
+        <VisibleCenterSync padding={padding} onChange={setVisibleCenter} />
         <MapLongPress onLongPress={setPin} />
         <MapFlyTo target={flyTarget} />
         <RouteShapeLayer routeId={routeId} />
