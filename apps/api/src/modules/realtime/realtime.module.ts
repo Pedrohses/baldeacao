@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AppConfig } from '../../config';
 import { OlhoVivoModule } from '../../shared/infrastructure/olho-vivo/olho-vivo.module';
+import { GetVehicleSnapshotUseCase } from './application/use-cases/get-vehicle-snapshot.use-case';
 import { RefreshVehiclePositionsUseCase } from './application/use-cases/refresh-vehicle-positions.use-case';
 import { ClockPort } from './domain/ports/clock.port';
 import { PositionsCycleNotifierPort } from './domain/ports/positions-cycle-notifier.port';
@@ -11,6 +12,7 @@ import { OlhoVivoVehiclePositionsAdapter } from './infrastructure/adapters/olho-
 import { RedisPositionsCycleNotifierAdapter } from './infrastructure/adapters/redis-positions-cycle-notifier.adapter';
 import { RedisVehiclePositionsStoreAdapter } from './infrastructure/adapters/redis-vehicle-positions-store.adapter';
 import { SystemClockAdapter } from './infrastructure/adapters/system-clock.adapter';
+import { VehiclePositionsController } from './presentation/http/vehicle-positions.controller';
 import { REALTIME_QUEUE } from './presentation/jobs/realtime-queue';
 import { RefreshPositionsProcessor } from './presentation/jobs/refresh-positions.processor';
 import { RefreshPositionsScheduler } from './presentation/jobs/refresh-positions.scheduler';
@@ -25,8 +27,10 @@ import { RefreshPositionsScheduler } from './presentation/jobs/refresh-positions
     }),
     BullModule.registerQueue({ name: REALTIME_QUEUE }),
   ],
+  controllers: [VehiclePositionsController],
   providers: [
     RefreshVehiclePositionsUseCase,
+    GetVehicleSnapshotUseCase,
     { provide: VehiclePositionsSourcePort, useClass: OlhoVivoVehiclePositionsAdapter },
     { provide: VehiclePositionsStorePort, useClass: RedisVehiclePositionsStoreAdapter },
     { provide: PositionsCycleNotifierPort, useClass: RedisPositionsCycleNotifierAdapter },

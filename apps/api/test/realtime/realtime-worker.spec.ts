@@ -1,7 +1,9 @@
 import { Logger, type INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { VehiclePositionSchema } from '@baldeacao/types';
+import { API_PATHS, VehiclePositionSchema, VehicleSnapshotSchema } from '@baldeacao/types';
 import Redis from 'ioredis';
+import request from 'supertest';
+import type { App } from 'supertest/types';
 import { GenericContainer, type StartedTestContainer } from 'testcontainers';
 import { RealtimeModule } from '../../src/modules/realtime/realtime.module';
 import { mapOlhoVivoPositions } from '../../src/modules/realtime/infrastructure/adapters/olho-vivo-position.mapper';
@@ -141,6 +143,20 @@ describe('tempo real no Redis (Testcontainers)', () => {
         routeId: '875A-10',
         directionId: 1,
       });
+    });
+
+    it('GET /vehicles/positions lê a foto gravada pelo worker', async () => {
+      const running = await boot(fakeOlhoVivoClient());
+      const updatedAt = await waitFor(() => redis.get('realtime:sptrans:updated_at'));
+
+      const response = await request(running.getHttpServer() as App)
+        .get(API_PATHS.vehiclePositions)
+        .query({ routeId: '875A-10' })
+        .expect(200);
+
+      const snapshot = VehicleSnapshotSchema.parse(response.body);
+      expect(snapshot).toMatchObject({ sourceId: 'sptrans', routeId: '875A-10', updatedAt });
+      expect(snapshot.vehicles.map((v) => v.vehicleId).sort()).toEqual(['11433', '11502', '11611']);
     });
 
     it('token recusado vira log e o app continua de pé', async () => {
