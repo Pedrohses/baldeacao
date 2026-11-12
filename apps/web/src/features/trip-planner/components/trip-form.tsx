@@ -21,6 +21,8 @@ export interface TripFormProps {
   onPickOnMap?: (field: TripField) => void;
   /** Erro do par origem e destino (ex.: iguais). */
   error?: string | null;
+  /** Pede o foco num campo; trocar `key` repete o pedido. */
+  focusRequest?: { field: TripField; key: number } | null;
 }
 
 /**
@@ -37,7 +39,10 @@ export function TripForm({
   autoFocus = null,
   onPickOnMap,
   error,
+  focusRequest = null,
 }: TripFormProps) {
+  const focusKeyFor = (field: TripField) =>
+    focusRequest?.field === field ? { focusKey: focusRequest.key } : {};
   const baseId = useId();
   const errorId = `${baseId}-error`;
 
@@ -68,6 +73,7 @@ export function TripForm({
             onChange: onOriginChange,
             placeholder: 'De onde?',
             autoFocus: autoFocus === 'origin',
+            ...focusKeyFor('origin'),
             ...(onPickOnMap ? { onPickOnMap: () => onPickOnMap('origin') } : {}),
           })}
           {renderPlaceInput({
@@ -77,6 +83,7 @@ export function TripForm({
             onChange: onDestinationChange,
             placeholder: 'Para onde?',
             autoFocus: autoFocus === 'destination',
+            ...focusKeyFor('destination'),
             ...(onPickOnMap ? { onPickOnMap: () => onPickOnMap('destination') } : {}),
           })}
         </div>

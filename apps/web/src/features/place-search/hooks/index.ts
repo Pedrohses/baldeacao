@@ -1,4 +1,3 @@
-export { useDebouncedValue } from './use-debounced-value';
 export {
   PLACE_SEARCH_DEBOUNCE_MS,
   PLACE_SEARCH_MIN_LENGTH,
@@ -15,3 +14,4 @@ export {
   useRecentPlaces,
 } from './use-recent-places';
 export { useResolvePlace } from './use-resolve-place';
+export { mapPointPlace, useMapPointPlace, useResolveMapPoint } from './use-map-point-place';

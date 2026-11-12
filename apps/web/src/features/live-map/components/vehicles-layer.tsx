@@ -4,7 +4,7 @@ import type { DataDrivenPropertyValueSpecification, MapLayerMouseEvent } from 'm
 import { useEffect } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
-import { MAP_COLORS } from '@/shared/ui/map';
+import { useMapColors } from '@/shared/ui/map';
 
 import { useMapStore } from '../hooks/use-map-store';
 import { useStaleDataTracker } from '../hooks/use-stale-data-tracker';
@@ -24,8 +24,6 @@ const FADE_END = VEHICLES_POINTS_ZOOM + 0.5;
 export const DIMMED_VEHICLE_OPACITY = 0.12;
 
 const EMPTY_VEHICLES = toVehiclesFeatureCollection([]);
-// Cor da marca (#C7361F) transparente na densidade zero.
-const BRAND_RGB = '199, 54, 31';
 
 export interface VehicleHighlight {
   /** route_id da linha em destaque. */
@@ -44,6 +42,7 @@ export interface VehiclesLayerProps {
 /** Ônibus em tempo real como uma única fonte GeoJSON (sem um Marker por veículo). */
 export function VehiclesLayer({ routeId, highlight = null }: VehiclesLayerProps) {
   const { data } = useVehiclePositions(routeId);
+  const colors = useMapColors();
   useStaleDataTracker(data?.updatedAt);
   useSelectVehicleOnClick();
 
@@ -73,9 +72,10 @@ export function VehiclesLayer({ routeId, highlight = null }: VehiclesLayerProps)
             ['linear'],
             ['heatmap-density'],
             0,
-            `rgba(${BRAND_RGB}, 0)`,
+            // Cor da marca transparente na densidade zero.
+            `rgba(${colors.brandRgb}, 0)`,
             1,
-            `rgba(${BRAND_RGB}, 1)`,
+            `rgba(${colors.brandRgb}, 1)`,
           ],
           'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 10, 8, VEHICLES_POINTS_ZOOM, 14],
           'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], FADE_START, 0.35, FADE_END, 0],
@@ -96,9 +96,9 @@ export function VehiclesLayer({ routeId, highlight = null }: VehiclesLayerProps)
             17,
             ['case', isSelected, 9, 6],
           ],
-          'circle-color': MAP_COLORS.brand,
+          'circle-color': colors.brand,
           'circle-opacity': circleOpacity,
-          'circle-stroke-color': ['case', isSelected, MAP_COLORS.text, MAP_COLORS.surface],
+          'circle-stroke-color': ['case', isSelected, colors.text, colors.surface],
           'circle-stroke-width': ['case', isSelected, 3, 1],
           'circle-stroke-opacity': circleOpacity,
         }}
@@ -111,7 +111,7 @@ export function VehiclesLayer({ routeId, highlight = null }: VehiclesLayerProps)
           paint={{
             'circle-radius': ['case', isSelected, 9, 7],
             'circle-color': highlight.color,
-            'circle-stroke-color': ['case', isSelected, MAP_COLORS.text, MAP_COLORS.surface],
+            'circle-stroke-color': ['case', isSelected, colors.text, colors.surface],
             'circle-stroke-width': ['case', isSelected, 3, 2],
           }}
         />

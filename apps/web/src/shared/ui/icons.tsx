@@ -42,6 +42,25 @@ export function RouteIcon(props: IconProps) {
   );
 }
 
+export function BusIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <rect x="5" y="3" width="14" height="15" rx="3" />
+      <path d="M5 11h14M9 21v-3M15 21v-3" />
+      <circle cx="8.5" cy="14.5" r="0.5" fill="currentColor" />
+      <circle cx="15.5" cy="14.5" r="0.5" fill="currentColor" />
+    </Svg>
+  );
+}
+
+export function ArrowLeftIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M19 12H5M11 6l-6 6 6 6" />
+    </Svg>
+  );
+}
+
 export function StarIcon(props: IconProps) {
   return (
     <Svg {...props}>

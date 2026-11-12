@@ -4,7 +4,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { setWorkerUrl } from 'maplibre-gl';
 import Map, { AttributionControl, NavigationControl, type ViewState } from 'react-map-gl/maplibre';
 import type { ReactNode } from 'react';
-import { env } from '@/shared/config/env';
+
+import { MAP_STYLE_URLS, useMapTheme } from './map-colors';
 
 // O MapLibre 6 deduz a URL do worker a partir do próprio arquivo, o que quebra depois do bundle.
 // `new URL(..., import.meta.url)` faz o bundler emitir o worker como asset e nos dá a URL final.
@@ -25,10 +26,11 @@ export default function BaseMapClient({
   showNavigation = false,
   children,
 }: BaseMapProps) {
+  const theme = useMapTheme();
   return (
     <Map
       initialViewState={initialViewState}
-      mapStyle={env.mapStyleUrl}
+      mapStyle={MAP_STYLE_URLS[theme]}
       style={{ width: '100%', height: '100%' }}
       attributionControl={false}
       // O clique direito vira "soltar alfinete"; girar o mapa com ele confunde.

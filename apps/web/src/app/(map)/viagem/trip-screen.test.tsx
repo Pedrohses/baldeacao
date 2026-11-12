@@ -1,18 +1,29 @@
+import type { Itinerary, PlanTripNotice } from '@baldeacao/types';
 import { itineraryExample } from '@baldeacao/types/examples';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildTripHref, parseTripSearchParams } from '@/features/trip-planner';
+import { placesService } from '@/features/place-search/services';
 import { tripPlannerService } from '@/features/trip-planner/services';
 import { resetGeolocation } from '@/shared/hooks/use-geolocation';
 
 import { TripScreen } from './trip-screen';
 
+const planned = (itineraries: Itinerary[], notices: PlanTripNotice[] = []) => ({
+  itineraries,
+  notices,
+});
+
 vi.mock('@/shared/ui/map', () => ({
-  BaseMap: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
-  CenterPicker: () => null,
+  MapLayers: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
+  CenterPicker: ({ onConfirm }: { onConfirm: (c: { lat: number; lon: number }) => void }) => (
+    <button type="button" onClick={() => onConfirm({ lat: -23.55, lon: -46.63 })}>
+      confirmar mira
+    </button>
+  ),
   UserLocationLayer: () => null,
 }));
 
@@ -46,7 +57,7 @@ afterEach(() => {
 
 describe('TripScreen', () => {
   it('lê origem e destino da URL e busca sozinho', async () => {
-    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([itineraryExample]);
+    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([itineraryExample]));
     renderScreen(
       `/viagem?de=${paulista.lat},${paulista.lon}&deNome=Av.%20Paulista%201578&deTipo=stop&para=${se.lat},${se.lon}&paraNome=Ponto%20no%20mapa&paraTipo=coordinates`,
     );
@@ -65,7 +76,7 @@ describe('TripScreen', () => {
           ok({ coords: { latitude: paulista.lat, longitude: paulista.lon } }),
       },
     });
-    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([]);
+    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([]));
     const href = buildTripHref({
       from: 'current-location',
       to: {
@@ -91,5 +102,42 @@ describe('TripScreen', () => {
     expect(screen.getByText('Escolha a origem e o destino para ver as rotas.')).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'Destino' })).toHaveFocus();
     expect(spy).not.toHaveBeenCalled();
+  });
+
+  it('destino fora da área atendida explica e devolve o foco ao campo', async () => {
+    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(
+      planned([], ['destination_outside_service_area']),
+    );
+    renderScreen(
+      `/viagem?de=${paulista.lat},${paulista.lon}&deNome=Paulista&deTipo=stop&para=-22.9,-43.2&paraNome=Rio&paraTipo=coordinates`,
+    );
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'O destino fica fora da área atendida pela SPTrans (nenhuma parada a até 1 km). Confira se escolheu o lugar certo.',
+    );
+    expect(
+      screen.queryByText('Nenhuma rota de transporte para esse trajeto agora.'),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Editar destino' }));
+    expect(screen.getByRole('combobox', { name: 'Destino' })).toHaveFocus();
+  });
+
+  it('escolher no mapa dá nome ao ponto pela busca reversa', async () => {
+    vi.spyOn(placesService, 'reverse').mockResolvedValue({
+      id: 'osm:node:1',
+      name: 'Praça da Sé',
+      address: 'Sé, São Paulo',
+      kind: 'poi',
+      location: se,
+    });
+    renderScreen('/viagem?foco=destino');
+    const destination = screen.getByRole('combobox', { name: 'Destino' });
+    fireEvent.focus(destination);
+    fireEvent.click(screen.getByRole('option', { name: /Escolher no mapa/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'confirmar mira' }));
+
+    expect(destination).toHaveValue('Ponto no mapa');
+    await waitFor(() => expect(destination).toHaveValue('Praça da Sé'));
+    expect(screen.getAllByText('Sé, São Paulo').length).toBeGreaterThan(0);
   });
 });

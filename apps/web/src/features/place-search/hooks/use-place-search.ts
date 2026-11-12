@@ -3,8 +3,9 @@
 import { SearchPlacesQuerySchema, type Place } from '@baldeacao/types';
 import { useQuery } from '@tanstack/react-query';
 
+import { useDebouncedValue } from '@/shared/hooks/use-debounced-value';
+
 import { placeKeys, placesService } from '../services';
-import { useDebouncedValue } from './use-debounced-value';
 
 export const PLACE_SEARCH_DEBOUNCE_MS = 300;
 export const PLACE_SEARCH_MIN_LENGTH = 2;

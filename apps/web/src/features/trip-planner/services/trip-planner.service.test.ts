@@ -13,13 +13,31 @@ describe('tripPlannerService.plan', () => {
     const fetchMock = vi.fn().mockResolvedValue(Response.json({ itineraries: [itineraryExample] }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(tripPlannerService.plan(tripRequestExample)).resolves.toEqual([itineraryExample]);
+    await expect(tripPlannerService.plan(tripRequestExample)).resolves.toEqual({
+      itineraries: [itineraryExample],
+      notices: [],
+    });
 
     const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(url).toBe('http://localhost:3001/trips/plan');
     expect(init.method).toBe('POST');
     expect(init.headers).toMatchObject({ 'Content-Type': 'application/json' });
     expect(JSON.parse(init.body as string)).toEqual(tripRequestExample);
+  });
+
+  it('repassa os avisos de área de atendimento', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValue(
+          Response.json({ itineraries: [], notices: ['destination_outside_service_area'] }),
+        ),
+    );
+    await expect(tripPlannerService.plan(tripRequestExample)).resolves.toEqual({
+      itineraries: [],
+      notices: ['destination_outside_service_area'],
+    });
   });
 
   it('converte erro HTTP em ApiError com mensagem em português', async () => {

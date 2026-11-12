@@ -14,6 +14,8 @@ export interface PlaceInputProps {
   placeholder?: string;
   autoFocus?: boolean;
   onPickOnMap?: () => void;
+  /** Trocar o número pede o foco no campo (ex.: "Editar destino" num aviso). */
+  focusKey?: number;
 }
 
 export type RenderPlaceInput = (props: PlaceInputProps) => ReactNode;

@@ -26,3 +26,21 @@ describe('placesService.search', () => {
     await expect(placesService.search('Morumbis', 'quick')).rejects.toBeInstanceOf(ApiError);
   });
 });
+
+describe('placesService.reverse', () => {
+  it('chama /places/reverse com lat e lon e devolve o lugar ou null', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ place: placeOriginExample }))
+      .mockResolvedValueOnce(Response.json({ place: null }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(placesService.reverse({ lat: -23.55, lon: -46.63 })).resolves.toEqual(
+      placeOriginExample,
+    );
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      'http://localhost:3001/places/reverse?lat=-23.55&lon=-46.63',
+    );
+    await expect(placesService.reverse({ lat: 0, lon: 0 })).resolves.toBeNull();
+  });
+});

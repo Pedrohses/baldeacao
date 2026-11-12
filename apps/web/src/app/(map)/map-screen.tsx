@@ -5,24 +5,23 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { LineHeader, RouteShapeLayer, useLineDetails } from '@/features/lines';
-import { MapViewportSync, StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
-import { PlaceKindIcon, useRecentPlaces } from '@/features/place-search';
+import { StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
+import { PlaceKindIcon, useMapPointPlace, useRecentPlaces } from '@/features/place-search';
 import { NearbyStopsList, STOPS_MIN_ZOOM, StopSheet, StopsLayer } from '@/features/stops';
 import { buildTripHref } from '@/features/trip-planner';
 import { useGeolocation } from '@/shared/hooks/use-geolocation';
 import { useIsDesktop } from '@/shared/hooks/use-media-query';
-import { AppPanel, LOW_SNAP_PX, type PanelSnap } from '@/shared/ui/app-shell';
+import { AppPanel, LOW_SNAP_PX, type PanelSnap, SCREEN_CLASS } from '@/shared/ui/app-shell';
 import { CloseIcon, SearchIcon } from '@/shared/ui/icons';
 import {
-  BaseMap,
   DroppedPin,
   LocateButton,
   MAP_COLORS,
   MapFlyTo,
+  MapLayers,
   MapLongPress,
   UserLocationLayer,
 } from '@/shared/ui/map';
-import { MAP_POINT_NAME, coordinatesPlace } from '@/shared/utils/place';
 
 const RECENT_CHIPS = 3;
 const PRIMARY_ACTION =
@@ -79,10 +78,12 @@ export function MapScreen() {
   const [pin, setPin] = useState<Coordinates | null>(null);
   const [flyTarget, setFlyTarget] = useState<Coordinates | null>(null);
   const [snap, setSnap] = useState<PanelSnap>('low');
+  const pinPlace = useMapPointPlace(pin).place;
 
   const activeStop =
     selection?.kind === 'stop' && selectedStop?.id === selection.stopId ? selectedStop : null;
-  const routeId = selection?.kind === 'vehicle' ? selection.routeId : null;
+  const routeId =
+    selection?.kind === 'vehicle' || selection?.kind === 'line' ? selection.routeId : null;
   const line = useLineDetails(routeId);
   const lineColor = line.data?.line.color ? `#${line.data.line.color}` : MAP_COLORS.brand;
 
@@ -178,9 +179,8 @@ export function MapScreen() {
   }
 
   return (
-    <main className="relative h-full w-full">
-      <BaseMap initialViewState={viewport} showNavigation={isDesktop}>
-        <MapViewportSync />
+    <main className={SCREEN_CLASS}>
+      <MapLayers>
         <MapLongPress onLongPress={setPin} />
         <MapFlyTo target={flyTarget} />
         <RouteShapeLayer routeId={routeId} />
@@ -191,9 +191,14 @@ export function MapScreen() {
         />
         <VehiclesLayer highlight={routeId ? { routeId, color: lineColor } : null} />
         <UserLocationLayer />
-        {pin ? (
-          <DroppedPin location={pin} title={MAP_POINT_NAME} onClose={() => setPin(null)}>
-            <PlaceActions place={coordinatesPlace(pin)} />
+        {pin && pinPlace ? (
+          <DroppedPin
+            location={pin}
+            title={pinPlace.name}
+            subtitle={pinPlace.address}
+            onClose={() => setPin(null)}
+          >
+            <PlaceActions place={pinPlace} />
           </DroppedPin>
         ) : null}
         <LocateButton
@@ -201,7 +206,7 @@ export function MapScreen() {
           // No celular fica logo acima do painel na altura baixa.
           {...(isDesktop ? {} : { style: { bottom: LOW_SNAP_PX + 12 } })}
         />
-      </BaseMap>
+      </MapLayers>
       <StaleDataNotice />
       <AppPanel title="Mapa de São Paulo" titleHidden snap={snap} onSnapChange={setSnap}>
         {content}

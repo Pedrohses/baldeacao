@@ -1,4 +1,4 @@
-import type { Place } from '@baldeacao/types';
+import type { Itinerary, Place, PlanTripNotice } from '@baldeacao/types';
 import {
   itineraryExample,
   placeDestinationExample,
@@ -14,6 +14,11 @@ import { tripPlannerService } from '../services';
 import type { RenderPlaceInput } from '../types';
 import { TimeChip } from './time-chip';
 import { TripForm } from './trip-form';
+
+const planned = (itineraries: Itinerary[], notices: PlanTripNotice[] = []) => ({
+  itineraries,
+  notices,
+});
 
 // Campo de lugar falso: mostra o valor e oferece botões para escolher os lugares de fixture.
 const renderPlaceInput: RenderPlaceInput = ({
@@ -92,7 +97,7 @@ describe('TripForm e busca automática', () => {
   });
 
   it('busca sozinho assim que origem e destino estão definidos, partindo agora', async () => {
-    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([itineraryExample]);
+    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([itineraryExample]));
     renderHarness(placeDestinationExample);
     expect(spy).not.toHaveBeenCalled();
 
@@ -107,7 +112,7 @@ describe('TripForm e busca automática', () => {
   });
 
   it('inverter troca as pontas e busca de novo no sentido contrário', async () => {
-    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([]);
+    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([]));
     renderHarness(placeDestinationExample);
     fireEvent.click(screen.getByRole('button', { name: 'Origem: Morumbis' }));
     await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));
@@ -136,7 +141,7 @@ describe('TripForm e busca automática', () => {
   });
 
   it('trocar a hora no chip refaz a busca com chegar até em ISO de São Paulo', async () => {
-    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([]);
+    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([]));
     renderHarness(placeDestinationExample);
     fireEvent.click(screen.getByRole('button', { name: 'Origem: Morumbis' }));
     await waitFor(() => expect(spy).toHaveBeenCalledTimes(1));

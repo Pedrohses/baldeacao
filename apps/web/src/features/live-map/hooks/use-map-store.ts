@@ -13,6 +13,8 @@ export const DEFAULT_MAP_VIEWPORT: MapViewState = {
 export type MapSelection =
   | { kind: 'vehicle'; vehicleId: string; routeId: string | null }
   | { kind: 'stop'; stopId: string }
+  /** Linha escolhida na aba Linhas ("Ver no mapa"), sem um ônibus específico. */
+  | { kind: 'line'; routeId: string }
   | null;
 
 export interface MapStateData {
@@ -28,6 +30,7 @@ export interface MapStateActions {
   setViewport(viewport: MapViewState): void;
   selectVehicle(vehicleId: string, routeId?: string | null): void;
   selectStop(stopId: string): void;
+  selectLine(routeId: string): void;
   clearSelection(): void;
   /** Registra o `updatedAt` de um snapshot e recalcula `isStale`. */
   reportDataUpdatedAt(updatedAt: string, now?: Date): void;
@@ -55,6 +58,7 @@ export const useMapStore = create<MapState>()((set, get) => ({
   selectVehicle: (vehicleId, routeId = null) =>
     set({ selection: { kind: 'vehicle', vehicleId, routeId } }),
   selectStop: (stopId) => set({ selection: { kind: 'stop', stopId } }),
+  selectLine: (routeId) => set({ selection: { kind: 'line', routeId } }),
   clearSelection: () => set({ selection: null }),
 
   reportDataUpdatedAt: (updatedAt, now = new Date()) =>

@@ -22,6 +22,7 @@ vi.mock('react-map-gl/maplibre', () => ({
     mapMock.layers.push({ id, paint });
     return null;
   },
+  useMap: () => ({ current: null }),
 }));
 
 const inbound = {

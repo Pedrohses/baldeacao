@@ -3,8 +3,7 @@
 import type { Place } from '@baldeacao/types';
 import { useEffect, useState } from 'react';
 
-import { MapViewportSync, useMapStore } from '@/features/live-map';
-import { PlaceAutocomplete } from '@/features/place-search';
+import { PlaceAutocomplete, useResolveMapPoint } from '@/features/place-search';
 import {
   ItineraryLayer,
   ItineraryList,
@@ -22,8 +21,8 @@ import {
 import { locate } from '@/shared/hooks/use-geolocation';
 import { useIsDesktop } from '@/shared/hooks/use-media-query';
 import { useNow } from '@/shared/hooks/use-now';
-import { AppPanel, type PanelSnap, useMapPadding } from '@/shared/ui/app-shell';
-import { BaseMap, CenterPicker, UserLocationLayer } from '@/shared/ui/map';
+import { AppPanel, type PanelSnap, SCREEN_CLASS, useMapPadding } from '@/shared/ui/app-shell';
+import { CenterPicker, MapLayers, UserLocationLayer } from '@/shared/ui/map';
 import { coordinatesPlace, currentLocationPlace } from '@/shared/utils/place';
 
 // Composição: o TripForm recebe o campo de lugar daqui porque features não se importam.
@@ -41,7 +40,6 @@ export interface TripScreenProps {
 /** Tela de planejamento: cartão de origem e destino, hora e itinerários no painel, rota no mapa. */
 export function TripScreen({ initial }: TripScreenProps) {
   const isDesktop = useIsDesktop();
-  const viewport = useMapStore((state) => state.viewport);
   const now = useNow(30_000);
   const trip = useTripRequest({
     initialOrigin: asPlace(initial.origin),
@@ -53,7 +51,9 @@ export function TripScreen({ initial }: TripScreenProps) {
   const [snap, setSnap] = useState<PanelSnap>(initial.destination ? 'mid' : 'high');
   const [picking, setPicking] = useState<TripField | null>(null);
   const [timeOpen, setTimeOpen] = useState(false);
+  const [focusRequest, setFocusRequest] = useState<{ field: TripField; key: number } | null>(null);
   const padding = useMapPadding(snap);
+  const resolveMapPoint = useResolveMapPoint();
 
   // Seleção (itinerário e trecho em foco) volta ao começo a cada pedido novo.
   const requestKey = trip.request ? JSON.stringify(trip.request) : '';
@@ -93,7 +93,8 @@ export function TripScreen({ initial }: TripScreenProps) {
       : plan.isError
         ? 'error'
         : 'success';
-  const itineraries = plan.data ?? [];
+  const itineraries = plan.data?.itineraries ?? [];
+  const notices = status === 'success' ? (plan.data?.notices ?? []) : [];
   const selected = status === 'success' ? (itineraries[current.index] ?? null) : null;
 
   function startPicking(field: TripField) {
@@ -102,17 +103,20 @@ export function TripScreen({ initial }: TripScreenProps) {
   }
 
   function confirmPick(location: { lat: number; lon: number }) {
+    // "Ponto no mapa" na hora; o nome do lugar mais próximo chega da busca reversa.
     const place = coordinatesPlace(location);
-    if (picking === 'origin') setOrigin(place);
-    else setDestination(place);
+    const set = picking === 'origin' ? setOrigin : setDestination;
+    set(place);
     setPicking(null);
     setSnap('mid');
+    void resolveMapPoint(location).then((named) =>
+      set((current) => (current?.id === place.id ? named : current)),
+    );
   }
 
   return (
-    <main className="relative h-full w-full">
-      <BaseMap initialViewState={viewport} showNavigation={isDesktop}>
-        <MapViewportSync />
+    <main className={SCREEN_CLASS}>
+      <MapLayers>
         <UserLocationLayer />
         <ItineraryLayer itinerary={selected} focusedLeg={current.leg} fitPadding={padding} />
         {picking ? (
@@ -126,7 +130,7 @@ export function TripScreen({ initial }: TripScreenProps) {
             onCancel={() => setPicking(null)}
           />
         ) : null}
-      </BaseMap>
+      </MapLayers>
       <AppPanel title="Planejar viagem" titleHidden={!isDesktop} snap={snap} onSnapChange={setSnap}>
         <div onFocusCapture={() => !isDesktop && setSnap('high')}>
           <TripForm
@@ -139,6 +143,7 @@ export function TripScreen({ initial }: TripScreenProps) {
             autoFocus={initial.focus}
             onPickOnMap={startPicking}
             error={trip.error}
+            focusRequest={focusRequest}
           />
         </div>
         <div className="mt-3">
@@ -165,6 +170,11 @@ export function TripScreen({ initial }: TripScreenProps) {
             onRetry={() => void plan.refetch()}
             onChangeTime={() => setTimeOpen(true)}
             onSwap={trip.swap}
+            notices={notices}
+            onEditField={(field) => {
+              setFocusRequest((previous) => ({ field, key: (previous?.key ?? 0) + 1 }));
+              if (!isDesktop) setSnap('high');
+            }}
             {...(plan.error ? { errorMessage: plan.error.message } : {})}
           />
         </div>

@@ -74,6 +74,7 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
   const departure = formatDeparture(itinerary.startAt, now);
   const start = formatTime(itinerary.startAt);
   const end = formatTime(itinerary.endAt);
+  const alsoAt = (itinerary.alsoDepartsAt ?? []).map(formatTime);
 
   return (
     <button
@@ -123,6 +124,11 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
         <span aria-hidden="true">·</span>
         <span>{formatDistance(itinerary.walkDistanceM)} a pé</span>
       </span>
+      {alsoAt.length > 0 ? (
+        <span data-testid="also-departs" className="mt-1 block text-sm text-muted">
+          Também às {alsoAt.join(', ')}
+        </span>
+      ) : null}
     </button>
   );
 }
