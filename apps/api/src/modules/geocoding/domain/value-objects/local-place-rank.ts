@@ -16,6 +16,8 @@ export interface PlaceCandidate {
   inCity: boolean | null;
   /** Posição na lista do Nominatim (0 = primeiro); null para candidato local. */
   remoteIndex: number | null;
+  /** Categoria OSM do lugar conhecido (ex.: "leisure=park"); null para os demais. */
+  category?: string | null;
 }
 
 // Abreviações comuns em nomes de rua e de parada da SPTrans ("R. Vergueiro", "Av. Paulista").

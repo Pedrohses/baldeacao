@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
+import { FindNearbyStopsUseCase } from '../../../transit/application/use-cases/find-nearby-stops.use-case';
 import { SearchStopsByNameUseCase } from '../../../transit/application/use-cases/search-stops-by-name.use-case';
 import { Place } from '../../domain/entities/place.entity';
 import { InvalidPlaceQueryError } from '../../domain/errors/invalid-place-query.error';
@@ -7,6 +8,11 @@ import { GeocodeCache } from '../../domain/ports/geocode-cache.port';
 import { Geocoder } from '../../domain/ports/geocoder.port';
 import { KnownPlaceRepository } from '../../domain/ports/known-place-repository.port';
 import { type PlaceCandidate, rankPlaces } from '../../domain/value-objects/local-place-rank';
+import {
+  ACCESS_POINT_MIN_OFFSET_M,
+  ACCESS_POINT_RADIUS_M,
+  LARGE_PLACE_CATEGORIES,
+} from '../../domain/value-objects/osm-poi-category';
 import { isPostalCodeQuery, normalizePlaceQuery } from '../../domain/value-objects/place-query';
 import type { SearchPlacesInput, SearchPlacesOutput } from '../dto/search-places.dto';
 
@@ -46,6 +52,7 @@ export class SearchPlacesUseCase {
     private readonly geocoder: Geocoder,
     private readonly searchStops: SearchStopsByNameUseCase,
     private readonly knownPlaces: KnownPlaceRepository,
+    private readonly nearbyStops: FindNearbyStopsUseCase,
   ) {}
 
   async execute(input: SearchPlacesInput): Promise<SearchPlacesOutput> {
@@ -63,12 +70,17 @@ export class SearchPlacesUseCase {
       const digits = key.replace(/\D/g, '');
       const cepKey = `cep:${digits.slice(0, 5)}-${digits.slice(5)}`;
       const remote = await this.searchRemote(cepKey, input.query);
-      return { places: remote.slice(0, SEARCH_PLACES_LIMIT) };
+      // O OSM tem CEP com ponto errado (ex.: 01310-200 em Nazaré Paulista): fora do município,
+      // melhor nada do que um lugar errado.
+      const inCity = await this.knownPlaces.inServiceCity(remote.map((p) => p.location));
+      const places = remote.filter((_, i) => inCity[i] !== false);
+      return { places: places.slice(0, SEARCH_PLACES_LIMIT) };
     }
 
     if (input.mode === 'quick' || key.length < SEARCH_PLACES_MIN_LENGTH) {
       const local = await this.localCandidates(key);
-      return { places: rankPlaces(key, await this.withCityFlags(local), SEARCH_PLACES_LIMIT) };
+      const ranked = rankPlaces(key, await this.withCityFlags(local), SEARCH_PLACES_LIMIT);
+      return { places: await this.withAccessPoints(ranked, local) };
     }
 
     const local = await this.localCandidates(key);
@@ -78,7 +90,8 @@ export class SearchPlacesUseCase {
     } catch (error) {
       // Com resultado local, a falha do Nominatim não derruba a busca.
       if (error instanceof SourceUnavailableError && local.length > 0) {
-        return { places: rankPlaces(key, await this.withCityFlags(local), SEARCH_PLACES_LIMIT) };
+        const ranked = rankPlaces(key, await this.withCityFlags(local), SEARCH_PLACES_LIMIT);
+        return { places: await this.withAccessPoints(ranked, local) };
       }
       throw error;
     }
@@ -88,9 +101,37 @@ export class SearchPlacesUseCase {
       importance: REMOTE_IMPORTANCE[place.kind],
       inCity: null,
       remoteIndex: index,
+      category: null,
     }));
     const candidates = await this.withCityFlags([...local, ...remoteCandidates]);
-    return { places: rankPlaces(key, candidates, SEARCH_PLACES_LIMIT) };
+    const ranked = rankPlaces(key, candidates, SEARCH_PLACES_LIMIT);
+    return { places: await this.withAccessPoints(ranked, candidates) };
+  }
+
+  /**
+   * Lugar grande (aeroporto, parque, campus...; ver LARGE_PLACE_CATEGORIES) troca o centroide
+   * pela parada ou estação mais próxima dele a até 1,5 km, quando o centroide está a mais de
+   * 250 m de qualquer parada: é por ali que se chega, e a rota não termina no meio do pátio.
+   * Nome, id e endereço continuam os do lugar.
+   */
+  private async withAccessPoints(places: Place[], candidates: PlaceCandidate[]): Promise<Place[]> {
+    // O mesmo id pode vir do banco (com categoria) e do Nominatim (sem): vale a do banco.
+    const categories = new Map<string, string>();
+    for (const c of candidates) if (c.category) categories.set(c.place.id, c.category);
+    return Promise.all(
+      places.map(async (place) => {
+        const category = categories.get(place.id);
+        if (!category || !LARGE_PLACE_CATEGORIES.has(category)) return place;
+        const { stops } = await this.nearbyStops.execute({
+          center: place.location,
+          radiusM: ACCESS_POINT_RADIUS_M,
+          limit: 1,
+        });
+        const nearest = stops[0];
+        if (!nearest || nearest.distanceM <= ACCESS_POINT_MIN_OFFSET_M) return place;
+        return new Place({ ...place, location: nearest.stop.location });
+      }),
+    );
   }
 
   /** Paradas, estações e lugares conhecidos que casam com o texto (sem ordem final). */
@@ -115,6 +156,7 @@ export class SearchPlacesUseCase {
           importance: isStation ? STATION_IMPORTANCE : 0,
           inCity: null,
           remoteIndex: null,
+          category: null,
         };
       }),
       ...known.map((match): PlaceCandidate => ({
@@ -123,6 +165,7 @@ export class SearchPlacesUseCase {
         importance: match.importance,
         inCity: match.inCity,
         remoteIndex: null,
+        category: match.category,
       })),
     ];
   }
