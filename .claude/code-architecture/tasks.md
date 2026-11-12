@@ -59,15 +59,24 @@ Só o orquestrador, em sequência.
 
 | ID | Tarefa | Depende de | Pronto quando |
 | --- | --- | --- | --- |
-| O-01 | Esqueleto da fase 1: monorepo, Compose, Nest, Next, CI | - | `/health` responde, mapa vazio abre, CI verde |
-| O-02 | `shared/infrastructure` do backend: DataSource, cliente Redis, http client com timeout e retry, `DomainError` e `SourceUnavailableError` | O-01 | Usado pelo health, com testes |
-| O-03 | Cliente da Olho Vivo em `shared/infrastructure/olho-vivo`: login por token, sessão em cookie, re-login automático | O-02 | Teste com fixture de login e de sessão expirada |
-| O-04 | Contratos v1 em `packages/types` (Zod): Stop, Route, LineShape, Arrival, VehiclePosition, VehicleSnapshot, eventos do WebSocket | O-01 | Importável na api e no web, typecheck passa |
-| O-05 | Fixtures compartilhadas: recorte pequeno do GTFS da SPTrans e respostas gravadas da Olho Vivo em `test/fixtures` | O-03 | Fixtures versionadas e citadas nos contratos |
-| O-06 | Esqueleto dos módulos registrados no `app.module.ts` (transit, sources, realtime) e das features no web, vazios | O-01 | App sobe com os módulos vazios |
-| O-07 | `shared/lib/realtime-client.ts` no web (Socket.IO) e `shared/lib/api-client.ts` | O-04 | Teste com servidor de socket falso |
+| O-01 ✅ | Esqueleto da fase 1: monorepo, Compose, Nest, Next, CI | - | `/health` responde, mapa vazio abre, CI verde |
+| O-02 ✅ | `shared/infrastructure` do backend: DataSource, cliente Redis, http client com timeout e retry, `DomainError` e `SourceUnavailableError` | O-01 | Usado pelo health, com testes |
+| O-03 ✅ | Cliente da Olho Vivo em `shared/infrastructure/olho-vivo`: login por token, sessão em cookie, re-login automático | O-02 | Teste com fixture de login e de sessão expirada |
+| O-04 ✅ | Contratos v1 em `packages/types` (Zod): Stop, Route, LineShape, Arrival, VehiclePosition, VehicleSnapshot, eventos do WebSocket | O-01 | Importável na api e no web, typecheck passa |
+| O-05 ✅ | Fixtures compartilhadas: recorte pequeno do GTFS da SPTrans e respostas gravadas da Olho Vivo em `test/fixtures` | O-03 | Fixtures versionadas e citadas nos contratos |
+| O-06 ✅ | Esqueleto dos módulos registrados no `app.module.ts` (transit, sources, realtime) e das features no web, vazios | O-01 | App sobe com os módulos vazios |
+| O-07 ✅ | `shared/lib/realtime-client.ts` no web (Socket.IO) e `shared/lib/api-client.ts` | O-04 | Teste com servidor de socket falso |
 
 **Portão 0:** contratos v1 e fixtures na `main`, CI verde.
+
+**Registro da Onda 0 (2026-11-12):** O-01 a O-07 integradas na `main`; lint, typecheck, testes (api 49, web 23) e build passando localmente. Pendente para fechar o portão: CI verde no GitHub (push) e subir a api com Postgres e Redis.
+
+Decisões tomadas na Onda 0, fora dos documentos:
+- `packages/types` compila para `dist/` (ESM com `.d.ts`); a api (CommonJS) carrega via `require(esm)` do Node; a turbo roda `^build` antes de `dev`, `lint`, `typecheck` e `test`; o Jest da api mapeia `@baldeacao/types` para o código-fonte.
+- Contratos: coordenadas em `{lat, lon}` (`toLonLat` para o MapLibre), datas ISO com fuso, ids sempre string, sentido 0/1 do GTFS; canal por linha usa o `route_id`; cada ciclo envia a foto completa do canal; dado atrasado a partir de 90 s (3 ciclos).
+- http client: 4xx volta como resposta, sem retry; 5xx, rede e timeout repetem com backoff exponencial e, esgotados, viram `SourceUnavailableError`; timeout por tentativa.
+- Olho Vivo: login lazy, só o cookie `apiCredentials`, um re-login por 401, login concorrente deduplicado; `OLHOVIVO_USER_AGENT` com default `baldeacao/0.1`.
+- Fixtures do GTFS são sintéticas no formato da SPTrans (o GTFS real exige login no portal); `stop_id` igual ao `cp` da Olho Vivo; `sl` 1 vira `direction_id` 0 e `sl` 2 vira 1.
 
 ## Onda 1 - Dados e tempo real
 
