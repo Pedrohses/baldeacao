@@ -31,7 +31,7 @@ describe('tripPlannerService.plan', () => {
     expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({
       status: 503,
-      message: 'O planejador está com problemas. Tente de novo em instantes.',
+      message: 'O servidor está com problemas. Tente de novo em instantes.',
     });
   });
 

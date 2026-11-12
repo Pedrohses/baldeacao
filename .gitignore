@@ -16,3 +16,7 @@ next-env.d.ts
 
 # worktrees dos agentes
 .claude/worktrees/
+
+# dados e grafo do OpenTripPlanner (gerados por pnpm otp:prepare)
+infra/otp/cache/
+infra/otp/data/

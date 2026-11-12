@@ -1,0 +1,9 @@
+{
+  "routingDefaults": {
+    "numItineraries": 3,
+    "walkSpeed": 1.3
+  },
+  "server": {
+    "apiProcessingTimeout": "10s"
+  }
+}

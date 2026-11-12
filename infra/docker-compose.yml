@@ -30,6 +30,24 @@ services:
       timeout: 3s
       retries: 10
 
+  otp:
+    image: opentripplanner/opentripplanner:2.10.0
+    # Precisa do grafo gerado antes: pnpm otp:prepare
+    command: ['--load', '--serve']
+    environment:
+      JAVA_TOOL_OPTIONS: '-Xmx${OTP_HEAP:-4g}'
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./otp/data:/var/opentripplanner
+    profiles: ['otp']
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -fs http://localhost:8080/otp/ >/dev/null || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
 volumes:
   postgres-data:
   redis-data:

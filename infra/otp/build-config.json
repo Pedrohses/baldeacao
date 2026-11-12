@@ -1,0 +1,8 @@
+{
+  "transitServiceStart": "-P7D",
+  "transitServiceEnd": "P1Y",
+  "transitFeeds": [
+    { "type": "gtfs", "feedId": "sptrans", "source": "sptrans.gtfs.zip" }
+  ],
+  "osm": [{ "source": "sao-paulo.osm.pbf", "timeZone": "America/Sao_Paulo" }]
+}
