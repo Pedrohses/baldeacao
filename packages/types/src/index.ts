@@ -1,2 +1,4 @@
-// Contratos compartilhados entre apps/api e apps/web entram aqui a partir da fase 2.
-export {};
+// Contratos v1 compartilhados entre apps/api e apps/web.
+export * from './common.js';
+export * from './transit.js';
+export * from './realtime.js';
