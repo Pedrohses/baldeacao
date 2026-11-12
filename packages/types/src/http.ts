@@ -105,6 +105,8 @@ export type ReversePlaceResponse = z.infer<typeof ReversePlaceResponseSchema>;
 export const PlanTripNoticeSchema = z.enum([
   'origin_outside_service_area', // nenhuma parada a até 1 km da origem
   'destination_outside_service_area', // nenhuma parada a até 1 km do destino
+  'date_outside_service', // data fora da validade do GTFS carregado
+  'time_in_past_moved', // horário pedido já passou; a busca foi para o dia seguinte
 ]);
 export type PlanTripNotice = z.infer<typeof PlanTripNoticeSchema>;
 

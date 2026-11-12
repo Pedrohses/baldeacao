@@ -4,7 +4,8 @@ import { z } from 'zod';
 import { CoordinatesSchema, EntityIdSchema, IsoDateTimeSchema } from './common.js';
 import { RouteTypeSchema } from './transit.js';
 
-export const PlaceKindSchema = z.enum(['address', 'poi', 'stop', 'coordinates']);
+// stop = parada de ônibus; station = estação de metrô ou trem.
+export const PlaceKindSchema = z.enum(['address', 'poi', 'stop', 'station', 'coordinates']);
 export type PlaceKind = z.infer<typeof PlaceKindSchema>;
 
 /** Lugar devolvido pela busca (Nominatim) ou escolhido no mapa. */
