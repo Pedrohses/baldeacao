@@ -24,9 +24,6 @@ import {
 } from '../../domain/ports/positions-cycle-notifier.port';
 import { DEFAULT_REALTIME_SOURCE_ID } from '../../domain/realtime-source';
 
-// Origem do app web em desenvolvimento local. Vai para src/config quando houver WEB_ORIGIN.
-export const WEB_ORIGIN = 'http://localhost:3000';
-
 /** Resposta opcional (ack) de positions:subscribe e positions:unsubscribe. */
 export type SubscriptionAck =
   { ok: true; channel: PositionsChannel } | { ok: false; error: ApiErrorBody };
@@ -38,7 +35,8 @@ type PositionsSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
  * Canais são salas do Socket.IO. A cada ciclo do worker (pub/sub positions:{source}) publica
  * positions:update com a foto completa de cada canal que tem alguém ouvindo.
  */
-@WebSocketGateway({ cors: { origin: WEB_ORIGIN } })
+// CORS vem do CorsIoAdapter (WEB_ORIGIN), ligado em shared/presentation/configure-app.ts.
+@WebSocketGateway()
 export class PositionsGateway implements OnGatewayInit, OnModuleDestroy {
   private readonly logger = new Logger(PositionsGateway.name);
   private unsubscribeCycles: (() => Promise<void>) | undefined;

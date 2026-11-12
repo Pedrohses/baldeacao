@@ -26,4 +26,8 @@ export class AppConfig {
   get olhoVivoUserAgent(): string {
     return this.env.OLHOVIVO_USER_AGENT;
   }
+
+  get webOrigin(): string {
+    return this.env.WEB_ORIGIN;
+  }
 }

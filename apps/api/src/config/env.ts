@@ -12,6 +12,7 @@ const optionalUrl = z.preprocess((value) => (value === '' ? undefined : value), 
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3001),
+  WEB_ORIGIN: z.url().default('http://localhost:3000'),
   DATABASE_URL: z.url(),
   REDIS_URL: z.url(),
   OLHOVIVO_TOKEN: optionalString,

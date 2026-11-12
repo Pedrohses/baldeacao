@@ -16,7 +16,10 @@ import { BuildChannelUpdatesUseCase } from '../../application/use-cases/build-ch
 import { PositionsCycleNotifierPort } from '../../domain/ports/positions-cycle-notifier.port';
 import { VehiclePositionsStorePort } from '../../domain/ports/vehicle-positions-store.port';
 import { mapOlhoVivoPositions } from '../../infrastructure/adapters/olho-vivo-position.mapper';
-import { PositionsGateway, WEB_ORIGIN, type SubscriptionAck } from './positions.gateway';
+import { configureApp } from '../../../../shared/presentation/configure-app';
+import { PositionsGateway, type SubscriptionAck } from './positions.gateway';
+
+const WEB_ORIGIN = 'http://localhost:3000';
 
 const FIRST = '2026-11-12T15:34:30.000Z';
 const SECOND = '2026-11-12T15:35:00.000Z';
@@ -40,6 +43,7 @@ describe('PositionsGateway (Socket.IO)', () => {
       ],
     }).compile();
     app = moduleRef.createNestApplication({ logger: false });
+    configureApp(app, WEB_ORIGIN);
     await app.listen(0, '127.0.0.1');
     url = await app.getUrl();
   });
