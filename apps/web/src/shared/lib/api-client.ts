@@ -1,3 +1,4 @@
+import { ApiErrorBodySchema } from '@baldeacao/types';
 import type { z } from 'zod';
 
 import { env } from '@/shared/config/env';
@@ -24,6 +25,58 @@ function messageForStatus(status: number): string {
   if (status === 429) return 'Muitas requisições. Tente de novo em instantes.';
   if (status >= 500) return 'O servidor está com problemas. Tente de novo em instantes.';
   return 'Não foi possível concluir a requisição.';
+}
+
+const PORTUGUESE_CHARS = /[ãõçáéíóúâêôà]/i;
+const PORTUGUESE_WORDS = new Set([
+  'não',
+  'nao',
+  'de',
+  'do',
+  'da',
+  'para',
+  'com',
+  'sem',
+  'uma',
+  'um',
+  'em',
+  'no',
+  'na',
+  'ou',
+  'e',
+]);
+const ENGLISH_WORDS = new Set([
+  'the',
+  'must',
+  'should',
+  'is',
+  'not',
+  'be',
+  'of',
+  'to',
+  'found',
+  'invalid',
+  'request',
+  'error',
+  'internal',
+  'server',
+]);
+
+/** Heurística: a mensagem da api serve para a tela só se vier em português. */
+export function isPortugueseMessage(message: string): boolean {
+  const words = message
+    .toLocaleLowerCase('pt-BR')
+    .split(/[^\p{L}]+/u)
+    .filter(Boolean);
+  if (words.some((word) => ENGLISH_WORDS.has(word))) return false;
+  return PORTUGUESE_CHARS.test(message) || words.some((word) => PORTUGUESE_WORDS.has(word));
+}
+
+/** Mensagem do corpo `{ code, message }` quando em português; senão a genérica do status. */
+function errorMessage(status: number, payload: unknown): string {
+  const body = ApiErrorBodySchema.safeParse(payload);
+  if (body.success && isPortugueseMessage(body.data.message)) return body.data.message;
+  return messageForStatus(status);
 }
 
 export interface ApiClientOptions {
@@ -69,7 +122,7 @@ export function createApiClient({ baseUrl, fetchFn }: ApiClientOptions): ApiClie
 
     if (!response.ok) {
       const payload: unknown = await response.json().catch(() => undefined);
-      throw new ApiError(response.status, messageForStatus(response.status), payload);
+      throw new ApiError(response.status, errorMessage(response.status, payload), payload);
     }
 
     const body: unknown = await response.json().catch(() => undefined);

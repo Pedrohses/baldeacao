@@ -18,6 +18,9 @@ const TYPE_LABELS: Record<Route['type'], string> = {
   ferry: 'Balsa',
 };
 
+// Limite padrão da busca de linhas na api (GET /lines).
+export const LINE_SEARCH_LIMIT = 20;
+
 export interface LineSearchProps {
   /** Link de cada resultado (a página decide a rota). */
   hrefFor: (line: Route) => string;
@@ -60,13 +63,17 @@ export function LineSearch({ hrefFor, autoFocus = false }: LineSearchProps) {
       );
       break;
     case 'success':
-      message = (
-        <span className="sr-only">
-          {search.lines.length === 1
-            ? '1 linha encontrada.'
-            : `${search.lines.length} linhas encontradas.`}
-        </span>
-      );
+      // A api devolve no máximo LINE_SEARCH_LIMIT linhas: chegar nele quer dizer que há mais.
+      message =
+        search.lines.length >= LINE_SEARCH_LIMIT ? (
+          `Mais de ${LINE_SEARCH_LIMIT} linhas; refine a busca.`
+        ) : (
+          <span className="sr-only">
+            {search.lines.length === 1
+              ? '1 linha encontrada.'
+              : `${search.lines.length} linhas encontradas.`}
+          </span>
+        );
       break;
   }
 
