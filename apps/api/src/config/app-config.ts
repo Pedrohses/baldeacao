@@ -18,4 +18,12 @@ export class AppConfig {
   get redisUrl(): string {
     return this.env.REDIS_URL;
   }
+
+  get olhoVivoToken(): string | undefined {
+    return this.env.OLHOVIVO_TOKEN;
+  }
+
+  get olhoVivoUserAgent(): string {
+    return this.env.OLHOVIVO_USER_AGENT;
+  }
 }

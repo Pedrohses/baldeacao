@@ -1,18 +1,17 @@
 import { Module } from '@nestjs/common';
-import { loadEnv } from '../../../config';
+import { AppConfig } from '../../../config/app-config';
 import { OlhoVivoClient } from './olho-vivo.client';
 
 @Module({
   providers: [
     {
       provide: OlhoVivoClient,
-      useFactory: () => {
-        const env = loadEnv();
-        return new OlhoVivoClient({
-          token: env.OLHOVIVO_TOKEN,
-          userAgent: env.OLHOVIVO_USER_AGENT,
-        });
-      },
+      inject: [AppConfig],
+      useFactory: (config: AppConfig) =>
+        new OlhoVivoClient({
+          token: config.olhoVivoToken,
+          userAgent: config.olhoVivoUserAgent,
+        }),
     },
   ],
   exports: [OlhoVivoClient],
