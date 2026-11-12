@@ -42,6 +42,28 @@ describe('NominatimGeocoderAdapter', () => {
     expect(headers.get('User-Agent')).toBe('baldeacao/test');
   });
 
+  it('reverse chama /reverse com zoom 18 e mapeia o objeto; "Unable to geocode" vira null', async () => {
+    const fetchFn = fakeNominatimFetch(readNominatimFixture('reverse-paulista.json'));
+    const place = await adapterWith(fetchFn).reverse({ lat: -23.5633, lon: -46.6544 });
+    expect(place).toMatchObject({
+      id: 'osm:way:4335741',
+      name: 'Avenida Paulista',
+      kind: 'address',
+    });
+    const [{ url }] = fetchFn.calls as [(typeof fetchFn.calls)[number]];
+    expect(url.pathname).toBe('/reverse');
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      lat: '-23.5633',
+      lon: '-46.6544',
+      format: 'jsonv2',
+      zoom: '18',
+      addressdetails: '1',
+      'accept-language': 'pt-BR',
+    });
+    const none = adapterWith(fakeNominatimFetch(readNominatimFixture('reverse-unable.json')));
+    expect(await none.reverse({ lat: -10, lon: -40 })).toBeNull();
+  });
+
   it('corta no limite pedido', async () => {
     const places = await adapterWith(fakeNominatimFetch(MORUMBIS)).search('morumbis', 2);
     expect(places.map((p) => p.id)).toEqual(['osm:way:23935207', 'osm:node:4517265781']);

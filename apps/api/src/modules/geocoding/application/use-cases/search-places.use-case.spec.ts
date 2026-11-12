@@ -46,6 +46,9 @@ class FakeGeocoder extends Geocoder {
       ? Promise.reject(this.result)
       : Promise.resolve(this.result);
   }
+  reverse(): Promise<Place | null> {
+    return Promise.resolve(null);
+  }
 }
 
 describe('SearchPlacesUseCase', () => {

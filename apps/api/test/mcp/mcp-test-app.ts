@@ -77,6 +77,10 @@ export class InMemoryGeocoder extends Geocoder {
     }
     return Promise.resolve([]);
   }
+
+  reverse(): Promise<Place | null> {
+    return Promise.resolve(null);
+  }
 }
 
 /** Planejador falso com resultado trocável e registro das consultas. */

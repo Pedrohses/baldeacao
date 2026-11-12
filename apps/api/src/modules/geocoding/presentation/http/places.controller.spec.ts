@@ -1,6 +1,11 @@
 import type { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { API_PATHS, ApiErrorBodySchema, SearchPlacesResponseSchema } from '@baldeacao/types';
+import {
+  API_PATHS,
+  ApiErrorBodySchema,
+  ReversePlaceResponseSchema,
+  SearchPlacesResponseSchema,
+} from '@baldeacao/types';
 import request from 'supertest';
 import type { App } from 'supertest/types';
 import {
@@ -10,8 +15,10 @@ import {
   readNominatimFixture,
 } from '../../../../../test/support/geocoding-in-memory';
 import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
+import { FindNearbyStopsUseCase } from '../../../transit/application/use-cases/find-nearby-stops.use-case';
 import { SearchStopsByNameUseCase } from '../../../transit/application/use-cases/search-stops-by-name.use-case';
 import { StopRepository } from '../../../transit/domain/ports/stop-repository.port';
+import { ReversePlaceUseCase } from '../../application/use-cases/reverse-place.use-case';
 import { SearchPlacesUseCase } from '../../application/use-cases/search-places.use-case';
 import { GeocodeCache } from '../../domain/ports/geocode-cache.port';
 import { Geocoder } from '../../domain/ports/geocoder.port';
@@ -21,6 +28,8 @@ import { NominatimGeocoderAdapter } from '../../infrastructure/adapters/nominati
 import { PlacesController } from './places.controller';
 
 const MORUMBIS = readNominatimFixture('search-morumbis.json');
+const REVERSE_PAULISTA = readNominatimFixture('reverse-paulista.json');
+const REVERSE_UNABLE = readNominatimFixture('reverse-unable.json');
 
 describe('HTTP do geocoding (contrato v2)', () => {
   let app: INestApplication<App>;
@@ -32,12 +41,21 @@ describe('HTTP do geocoding (contrato v2)', () => {
     const fetchWithFailure: typeof fetch = (input, init) => {
       const url = input instanceof Request ? input.url : input.toString();
       if (url.includes('q=falha')) return Promise.resolve(new Response('erro', { status: 503 }));
+      if (url.includes('/reverse?')) {
+        const body = url.includes('lat=-23.5633') ? REVERSE_PAULISTA : REVERSE_UNABLE;
+        return fakeNominatimFetch(body)(input, init).then((res) => {
+          fetchFn.calls.push({ url: new URL(url), headers: new Headers(), atMs: Date.now() });
+          return res;
+        });
+      }
       return fetchFn(input, init);
     };
     const moduleRef = await Test.createTestingModule({
       controllers: [PlacesController],
       providers: [
         SearchPlacesUseCase,
+        ReversePlaceUseCase,
+        FindNearbyStopsUseCase,
         SearchStopsByNameUseCase,
         { provide: StopRepository, useValue: new InMemoryStopRepository() },
         {
@@ -98,6 +116,52 @@ describe('HTTP do geocoding (contrato v2)', () => {
     expect(ApiErrorBodySchema.parse(res.body)).toEqual({
       code: 'SOURCE_UNAVAILABLE',
       message: expect.stringContaining('nominatim') as string,
+    });
+  });
+
+  describe('GET /places/reverse', () => {
+    it('parada local a até 60 m responde sem chamar o Nominatim', async () => {
+      const before = fetchFn.calls.length;
+      const res = await request(app.getHttpServer())
+        .get(API_PATHS.reversePlace)
+        .query({ lat: -23.5616, lon: -46.6559 })
+        .expect(200);
+      expect(ReversePlaceResponseSchema.parse(res.body).place).toMatchObject({
+        id: 'stop:4301848',
+        kind: 'stop',
+      });
+      expect(fetchFn.calls.length).toBe(before);
+    });
+
+    it('longe de lugar local usa o Nominatim e o cache na repetição', async () => {
+      const before = fetchFn.calls.length;
+      for (const lon of [-46.65441, -46.654412]) {
+        const res = await request(app.getHttpServer())
+          .get(API_PATHS.reversePlace)
+          .query({ lat: -23.56329, lon })
+          .expect(200);
+        expect(ReversePlaceResponseSchema.parse(res.body).place).toEqual({
+          id: 'osm:way:4335741',
+          name: 'Avenida Paulista',
+          address: 'Avenida Paulista, Bela Vista, São Paulo',
+          kind: 'address',
+          location: { lat: -23.5632871, lon: -46.654413 },
+        });
+      }
+      expect(fetchFn.calls.length).toBe(before + 1);
+    });
+
+    it('sem lugar devolve { place: null }; coordenada inválida vira 400', async () => {
+      const res = await request(app.getHttpServer())
+        .get(API_PATHS.reversePlace)
+        .query({ lat: -10, lon: -40 })
+        .expect(200);
+      expect(res.body).toEqual({ place: null });
+      const bad = await request(app.getHttpServer())
+        .get(API_PATHS.reversePlace)
+        .query({ lat: 100, lon: 0 })
+        .expect(400);
+      expect(ApiErrorBodySchema.parse(bad.body).code).toBe('INVALID_QUERY');
     });
   });
 });
