@@ -35,6 +35,11 @@ function planTrip(
   );
 }
 
+/** Consultas principais (sem a de alternativa, que exclui o modo dominante). */
+function mainQueries(planner: InMemoryTripPlanner) {
+  return planner.queries.filter((q) => !q.excludeModes);
+}
+
 /** Mesmo itinerário saindo `minutes` depois. */
 function shifted(it: Itinerary, minutes: number): Itinerary {
   const move = (iso: string) => new Date(Date.parse(iso) + minutes * 60_000).toISOString();
@@ -61,7 +66,7 @@ describe('PlanTripUseCase', () => {
     const planner = new InMemoryTripPlanner([ITINERARY]);
     const result = await planTrip(planner).execute({ from: FROM, to: TO });
     expect(result).toEqual({ itineraries: [ITINERARY], notices: [] });
-    expect(planner.queries).toEqual([
+    expect(mainQueries(planner)).toEqual([
       { from: FROM, to: TO, time: null, maxItineraries: 3, candidates: 12 },
     ]);
   });
@@ -80,7 +85,7 @@ describe('PlanTripUseCase', () => {
     await useCase.execute({ from: FROM, to: TO, maxItineraries: 0 });
 
     expect(out.itineraries).toHaveLength(2);
-    expect(planner.queries.map((q) => [q.time, q.maxItineraries, q.candidates])).toEqual([
+    expect(mainQueries(planner).map((q) => [q.time, q.maxItineraries, q.candidates])).toEqual([
       [{ departAt }, 2, 12],
       [{ arriveBy: '2026-11-12T12:00:00Z' }, 5, 20],
       [null, 1, 12],
@@ -96,7 +101,7 @@ describe('PlanTripUseCase', () => {
     await expect(
       planTrip(planner).execute({ from: FROM, to: TO, ...times }),
     ).rejects.toBeInstanceOf(InvalidTripRequestError);
-    expect(planner.queries).toHaveLength(0);
+    expect(mainQueries(planner)).toHaveLength(0);
   });
 
   it('recusa coordenada fora do intervalo', async () => {
@@ -154,7 +159,7 @@ describe('PlanTripUseCase', () => {
       'origin_outside_service_area',
       'destination_outside_service_area',
     ]);
-    expect(planner.queries).toHaveLength(2);
+    expect(mainQueries(planner)).toHaveLength(2);
   });
 
   describe('avisos de data e hora', () => {
@@ -168,11 +173,11 @@ describe('PlanTripUseCase', () => {
         departAt: '2026-11-12T08:00:00-03:00',
       });
       expect(out.notices).toEqual(['time_in_past_moved']);
-      expect(planner.queries[0]?.time).toEqual({ departAt: '2026-11-13T08:00:00-03:00' });
+      expect(mainQueries(planner)[0]?.time).toEqual({ departAt: '2026-11-13T08:00:00-03:00' });
 
       // Dois dias atrás vai para amanhã, não para ontem; chegada também.
       await useCase.execute({ from: FROM, to: TO, arriveBy: '2026-11-10T09:30:00-03:00' });
-      expect(planner.queries[1]?.time).toEqual({ arriveBy: '2026-11-13T09:30:00-03:00' });
+      expect(mainQueries(planner)[1]?.time).toEqual({ arriveBy: '2026-11-13T09:30:00-03:00' });
     });
 
     it('até 5 minutos no passado não move', async () => {
@@ -184,7 +189,7 @@ describe('PlanTripUseCase', () => {
         departAt: '2026-11-12T08:00:00-03:00',
       });
       expect(out.notices).toEqual([]);
-      expect(planner.queries[0]?.time).toEqual({ departAt: '2026-11-12T08:00:00-03:00' });
+      expect(mainQueries(planner)[0]?.time).toEqual({ departAt: '2026-11-12T08:00:00-03:00' });
     });
 
     it('data fora da validade do GTFS avisa date_outside_service (também para agora)', async () => {
@@ -208,6 +213,53 @@ describe('PlanTripUseCase', () => {
       ]);
       const noFeed = planTrip(planner, undefined, undefined, new InMemoryServiceCalendar(null));
       expect((await noFeed.execute({ from: FROM, to: TO })).notices).toEqual([]);
+    });
+  });
+
+  describe('alternativa quando só há uma opção', () => {
+    const subwayOnly: Itinerary = ITINERARY;
+    const busOnly = (minutes: number, routeId = '6262-10'): Itinerary => ({
+      ...shifted(ITINERARY, 0),
+      durationS: minutes * 60,
+      legs: ITINERARY.legs.map((leg) =>
+        leg.mode === 'subway' ? { ...leg, mode: 'bus', routeId } : leg,
+      ),
+    });
+
+    class TwoAnswerPlanner extends InMemoryTripPlanner {
+      constructor(private readonly alternative: Itinerary[] | Error) {
+        super([subwayOnly]);
+      }
+      override plan(query: Parameters<InMemoryTripPlanner['plan']>[0]) {
+        if (!query.excludeModes) return super.plan(query);
+        this.queries.push(query);
+        return this.alternative instanceof Error
+          ? Promise.reject(this.alternative)
+          : Promise.resolve(this.alternative);
+      }
+    }
+
+    it('consulta sem o modo dominante e acrescenta a melhor se durar até 1,5x', async () => {
+      const ok = busOnly(Math.round((subwayOnly.durationS * 1.4) / 60));
+      const planner = new TwoAnswerPlanner([busOnly(999, '775F-10'), ok]);
+      const out = await planTrip(planner).execute({ from: FROM, to: TO });
+      expect(out.itineraries).toEqual([subwayOnly, ok]);
+      // No exemplo o metrô tem mais tempo de veículo (30 min contra 18 de ônibus).
+      expect(planner.queries[1]?.excludeModes).toEqual(['subway', 'rail']);
+    });
+
+    it('alternativa longa demais, falha da segunda consulta ou 1 opção pedida: só a primeira', async () => {
+      const long = new TwoAnswerPlanner([busOnly(Math.ceil((subwayOnly.durationS * 2) / 60))]);
+      expect((await planTrip(long).execute({ from: FROM, to: TO })).itineraries).toEqual([
+        subwayOnly,
+      ]);
+      const failing = new TwoAnswerPlanner(new SourceUnavailableError('otp'));
+      expect((await planTrip(failing).execute({ from: FROM, to: TO })).itineraries).toEqual([
+        subwayOnly,
+      ]);
+      const single = new TwoAnswerPlanner([busOnly(1)]);
+      await planTrip(single).execute({ from: FROM, to: TO, maxItineraries: 1 });
+      expect(single.queries).toHaveLength(1);
     });
   });
 });

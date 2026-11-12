@@ -1,17 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { GetServicePeriodUseCase } from '../../../transit/application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
-import type { Coordinates } from '../../domain/entities/itinerary.entity';
+import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
+import type { Coordinates, Itinerary } from '../../domain/entities/itinerary.entity';
 import { InvalidTripRequestError } from '../../domain/errors/invalid-trip-request.error';
 import { Clock } from '../../domain/ports/clock.port';
 import { TripPlanner } from '../../domain/ports/trip-planner.port';
-import { groupItineraries } from '../../domain/value-objects/itinerary-grouping';
+import {
+  dominantModeFamily,
+  groupItineraries,
+  pickAlternative,
+} from '../../domain/value-objects/itinerary-grouping';
 import {
   type PlanTripNotice,
   SERVICE_AREA_RADIUS_M,
 } from '../../domain/value-objects/plan-trip-notice';
 import { movePastTimeForward, serviceDateOf } from '../../domain/value-objects/trip-date';
-import type { TripTime } from '../../domain/value-objects/trip-plan-query';
+import type { TripPlanQuery, TripTime } from '../../domain/value-objects/trip-plan-query';
 import type { PlanTripInput, PlanTripOutput } from '../dto/plan-trip.dto';
 
 export const PLAN_TRIP_DEFAULT_ITINERARIES = 3;
@@ -92,14 +97,35 @@ export class PlanTripUseCase {
       this.serviceDateNotices(serviceDateOf(requestedIso, now)),
     ]);
     const notices = [...timeNotices, ...dateNotices, ...areaNotices];
-    const itineraries = await this.planner.plan({
+    const query = {
       from: input.from,
       to: input.to,
       time,
       maxItineraries,
       candidates: planTripCandidates(maxItineraries),
-    });
-    return { itineraries: groupItineraries(itineraries, maxItineraries), notices };
+    };
+    const grouped = groupItineraries(await this.planner.plan(query), maxItineraries);
+    return { itineraries: await this.withAlternative(grouped, query), notices };
+  }
+
+  /**
+   * Só uma opção (ex.: metrô direto): consulta de novo sem o modo dominante e acrescenta a
+   * melhor alternativa se durar até 1,5x. Falha nessa segunda consulta não derruba a primeira.
+   */
+  private async withAlternative(grouped: Itinerary[], query: TripPlanQuery): Promise<Itinerary[]> {
+    const [best] = grouped;
+    if (grouped.length !== 1 || !best || query.maxItineraries < 2) return grouped;
+    const excludeModes = dominantModeFamily(best);
+    if (!excludeModes) return grouped;
+    let others: Itinerary[];
+    try {
+      others = await this.planner.plan({ ...query, excludeModes });
+    } catch (error) {
+      if (error instanceof SourceUnavailableError) return grouped;
+      throw error;
+    }
+    const alternative = pickAlternative(best, others);
+    return alternative ? [best, alternative] : grouped;
   }
 
   /** Data fora da validade do GTFS: o OTP não acha viagens nela (ou acha só caminhada). */

@@ -23,9 +23,19 @@ export interface OtpPlanVariables {
   };
   dateTime?: { earliestDeparture: string } | { latestArrival: string };
   first: number;
+  /** Janela de saídas (Duration do OTP em ISO 8601, ex.: "PT45M"). */
+  searchWindow?: string;
+  /** Só estes modos de transporte (enum TransitMode do OTP). */
+  modes?: { transit: { transit: Array<{ mode: string }> } };
 }
 
-/** Cliente GraphQL do OpenTripPlanner (timeout e nova tentativa em falha de rede ou 5xx). */
+/** Planejamento pesado (cidade inteira, muitas baldeações) leva vários segundos no OTP. */
+export const OTP_TIMEOUT_MS = 30_000;
+
+/**
+ * Cliente GraphQL do OpenTripPlanner, uma tentativa por chamada (timeout de 30 s); a nova
+ * tentativa (mesma consulta em falha de rede/5xx, consulta menor em timeout) fica no adaptador.
+ */
 export class OtpClient {
   private readonly http: HttpClient | null;
 
@@ -34,12 +44,17 @@ export class OtpClient {
       ? new HttpClient({
           source: OTP_SOURCE,
           baseUrl: options.baseUrl,
-          timeoutMs: options.timeoutMs ?? 15_000,
-          retries: options.retries ?? 1,
+          timeoutMs: options.timeoutMs ?? OTP_TIMEOUT_MS,
+          retries: options.retries ?? 0,
           headers: { Accept: 'application/json' },
           fetch: options.fetch,
         })
       : null;
+  }
+
+  /** Sem OTP_URL não há o que tentar de novo. */
+  get isConfigured(): boolean {
+    return this.http !== null;
   }
 
   async planConnection(variables: OtpPlanVariables): Promise<OtpPlanConnectionResponse> {

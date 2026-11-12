@@ -54,7 +54,7 @@ describe('Tool MCP planejar_viagem', () => {
 
     expect(result.isError).toBeFalsy();
     expect(fakes.geocoder.queries).toEqual(['morumbis', 'terminal tietê']);
-    expect(fakes.planner.queries).toEqual([
+    expect(fakes.planner.queries.filter((q) => !q.excludeModes)).toEqual([
       {
         from: placeOriginExample.location,
         to: placeDestinationExample.location,
