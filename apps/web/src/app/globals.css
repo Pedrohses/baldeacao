@@ -1,6 +1,136 @@
 @import 'tailwindcss';
 
-html,
-body {
-  height: 100%;
+/* Tokens do sistema visual (redesign-ux.md). Claro por padrão, escuro por prefers-color-scheme. */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --surface-2: #ebeff1;
+  --border: #d3dadf;
+  --text: #101a20;
+  --muted: #4f5d67;
+  --brand: #0b4f5c;
+  --brand-fg: #ffffff;
+  --live: #0a7a3e;
+  --warn: #a85a00;
+  --danger: #b42318;
+  --focus: #0b4f5c;
+  --shadow-float-value: 0 -4px 24px rgb(16 26 32 / 0.12);
+  --float-border: transparent;
+  /* Barra inferior do celular: 64 px mais a área segura do aparelho. */
+  --nav-h: calc(64px + env(safe-area-inset-bottom));
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1418;
+    --surface: #162026;
+    --surface-2: #1f2b32;
+    --border: #2e3c44;
+    --text: #e6ecef;
+    --muted: #9cabb4;
+    --brand: #5cc3d2;
+    --brand-fg: #0e1418;
+    --live: #4ade80;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --focus: #5cc3d2;
+    --shadow-float-value: 0 -4px 24px rgb(0 0 0 / 0.5);
+    --float-border: #2e3c44;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-fg: var(--brand-fg);
+  --color-live: var(--live);
+  --color-warn: var(--warn);
+  --color-danger: var(--danger);
+  --color-focus: var(--focus);
+
+  --font-sans: var(--font-atkinson), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-atkinson-mono), ui-monospace, monospace;
+
+  /* Escala 12/14/16/20/28/40. */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.75rem;
+  --text-4xl: 2.5rem;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+
+  --shadow-float: var(--shadow-float-value);
+
+  --ease-app: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --default-transition-duration: 180ms;
+  --default-transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+  }
+
+  /* Foco visível único: anel de 3 px com afastamento de 2 px. */
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  button:not(:disabled),
+  [role='button'],
+  [role='option'] {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* Superfície sobre o mapa: só ela leva sombra (no escuro, borda de 1 px). */
+  .surface-float {
+    background-color: var(--surface);
+    box-shadow: var(--shadow-float-value);
+    border: 1px solid var(--float-border);
+  }
+}
+
+/* Cartão de ações sobre o mapa (Popup do MapLibre) com os tokens do app. */
+.baldeacao-popup .maplibregl-popup-content {
+  background-color: var(--surface);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 8px 16px 16px;
+  box-shadow: var(--shadow-float-value);
+}
+.baldeacao-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--surface);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
