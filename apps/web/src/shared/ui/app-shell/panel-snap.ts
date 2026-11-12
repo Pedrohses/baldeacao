@@ -1,5 +1,5 @@
-// Alturas do painel no celular. O vaul mede a partir do pé da janela, e a barra de abas
-// (64 px) fica por cima do painel: a altura baixa soma a barra para sobrar 152 px visíveis (alça de 44 px,
+// Alturas do painel no celular, medidas a partir do pé da janela. A barra de abas (64 px) fica
+// por cima do painel: a altura baixa soma a barra para sobrar 152 px visíveis (alça de 44 px,
 // "Para onde?" de 56 px e uma fileira de recentes).
 export type PanelSnap = 'low' | 'mid' | 'high';
 
@@ -8,17 +8,6 @@ export const PANEL_SNAPS: readonly PanelSnap[] = ['low', 'mid', 'high'];
 export const NAV_HEIGHT_PX = 64;
 export const LOW_SNAP_PX = 216;
 export const DESKTOP_PANEL_WIDTH_PX = 400;
-
-export const SNAP_POINTS: (string | number)[] = [`${LOW_SNAP_PX}px`, 0.5, 0.92];
-
-export function snapToPoint(snap: PanelSnap): string | number {
-  return SNAP_POINTS[PANEL_SNAPS.indexOf(snap)] ?? SNAP_POINTS[0]!;
-}
-
-export function pointToSnap(point: string | number | null): PanelSnap {
-  const index = SNAP_POINTS.indexOf(point ?? '');
-  return PANEL_SNAPS[index] ?? 'low';
-}
 
 /** A alça alterna baixa, média e alta, e da alta volta para a baixa. */
 export function nextSnap(snap: PanelSnap): PanelSnap {

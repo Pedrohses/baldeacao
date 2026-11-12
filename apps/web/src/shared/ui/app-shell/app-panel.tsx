@@ -1,18 +1,11 @@
 'use client';
 
-import { useId, useState, type ReactNode } from 'react';
-import { Drawer } from 'vaul';
+import { useId, useRef, useState, type PointerEvent, type ReactNode } from 'react';
 
 import { useIsDesktop } from '@/shared/hooks/use-media-query';
 
-import {
-  LOW_SNAP_PX,
-  type PanelSnap,
-  SNAP_POINTS,
-  nextSnap,
-  pointToSnap,
-  snapToPoint,
-} from './panel-snap';
+import { PANEL_SNAPS, type PanelSnap, nextSnap, snapHeightPx } from './panel-snap';
+import { useViewportHeight } from './use-viewport-height';
 
 export interface AppPanelProps {
   /** Título do painel (vira o h1 da tela). */
@@ -26,18 +19,31 @@ export interface AppPanelProps {
 }
 
 const SNAP_LABELS: Record<PanelSnap, string> = { low: 'baixa', mid: 'média', high: 'alta' };
+const HANDLE_PX = 44;
+// Abaixo disso o gesto na alça é toque (alterna a altura), não arraste.
+const DRAG_THRESHOLD_PX = 6;
 
-// Parte rolável do painel no celular: altura visível menos a barra de abas e a alça (44 px).
-// Sem esse limite o fim da lista ficaria fora da tela nas alturas baixa e média.
-const BODY_MAX_HEIGHT: Record<PanelSnap, string> = {
-  low: `calc(${LOW_SNAP_PX}px - var(--nav-h) - 44px)`,
-  mid: 'calc(50dvh - var(--nav-h) - 44px)',
-  high: 'calc(92dvh - var(--nav-h) - 44px)',
-};
+interface DragState {
+  pointerId: number;
+  startY: number;
+  startHeight: number;
+  height: number;
+  moved: boolean;
+}
+
+function nearestSnap(height: number, viewportHeight: number): PanelSnap {
+  let best: PanelSnap = 'low';
+  for (const snap of PANEL_SNAPS) {
+    const distance = Math.abs(snapHeightPx(snap, viewportHeight) - height);
+    if (distance < Math.abs(snapHeightPx(best, viewportHeight) - height)) best = snap;
+  }
+  return best;
+}
 
 /**
- * Painel de conteúdo da tela: bottom sheet arrastável (vaul) no celular e painel lateral fixo de
- * 400 px no desktop. O mapa continua utilizável atrás dele.
+ * Painel de conteúdo da tela: bottom sheet arrastável no celular (alturas baixa, média e alta;
+ * a alça é um botão que alterna as alturas) e painel lateral fixo de 400 px no desktop. Não é
+ * diálogo: o mapa e as abas continuam acessíveis e o foco nunca fica preso nele.
  */
 export function AppPanel({
   title,
@@ -47,16 +53,17 @@ export function AppPanel({
   children,
 }: AppPanelProps) {
   const isDesktop = useIsDesktop();
+  const viewportHeight = useViewportHeight();
   const titleId = useId();
   const [ownSnap, setOwnSnap] = useState<PanelSnap>('low');
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const suppressClickRef = useRef(false);
   const snap = snapProp ?? ownSnap;
 
   function setSnap(next: PanelSnap) {
     setOwnSnap(next);
     onSnapChange?.(next);
   }
-
-  const titleClass = titleHidden ? 'sr-only' : 'px-4 pb-2 text-xl font-bold';
 
   if (isDesktop) {
     return (
@@ -74,50 +81,85 @@ export function AppPanel({
     );
   }
 
+  const maxHeight = snapHeightPx('high', viewportHeight);
+  const minHeight = snapHeightPx('low', viewportHeight);
+  const height = drag ? drag.height : snapHeightPx(snap, viewportHeight);
   const next = nextSnap(snap);
 
+  function onPointerDown(event: PointerEvent<HTMLElement>) {
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    setDrag({
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startHeight: height,
+      height,
+      moved: false,
+    });
+  }
+
+  function onPointerMove(event: PointerEvent<HTMLElement>) {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const delta = drag.startY - event.clientY;
+    const moved = drag.moved || Math.abs(delta) > DRAG_THRESHOLD_PX;
+    const nextHeight = Math.min(maxHeight, Math.max(minHeight, drag.startHeight + delta));
+    setDrag({ ...drag, moved, height: moved ? nextHeight : drag.startHeight });
+  }
+
+  function onPointerEnd(event: PointerEvent<HTMLElement>) {
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    if (drag.moved) {
+      suppressClickRef.current = true;
+      setSnap(nearestSnap(drag.height, viewportHeight));
+    }
+    setDrag(null);
+  }
+
+  const handlers = {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp: onPointerEnd,
+    onPointerCancel: onPointerEnd,
+  };
+
   return (
-    <Drawer.Root
-      open
-      modal={false}
-      dismissible={false}
-      noBodyStyles
-      repositionInputs={false}
-      snapPoints={SNAP_POINTS}
-      activeSnapPoint={snapToPoint(snap)}
-      setActiveSnapPoint={(point) => setSnap(pointToSnap(point))}
+    <section
+      aria-labelledby={titleId}
+      className="surface-float fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-lg text-text"
+      style={{
+        height: maxHeight,
+        transform: `translateY(${maxHeight - height}px)`,
+        transition: drag ? 'none' : 'transform 180ms var(--ease-app)',
+      }}
+      data-snap={snap}
     >
-      <Drawer.Portal>
-        <Drawer.Content
-          aria-labelledby={titleId}
-          aria-describedby={undefined}
-          // O painel é parte da tela, não um diálogo: não rouba o foco ao abrir.
-          onOpenAutoFocus={(event) => event.preventDefault()}
-          className="surface-float fixed inset-x-0 bottom-0 z-30 flex h-dvh flex-col rounded-t-lg text-text outline-none"
-        >
-          <button
-            type="button"
-            onClick={() => setSnap(next)}
-            aria-label={`Altura do painel: ${SNAP_LABELS[snap]}. Mudar para ${SNAP_LABELS[next]}.`}
-            className="flex h-11 w-full shrink-0 items-center justify-center rounded-t-lg"
-          >
-            <span aria-hidden="true" className="h-1.5 w-10 rounded-full bg-border" />
-          </button>
-          <Drawer.Title asChild>
-            <h1 id={titleId} className={titleClass}>
-              {title}
-            </h1>
-          </Drawer.Title>
-          <div
-            // Dentro do conteúdo o gesto é de rolagem; o arraste fica na alça.
-            data-vaul-no-drag=""
-            className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-4"
-            style={{ maxHeight: BODY_MAX_HEIGHT[snap] }}
-          >
-            {children}
-          </div>
-        </Drawer.Content>
-      </Drawer.Portal>
-    </Drawer.Root>
+      <button
+        type="button"
+        {...handlers}
+        onClick={() => {
+          // Fim de arraste também gera clique: só o toque (ou Enter/Espaço) alterna a altura.
+          if (suppressClickRef.current) {
+            suppressClickRef.current = false;
+            return;
+          }
+          setSnap(next);
+        }}
+        aria-label={`Altura do painel: ${SNAP_LABELS[snap]}. Mudar para ${SNAP_LABELS[next]}.`}
+        className="flex w-full shrink-0 touch-none items-center justify-center rounded-t-lg"
+        style={{ height: HANDLE_PX }}
+      >
+        <span aria-hidden="true" className="h-1.5 w-10 rounded-full bg-border" />
+      </button>
+      <h1 id={titleId} className={titleHidden ? 'sr-only' : 'px-4 pb-2 text-xl font-bold'}>
+        {title}
+      </h1>
+      <div
+        className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-4"
+        // Só a parte visível rola: sem isso o fim da lista ficaria fora da tela.
+        style={{ maxHeight: `calc(${height}px - var(--nav-h) - ${HANDLE_PX}px)` }}
+      >
+        {children}
+      </div>
+    </section>
   );
 }

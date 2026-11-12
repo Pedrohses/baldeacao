@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AppNav, isActivePath } from './app-nav';
 import { AppPanel } from './app-panel';
-import { type PanelSnap, mapPaddingFor, nextSnap, pointToSnap, snapToPoint } from './panel-snap';
+import { type PanelSnap, mapPaddingFor, nextSnap } from './panel-snap';
 
 const pathname = vi.hoisted(() => ({ current: '/' }));
 vi.mock('next/navigation', () => ({ usePathname: () => pathname.current }));
@@ -50,8 +50,6 @@ describe('alturas do painel', () => {
     expect(nextSnap('low')).toBe('mid');
     expect(nextSnap('mid')).toBe('high');
     expect(nextSnap('high')).toBe('low');
-    expect(pointToSnap(snapToPoint('mid'))).toBe('mid');
-    expect(pointToSnap(null)).toBe('low');
   });
 
   it('a folga do mapa considera o painel lateral no desktop e o sheet no celular', () => {
@@ -100,5 +98,40 @@ describe('AppPanel', () => {
     expect(onSnapChange).toHaveBeenLastCalledWith('mid');
     expect(screen.getByRole('button', { name: /Altura do painel: média/ })).toBeInTheDocument();
     expect(screen.getByText('conteúdo')).toBeInTheDocument();
+  });
+
+  it('arrastar a alça para cima leva à altura mais próxima e não alterna de novo no clique', () => {
+    mockDesktop(false);
+    vi.stubGlobal('innerHeight', 800);
+    const onSnapChange = vi.fn();
+    render(
+      <AppPanel title="Mapa" snap="low" onSnapChange={onSnapChange}>
+        <p>conteúdo</p>
+      </AppPanel>,
+    );
+    const handle = screen.getByRole('button', { name: /Altura do painel/ });
+    fireEvent.pointerDown(handle, { pointerId: 1, clientY: 700 });
+    fireEvent.pointerMove(handle, { pointerId: 1, clientY: 520 });
+    fireEvent.pointerUp(handle, { pointerId: 1, clientY: 520 });
+    fireEvent.click(handle);
+
+    // 216 + 180 = 396 px: a média (400 px) é a mais próxima.
+    expect(onSnapChange).toHaveBeenCalledTimes(1);
+    expect(onSnapChange).toHaveBeenCalledWith('mid');
+  });
+
+  it('o painel não é diálogo modal: o resto da tela continua acessível', () => {
+    mockDesktop(false);
+    render(
+      <>
+        <button type="button">fora</button>
+        <AppPanel title="Mapa">
+          <p>conteúdo</p>
+        </AppPanel>
+      </>,
+    );
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'fora' })).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Mapa' })).toBeInTheDocument();
   });
 });
