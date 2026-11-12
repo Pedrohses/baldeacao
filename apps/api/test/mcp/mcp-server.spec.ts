@@ -1,8 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
-import { Test } from '@nestjs/testing';
 import { MCP_SERVER_NAME } from '../../src/mcp/mcp-server.factory';
 import { clientIp, MCP_THROTTLE } from '../../src/mcp/mcp-throttler.guard';
-import { McpModule } from '../../src/mcp/mcp.module';
 import { connectClient, rawPost, startMcpApp } from './mcp-test-app';
 
 const PING = { jsonrpc: '2.0', id: 1, method: 'ping' };
@@ -12,7 +10,7 @@ describe('Servidor MCP (Streamable HTTP, stateless)', () => {
   let url: URL;
 
   beforeEach(async () => {
-    ({ app, url } = await startMcpApp(Test.createTestingModule({ imports: [McpModule] })));
+    ({ app, url } = await startMcpApp());
   });
 
   afterEach(async () => {
@@ -29,6 +27,27 @@ describe('Servidor MCP (Streamable HTTP, stateless)', () => {
     const res = await rawPost(url, PING);
     expect(res.status).toBe(200);
     expect(res.headers.get('mcp-session-id')).toBeNull();
+  });
+
+  it('lista as 5 tools com descrição em português e schema de entrada e saída', async () => {
+    const client = await connectClient(url);
+    const { tools } = await client.listTools();
+    expect(tools.map((t) => t.name).sort()).toEqual([
+      'buscar_linha',
+      'onibus_da_linha',
+      'paradas_proximas',
+      'previsao_chegada',
+      'status_dados',
+    ]);
+    for (const tool of tools) {
+      expect(tool.description).toMatch(/[ãçéêôõí]/);
+      expect(tool.inputSchema.type).toBe('object');
+      expect(tool.outputSchema?.type).toBe('object');
+      expect(tool.annotations?.readOnlyHint).toBe(true);
+    }
+    const nearby = tools.find((t) => t.name === 'paradas_proximas');
+    expect(nearby?.inputSchema.required).toEqual(['latitude', 'longitude']);
+    await client.close();
   });
 
   it('responde 405 a GET e DELETE', async () => {
