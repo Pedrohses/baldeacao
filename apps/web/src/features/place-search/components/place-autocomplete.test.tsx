@@ -170,6 +170,15 @@ describe('PlaceAutocomplete: autocompletar', () => {
     expect(onChange).toHaveBeenLastCalledWith(placeOriginExample);
   });
 
+  it('lugar escolhido mostra o endereço abaixo do nome e some ao editar', () => {
+    const input = renderAutocomplete(augusta);
+    expect(screen.getByTestId('place-subtitle')).toHaveTextContent('Consolação, São Paulo');
+    expect(input).toHaveAccessibleDescription(/Consolação, São Paulo/);
+
+    type(input, 'Rua Augusta');
+    expect(screen.queryByTestId('place-subtitle')).not.toBeInTheDocument();
+  });
+
   it('editar o texto de um lugar escolhido limpa a escolha e não busca o nome escolhido', async () => {
     const spy = mockSearch({});
     const input = renderAutocomplete(placeOriginExample);

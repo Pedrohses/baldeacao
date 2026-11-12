@@ -15,6 +15,7 @@ import {
   useResolvePlace,
 } from '../hooks';
 import { highlightMatch, pickConfirmed } from '../utils/match';
+import { placeSubtitle } from '../utils/place-subtitle';
 import { PLACE_KIND_LABELS, PlaceKindIcon } from './place-kind-icon';
 
 export interface PlaceAutocompleteProps {
@@ -70,6 +71,7 @@ export function PlaceAutocomplete({
   const inputId = id ?? `place-${generatedId}`;
   const listboxId = `${inputId}-listbox`;
   const statusId = `${inputId}-status`;
+  const subtitleId = `${inputId}-subtitle`;
 
   const [text, setText] = useState(value?.name ?? '');
   const [prevValue, setPrevValue] = useState(value);
@@ -298,6 +300,8 @@ export function PlaceAutocomplete({
 
   const firstRecentIndex = options.findIndex((o) => o.type === 'place' && o.group === 'recent');
   const highlightQuery = resolve.status === 'choices' ? resolve.query : trimmed;
+  // Lugar escolhido: endereço ou tipo abaixo do nome, para perceber se pegou o lugar errado.
+  const subtitle = value && text === value.name ? placeSubtitle(value) : null;
 
   return (
     <div className="relative min-w-0 flex-1">
@@ -313,7 +317,7 @@ export function PlaceAutocomplete({
         aria-autocomplete="list"
         aria-expanded={showList}
         aria-controls={listboxId}
-        aria-describedby={statusId}
+        aria-describedby={subtitle ? `${subtitleId} ${statusId}` : statusId}
         aria-activedescendant={active ? `${listboxId}-${activeIndex}` : undefined}
         placeholder={placeholder}
         value={text}
@@ -328,8 +332,19 @@ export function PlaceAutocomplete({
           setActiveIndex(-1);
           acceptTyped();
         }}
-        className="h-12 w-full rounded-sm bg-transparent px-2 text-base placeholder:text-muted hover:bg-surface-2"
+        className={`w-full rounded-sm bg-transparent px-2 text-base placeholder:text-muted hover:bg-surface-2 ${
+          subtitle ? 'h-11 pt-1 font-semibold' : 'h-12'
+        }`}
       />
+      {subtitle ? (
+        <p
+          id={subtitleId}
+          data-testid="place-subtitle"
+          className="-mt-1 truncate px-2 pb-1.5 text-sm text-muted"
+        >
+          {subtitle}
+        </p>
+      ) : null}
       <div
         // Cliques dentro da lista não tiram o foco do campo (senão o blur escolheria antes).
         onMouseDown={(event) => event.preventDefault()}
