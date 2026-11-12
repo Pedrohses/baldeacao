@@ -29,6 +29,10 @@ echo "Baixando GTFS da SPTrans..."
 curl -fL --retry 2 -A "baldeacao/0.1" -o data/sptrans.gtfs.zip "$GTFS_URL" \
   || curl -fL --retry 2 -A "baldeacao/0.1" -o data/sptrans.gtfs.zip "$GTFS_FALLBACK_URL"
 
+echo "Marcando frequências como exatas (exact_times=1)..."
+python3 gtfs-exact-times.py data/sptrans.gtfs.zip data/sptrans.gtfs.exact.zip
+mv data/sptrans.gtfs.exact.zip data/sptrans.gtfs.zip
+
 echo "Gerando o grafo do OTP (pode levar vários minutos)..."
 docker run --rm -e JAVA_TOOL_OPTIONS="-Xmx${OTP_BUILD_HEAP:-6g}" \
   -v "$PWD/data:/var/opentripplanner" "$OTP_IMAGE" --build --save

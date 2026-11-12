@@ -9,6 +9,6 @@
     "transferSlack": "2m"
   },
   "server": {
-    "apiProcessingTimeout": "10s"
+    "apiProcessingTimeout": "30s"
   }
 }
