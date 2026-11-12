@@ -226,9 +226,13 @@ function describeItinerary(it: Itinerary, index: number, timeZone: string): stri
 
 function describeLeg(leg: Leg, timeZone: string): string {
   if (leg.mode === 'walk') {
-    return `Caminhe ${formatDistance(leg.distanceM)} até ${leg.to.name} (${formatDuration(leg.durationS)}).`;
+    // O adaptador do OTP rotula o ponto final como "Destino"; no texto fica "até o destino".
+    const target = leg.to.name === 'Destino' ? 'o destino' : leg.to.name;
+    return `Caminhe ${formatDistance(leg.distanceM)} até ${target} (${formatDuration(leg.durationS)}).`;
   }
-  const line = leg.routeShortName ? ` ${leg.routeShortName}` : '';
+  // O GTFS da SPTrans nomeia metrô e trem como "METRÔ L4" e "CPTM L9"; o veículo já está no texto.
+  const shortName = leg.routeShortName?.replace(/^(METR[ÔO]|CPTM)\s+/i, '');
+  const line = shortName ? ` ${shortName}` : '';
   const direction = leg.headsign ? ` sentido ${leg.headsign}` : '';
   const stops =
     leg.intermediateStops > 0
