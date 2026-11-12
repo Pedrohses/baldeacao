@@ -1,0 +1,4 @@
+route_id,agency_id,route_short_name,route_long_name,route_type,route_color,route_text_color
+8000-10,1,8000-10,Term. Pq. D. Pedro II - Jd. Angela,3,0072BC,FFFFFF
+875A-10,1,875A-10,Perdizes - Aeroporto,3,509E2F,FFFFFF
+477U-10,1,477U-10,Metro Tatuape - Term. Pq. D. Pedro II,3,E4002B,FFFFFF

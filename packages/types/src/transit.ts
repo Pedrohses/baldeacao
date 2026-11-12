@@ -7,6 +7,7 @@ import {
   SourceIdSchema,
 } from './common.js';
 
+// Fixtures coerentes com estes contratos: apps/api/test/fixtures/gtfs/sptrans-mini/ e olho-vivo/.
 // Rede planejada (GTFS, Postgres) e previsão de chegada (Olho Vivo).
 
 export const RouteTypeSchema = z.enum(['bus', 'trolleybus', 'subway', 'rail', 'tram', 'ferry']);

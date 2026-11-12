@@ -7,6 +7,7 @@ import {
   SourceIdSchema,
 } from './common.js';
 
+// Fixtures coerentes com estes contratos: apps/api/test/fixtures/olho-vivo/ (e gtfs/sptrans-mini/).
 // Tempo real: posições lidas pelo worker (Redis) e eventos do WebSocket (Socket.IO).
 
 // Intervalo do ciclo do worker e limite a partir do qual a UI mostra "dados atrasados".
