@@ -1,6 +1,8 @@
 import {
   API_PATHS,
+  ReversePlaceResponseSchema,
   SearchPlacesResponseSchema,
+  type Coordinates,
   type Place,
   type SearchPlacesMode,
 } from '@baldeacao/types';
@@ -20,5 +22,16 @@ export const placesService = {
       init,
     );
     return places;
+  },
+
+  /** Lugar mais próximo de um ponto (busca reversa); null quando não há nada por perto. */
+  async reverse(location: Coordinates, init?: RequestInit): Promise<Place | null> {
+    const params = new URLSearchParams({ lat: String(location.lat), lon: String(location.lon) });
+    const { place } = await apiGet(
+      `${API_PATHS.reversePlace}?${params.toString()}`,
+      ReversePlaceResponseSchema,
+      init,
+    );
+    return place;
   },
 };

@@ -10,13 +10,15 @@ export interface DroppedPinProps {
   location: Coordinates;
   /** Título do cartão, ex.: "Ponto no mapa". */
   title: string;
+  /** Linha de apoio, ex.: o endereço do ponto. */
+  subtitle?: string | null;
   onClose: () => void;
   /** Ações do ponto (botões ou links). */
   children: ReactNode;
 }
 
 /** Alfinete solto no mapa com um cartão de ações acima dele. Fica dentro do BaseMap. */
-export function DroppedPin({ location, title, onClose, children }: DroppedPinProps) {
+export function DroppedPin({ location, title, subtitle, onClose, children }: DroppedPinProps) {
   return (
     <>
       <Marker longitude={location.lon} latitude={location.lat} anchor="bottom">
@@ -42,7 +44,10 @@ export function DroppedPin({ location, title, onClose, children }: DroppedPinPro
       >
         <section aria-label={title} className="min-w-56 font-sans text-text">
           <header className="mb-2 flex items-center justify-between gap-2">
-            <h2 className="text-base font-bold">{title}</h2>
+            <div className="min-w-0">
+              <h2 className="text-base font-bold">{title}</h2>
+              {subtitle ? <p className="text-sm text-muted">{subtitle}</p> : null}
+            </div>
             <button
               type="button"
               onClick={onClose}

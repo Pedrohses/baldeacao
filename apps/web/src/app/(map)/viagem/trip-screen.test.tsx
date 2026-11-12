@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { buildTripHref, parseTripSearchParams } from '@/features/trip-planner';
+import { placesService } from '@/features/place-search/services';
 import { tripPlannerService } from '@/features/trip-planner/services';
 import { resetGeolocation } from '@/shared/hooks/use-geolocation';
 
@@ -18,7 +19,11 @@ const planned = (itineraries: Itinerary[], notices: PlanTripNotice[] = []) => ({
 
 vi.mock('@/shared/ui/map', () => ({
   BaseMap: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
-  CenterPicker: () => null,
+  CenterPicker: ({ onConfirm }: { onConfirm: (c: { lat: number; lon: number }) => void }) => (
+    <button type="button" onClick={() => onConfirm({ lat: -23.55, lon: -46.63 })}>
+      confirmar mira
+    </button>
+  ),
   UserLocationLayer: () => null,
 }));
 
@@ -115,5 +120,24 @@ describe('TripScreen', () => {
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Editar destino' }));
     expect(screen.getByRole('combobox', { name: 'Destino' })).toHaveFocus();
+  });
+
+  it('escolher no mapa dá nome ao ponto pela busca reversa', async () => {
+    vi.spyOn(placesService, 'reverse').mockResolvedValue({
+      id: 'osm:node:1',
+      name: 'Praça da Sé',
+      address: 'Sé, São Paulo',
+      kind: 'poi',
+      location: se,
+    });
+    renderScreen('/viagem?foco=destino');
+    const destination = screen.getByRole('combobox', { name: 'Destino' });
+    fireEvent.focus(destination);
+    fireEvent.click(screen.getByRole('option', { name: /Escolher no mapa/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'confirmar mira' }));
+
+    expect(destination).toHaveValue('Ponto no mapa');
+    await waitFor(() => expect(destination).toHaveValue('Praça da Sé'));
+    expect(screen.getAllByText('Sé, São Paulo').length).toBeGreaterThan(0);
   });
 });

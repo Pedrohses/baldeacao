@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initialMapState, useMapStore } from '@/features/live-map';
 import { vehiclePositionsService } from '@/features/live-map/services';
 import { addRecentPlace } from '@/features/place-search';
+import { placesService } from '@/features/place-search/services';
 import { stopsService } from '@/features/stops/services';
 
 import { MapScreen } from './map-screen';
@@ -60,6 +61,7 @@ beforeEach(() => {
   vi.spyOn(vehiclePositionsService, 'getSnapshot').mockResolvedValue(vehicleSnapshotExample);
   vi.spyOn(stopsService, 'getNearby').mockResolvedValue({ stops: [nearby] });
   vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({ stopId: stopExample.id, arrivals: [] });
+  vi.spyOn(placesService, 'reverse').mockResolvedValue(null);
 });
 
 afterEach(() => vi.restoreAllMocks());
@@ -113,6 +115,23 @@ describe('MapScreen', () => {
       deTipo: 'coordinates',
       foco: 'destino',
     });
+  });
+
+  it('o alfinete ganha o nome do lugar mais próximo pela busca reversa', async () => {
+    vi.spyOn(placesService, 'reverse').mockResolvedValue({
+      id: 'osm:node:1',
+      name: 'Praça da Sé',
+      address: 'Sé, São Paulo',
+      kind: 'poi',
+      location: { lat: -23.5502, lon: -46.6331 },
+    });
+    renderScreen();
+    fireEvent.click(screen.getByRole('button', { name: 'simular toque longo' }));
+
+    const card = await screen.findByRole('region', { name: 'Praça da Sé' });
+    expect(
+      query(within(card).getByRole('link', { name: 'Ir para cá' }).getAttribute('href')),
+    ).toMatchObject({ para: '-23.550000,-46.630000', paraNome: 'Praça da Sé' });
   });
 
   it('a parada escolhida na lista abre no painel com as ações do planejador', async () => {

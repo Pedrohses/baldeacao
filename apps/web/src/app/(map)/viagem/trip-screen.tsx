@@ -4,7 +4,7 @@ import type { Place } from '@baldeacao/types';
 import { useEffect, useState } from 'react';
 
 import { MapViewportSync, useMapStore } from '@/features/live-map';
-import { PlaceAutocomplete } from '@/features/place-search';
+import { PlaceAutocomplete, useResolveMapPoint } from '@/features/place-search';
 import {
   ItineraryLayer,
   ItineraryList,
@@ -55,6 +55,7 @@ export function TripScreen({ initial }: TripScreenProps) {
   const [timeOpen, setTimeOpen] = useState(false);
   const [focusRequest, setFocusRequest] = useState<{ field: TripField; key: number } | null>(null);
   const padding = useMapPadding(snap);
+  const resolveMapPoint = useResolveMapPoint();
 
   // Seleção (itinerário e trecho em foco) volta ao começo a cada pedido novo.
   const requestKey = trip.request ? JSON.stringify(trip.request) : '';
@@ -104,11 +105,15 @@ export function TripScreen({ initial }: TripScreenProps) {
   }
 
   function confirmPick(location: { lat: number; lon: number }) {
+    // "Ponto no mapa" na hora; o nome do lugar mais próximo chega da busca reversa.
     const place = coordinatesPlace(location);
-    if (picking === 'origin') setOrigin(place);
-    else setDestination(place);
+    const set = picking === 'origin' ? setOrigin : setDestination;
+    set(place);
     setPicking(null);
     setSnap('mid');
+    void resolveMapPoint(location).then((named) =>
+      set((current) => (current?.id === place.id ? named : current)),
+    );
   }
 
   return (

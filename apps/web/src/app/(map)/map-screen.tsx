@@ -6,7 +6,7 @@ import { useState } from 'react';
 
 import { LineHeader, RouteShapeLayer, useLineDetails } from '@/features/lines';
 import { MapViewportSync, StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
-import { PlaceKindIcon, useRecentPlaces } from '@/features/place-search';
+import { PlaceKindIcon, useMapPointPlace, useRecentPlaces } from '@/features/place-search';
 import { NearbyStopsList, STOPS_MIN_ZOOM, StopSheet, StopsLayer } from '@/features/stops';
 import { buildTripHref } from '@/features/trip-planner';
 import { useGeolocation } from '@/shared/hooks/use-geolocation';
@@ -22,7 +22,6 @@ import {
   MapLongPress,
   UserLocationLayer,
 } from '@/shared/ui/map';
-import { MAP_POINT_NAME, coordinatesPlace } from '@/shared/utils/place';
 
 const RECENT_CHIPS = 3;
 const PRIMARY_ACTION =
@@ -79,6 +78,7 @@ export function MapScreen() {
   const [pin, setPin] = useState<Coordinates | null>(null);
   const [flyTarget, setFlyTarget] = useState<Coordinates | null>(null);
   const [snap, setSnap] = useState<PanelSnap>('low');
+  const pinPlace = useMapPointPlace(pin).place;
 
   const activeStop =
     selection?.kind === 'stop' && selectedStop?.id === selection.stopId ? selectedStop : null;
@@ -191,9 +191,14 @@ export function MapScreen() {
         />
         <VehiclesLayer highlight={routeId ? { routeId, color: lineColor } : null} />
         <UserLocationLayer />
-        {pin ? (
-          <DroppedPin location={pin} title={MAP_POINT_NAME} onClose={() => setPin(null)}>
-            <PlaceActions place={coordinatesPlace(pin)} />
+        {pin && pinPlace ? (
+          <DroppedPin
+            location={pin}
+            title={pinPlace.name}
+            subtitle={pinPlace.address}
+            onClose={() => setPin(null)}
+          >
+            <PlaceActions place={pinPlace} />
           </DroppedPin>
         ) : null}
         <LocateButton

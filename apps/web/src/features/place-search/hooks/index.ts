@@ -15,3 +15,4 @@ export {
   useRecentPlaces,
 } from './use-recent-places';
 export { useResolvePlace } from './use-resolve-place';
+export { mapPointPlace, useMapPointPlace, useResolveMapPoint } from './use-map-point-place';
