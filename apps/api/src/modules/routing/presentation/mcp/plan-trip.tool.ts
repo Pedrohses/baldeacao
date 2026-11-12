@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { cityInput, resolveCity, unsupportedCityMessage } from '../../../../mcp/city';
 import { formatClock, plural } from '../../../../mcp/format';
 import { McpTool } from '../../../../mcp/mcp-tool';
+import { parseToolInput, relaxShape } from '../../../../mcp/tool-input';
 import { runTool, toolError, toolText } from '../../../../mcp/tool-result';
 import { SearchPlacesUseCase } from '../../../geocoding/application/use-cases/search-places.use-case';
 import {
@@ -24,7 +25,7 @@ const inputSchema = {
   origem: z
     .string()
     .trim()
-    .min(3, 'Informe a origem com pelo menos 3 caracteres.')
+    .min(2, 'Informe a origem com pelo menos 2 caracteres.')
     .max(200)
     .describe(
       'De onde sai: endereço, lugar ou estação (ex.: "Morumbis", "Av. Paulista, 1578") ou "latitude,longitude".',
@@ -32,7 +33,7 @@ const inputSchema = {
   destino: z
     .string()
     .trim()
-    .min(3, 'Informe o destino com pelo menos 3 caracteres.')
+    .min(2, 'Informe o destino com pelo menos 2 caracteres.')
     .max(200)
     .describe('Para onde vai, no mesmo formato da origem (ex.: "Terminal Tietê").'),
   saida: timeInput.describe(
@@ -135,12 +136,15 @@ export class PlanTripTool extends McpTool {
           '(ex.: "Como chego do Tatuapé à Paulista saindo às 8h?"). Devolve as opções com duração, ' +
           'horários, baldeações e cada trecho, as saídas seguintes com as mesmas linhas ("também às") ' +
           'e avisos quando a origem ou o destino ficam longe de qualquer parada.',
-        inputSchema,
+        inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: true },
       },
-      ({ origem, destino, saida, chegada, opcoes, cidade }) =>
+      (args) =>
         runTool(this.logger, this.name, async () => {
+          const input = parseToolInput(inputSchema, args);
+          if (!input.ok) return input.result;
+          const { origem, destino, saida, chegada, opcoes, cidade } = input.data;
           const city = resolveCity(cidade);
           if (!city) return toolError(unsupportedCityMessage(cidade));
 

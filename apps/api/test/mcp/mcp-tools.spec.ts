@@ -100,6 +100,13 @@ describe('Tools MCP (cliente do SDK contra a app de teste)', () => {
       expect(textOf(result)).toContain('pelo menos 2 caracteres');
     });
 
+    it('validação em português, sem o erro -32602 cru do protocolo', async () => {
+      const result = await call(client, 'paradas_proximas', { latitude: 123, longitude: -46.6 });
+      expect(result.isError).toBe(true);
+      expect(textOf(result)).toBe('Entrada inválida: latitude: deve ser no máximo 90.');
+      expect(textOf(result)).not.toMatch(/-32602|Invalid/);
+    });
+
     it('recusa cidade que ainda não é atendida', async () => {
       const result = await call(client, 'buscar_linha', {
         texto: '875A',
@@ -185,6 +192,14 @@ describe('Tools MCP (cliente do SDK contra a app de teste)', () => {
       );
     });
 
+    it('parada inexistente diz que ela não existe', async () => {
+      const result = await call(client, 'previsao_chegada', { parada: '999999999' });
+      expect(result.isError).toBe(true);
+      expect(textOf(result)).toBe(
+        'A parada 999999999 não existe. Use paradas_proximas para achar o código da parada.',
+      );
+    });
+
     it('fonte fora do ar vira mensagem amigável com isError', async () => {
       fakes.arrivals.byStop.set('4301848', new SourceUnavailableError('olho-vivo'));
       const result = await call(client, 'previsao_chegada', { parada: '4301848' });
@@ -239,6 +254,17 @@ describe('Tools MCP (cliente do SDK contra a app de teste)', () => {
       expect(result.isError).toBeFalsy();
       expect(textOf(result)).toContain('Nenhum ônibus da linha 875A com posição agora');
       expect(textOf(result)).toContain('buscar_linha');
+    });
+
+    it('linha inexistente diz que ela não existe', async () => {
+      await fakes.positions.replace(
+        'sptrans',
+        [vehicle('11111', '875A-10')],
+        new Date().toISOString(),
+      );
+      const result = await call(client, 'onibus_da_linha', { linha: 'XYZ9-99' });
+      expect(result.isError).toBe(true);
+      expect(textOf(result)).toContain('A linha XYZ9-99 não existe');
     });
 
     it('avisa com isError quando ainda não há tempo real', async () => {

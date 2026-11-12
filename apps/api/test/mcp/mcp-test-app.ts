@@ -26,6 +26,7 @@ import { GetLineDetailsUseCase } from '../../src/modules/transit/application/use
 import { GetStopArrivalsUseCase } from '../../src/modules/transit/application/use-cases/get-stop-arrivals.use-case';
 import { GetServicePeriodUseCase } from '../../src/modules/transit/application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from '../../src/modules/transit/application/use-cases/has-nearby-stop.use-case';
+import { LineExistsUseCase } from '../../src/modules/transit/application/use-cases/line-exists.use-case';
 import { SearchLinesUseCase } from '../../src/modules/transit/application/use-cases/search-lines.use-case';
 import type { Arrival } from '../../src/modules/transit/domain/entities/arrival.entity';
 import { ArrivalsCache } from '../../src/modules/transit/domain/ports/arrivals-cache.port';
@@ -134,6 +135,7 @@ function buildTestingModule(fakes: McpFakes) {
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
       HasNearbyStopUseCase,
+      LineExistsUseCase,
       { provide: RouteRepository, useValue: new InMemoryRouteRepository() },
       { provide: StopRepository, useValue: fakes.stops },
       { provide: ArrivalsProvider, useValue: fakes.arrivals },
@@ -146,6 +148,7 @@ function buildTestingModule(fakes: McpFakes) {
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
       HasNearbyStopUseCase,
+      LineExistsUseCase,
     ],
   })
   class FakeTransitModule {}

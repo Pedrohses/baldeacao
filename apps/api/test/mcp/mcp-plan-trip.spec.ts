@@ -161,6 +161,15 @@ describe('Tool MCP planejar_viagem', () => {
     expect(fakes.planner.queries).toHaveLength(0);
   });
 
+  it('aceita origem de 2 caracteres ("Sé") e recusa 1 em português', async () => {
+    fakes.geocoder.byTerm.set('sé', [new Place(placeOriginExample)]);
+    const ok = await plan({ origem: 'Sé', destino: 'Terminal Tietê' });
+    expect(textOf(ok)).not.toContain('Entrada inválida');
+    const short = await plan({ origem: 'S', destino: 'Terminal Tietê' });
+    expect(short.isError).toBe(true);
+    expect(textOf(short)).toBe('Entrada inválida: Informe a origem com pelo menos 2 caracteres.');
+  });
+
   it('pede endereço mais específico quando não acha o destino', async () => {
     const result = await plan({ origem: 'Morumbis', destino: 'Xyzw' });
     expect(result.isError).toBe(true);
