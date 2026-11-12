@@ -1,0 +1,51 @@
+import { Injectable } from '@nestjs/common';
+import type { GtfsFeed, GtfsShape } from '../../domain/entities/gtfs-feed.entity';
+import { InvalidGtfsFeedError } from '../../domain/errors/invalid-gtfs-feed.error';
+import { GtfsFeedReader } from '../../domain/ports/gtfs-feed-reader.port';
+import { GtfsFeedStore } from '../../domain/ports/gtfs-feed-store.port';
+import { assembleShapes } from '../../domain/services/assemble-shapes';
+import type { ImportGtfsFeedInput, ImportGtfsFeedResult } from '../dto/import-gtfs-feed.dto';
+
+const SOURCE_ID = /^[a-z0-9-]+$/;
+
+@Injectable()
+export class ImportGtfsFeedUseCase {
+  constructor(
+    private readonly reader: GtfsFeedReader,
+    private readonly store: GtfsFeedStore,
+  ) {}
+
+  async execute(input: ImportGtfsFeedInput): Promise<ImportGtfsFeedResult> {
+    if (!SOURCE_ID.test(input.sourceId)) {
+      throw new InvalidGtfsFeedError(
+        `Fonte inválida: "${input.sourceId}". Use minúsculas, dígitos e hífen.`,
+      );
+    }
+    const startedAt = Date.now();
+    const raw = await this.reader.open(input.location);
+
+    // shapes.txt vem ponto a ponto; o LineString precisa do traçado inteiro e ordenado.
+    const { shapes, skipped } = await assembleShapes(raw.shapePoints());
+    const feed: GtfsFeed = {
+      routes: () => raw.routes(),
+      stops: () => raw.stops(),
+      trips: () => raw.trips(),
+      stopTimes: () => raw.stopTimes(),
+      calendar: () => raw.calendar(),
+      frequencies: () => raw.frequencies(),
+      shapes: () => fromArray(shapes),
+    };
+
+    const counts = await this.store.replace(input.sourceId, feed);
+    return {
+      sourceId: input.sourceId,
+      counts,
+      skippedShapes: skipped,
+      durationMs: Date.now() - startedAt,
+    };
+  }
+}
+
+async function* fromArray(items: GtfsShape[]): AsyncIterable<GtfsShape> {
+  for (const item of items) yield await Promise.resolve(item);
+}
