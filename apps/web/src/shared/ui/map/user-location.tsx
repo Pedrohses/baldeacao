@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { type CSSProperties, useEffect, useRef } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
 import { locate, locateIfPermitted, useGeolocation } from '@/shared/hooks/use-geolocation';
@@ -47,12 +47,17 @@ export function UserLocationLayer() {
 export interface LocateButtonProps {
   /** Classes de posição (o painel muda de altura no celular). */
   className?: string;
+  style?: CSSProperties;
   /** Na abertura do mapa, centraliza no usuário se a permissão já foi dada. */
   centerOnMount?: boolean;
 }
 
 /** Botão flutuante "Minha localização" (48 px). Fica dentro do BaseMap. */
-export function LocateButton({ className = '', centerOnMount = true }: LocateButtonProps) {
+export function LocateButton({
+  className = '',
+  style,
+  centerOnMount = true,
+}: LocateButtonProps) {
   const { current: map } = useMap();
   const { status } = useGeolocation();
   const centeredRef = useRef(false);
@@ -90,6 +95,7 @@ export function LocateButton({ className = '', centerOnMount = true }: LocateBut
       aria-label={label}
       title={label}
       aria-busy={status === 'locating'}
+      style={style}
       className={`surface-float absolute z-10 inline-flex size-12 items-center justify-center rounded-full text-brand ${className}`}
     >
       <LocateIcon className={`size-6 ${status === 'locating' ? 'animate-pulse' : ''}`} />

@@ -7,6 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { stopsService } from '../services';
 import { ArrivalsList, ArrivalsListView } from './arrivals-list';
+import { NearbyStopsList } from './nearby-stops-list';
 import { StopSheet } from './stop-sheet';
 import { StopsLayer } from './stops-layer';
 
@@ -100,8 +101,68 @@ describe('StopSheet', () => {
     wrap(<StopSheet stop={stopExample} onClose={onClose} />);
     expect(screen.getByRole('heading', { name: 'Av. Paulista 1578' })).toBeInTheDocument();
     expect(await screen.findByText('875A-10')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Fechar/ }));
+    const close = screen.getByRole('button', { name: /Fechar/ });
+    expect(close).toHaveClass('size-11');
+    fireEvent.click(close);
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('mostra as ações passadas por quem compõe a tela', () => {
+    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({ stopId: stopExample.id, arrivals: [] });
+    const goHere = vi.fn();
+    wrap(
+      <StopSheet
+        stop={stopExample}
+        onClose={vi.fn()}
+        actions={
+          <>
+            <button type="button" onClick={goHere}>
+              Ir para cá
+            </button>
+            <a href="/viagem?de=x">Sair daqui</a>
+          </>
+        }
+      />,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Ir para cá' }));
+    expect(goHere).toHaveBeenCalledOnce();
+    expect(screen.getByRole('link', { name: 'Sair daqui' })).toBeInTheDocument();
+  });
+
+  it('sem ações não reserva espaço para elas', () => {
+    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({ stopId: stopExample.id, arrivals: [] });
+    wrap(<StopSheet stop={stopExample} onClose={vi.fn()} />);
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+  });
+});
+
+describe('NearbyStopsList', () => {
+  it('lista as paradas mais próximas com as 2 próximas chegadas e devolve a tocada', async () => {
+    const far: NearbyStop = { ...nearby, id: 'far', name: 'Parada longe', distanceM: 480 };
+    vi.spyOn(stopsService, 'getNearby').mockResolvedValue({ stops: [far, nearby] });
+    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
+      stopId: stopExample.id,
+      arrivals: [arrivalExample, { ...arrivalExample, routeShortName: '702U-10' }, { ...arrivalExample, routeShortName: '9999-10' }],
+    });
+    const onSelectStop = vi.fn();
+    wrap(<NearbyStopsList center={{ lat: -23.56, lon: -46.65 }} onSelectStop={onSelectStop} />);
+
+    const buttons = await screen.findAllByRole('button');
+    expect(buttons.map((b) => b.textContent?.slice(0, 12))).toEqual(['Av. Paulista', 'Parada longe']);
+    expect(buttons[0]).toHaveTextContent('120 m');
+    expect(await screen.findAllByText('702U-10')).not.toHaveLength(0);
+    expect(screen.queryByText('9999-10')).not.toBeInTheDocument();
+
+    fireEvent.click(buttons[0]!);
+    expect(onSelectStop).toHaveBeenCalledWith(nearby);
+  });
+
+  it('não consulta sem centro', () => {
+    const spy = vi.spyOn(stopsService, 'getNearby');
+    const { container } = wrap(<NearbyStopsList center={null} onSelectStop={vi.fn()} />);
+    expect(spy).not.toHaveBeenCalled();
+    expect(container).toBeEmptyDOMElement();
   });
 });
 

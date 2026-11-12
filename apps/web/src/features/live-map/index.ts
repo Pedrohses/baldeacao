@@ -8,6 +8,7 @@ export {
 } from './components';
 export {
   DEFAULT_MAP_VIEWPORT,
+  initialMapState,
   type MapSelection,
   type MapState,
   useMapStore,
