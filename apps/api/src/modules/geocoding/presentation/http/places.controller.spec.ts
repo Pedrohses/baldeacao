@@ -8,6 +8,9 @@ import {
   fakeNominatimFetch,
   readNominatimFixture,
 } from '../../../../../test/support/geocoding-in-memory';
+import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
+import { SearchStopsByNameUseCase } from '../../../transit/application/use-cases/search-stops-by-name.use-case';
+import { StopRepository } from '../../../transit/domain/ports/stop-repository.port';
 import { SearchPlacesUseCase } from '../../application/use-cases/search-places.use-case';
 import { GeocodeCache } from '../../domain/ports/geocode-cache.port';
 import { Geocoder } from '../../domain/ports/geocoder.port';
@@ -33,6 +36,8 @@ describe('HTTP do geocoding (contrato v2)', () => {
       controllers: [PlacesController],
       providers: [
         SearchPlacesUseCase,
+        SearchStopsByNameUseCase,
+        { provide: StopRepository, useValue: new InMemoryStopRepository() },
         {
           provide: NominatimClient,
           useValue: new NominatimClient({
@@ -54,7 +59,7 @@ describe('HTTP do geocoding (contrato v2)', () => {
   it('GET /places/search?q= devolve SearchPlacesResponse e usa o cache na repetição', async () => {
     const first = await request(app.getHttpServer())
       .get(API_PATHS.searchPlaces)
-      .query({ q: 'Estádio do Morumbis' })
+      .query({ q: 'Estádio do Morumbis', mode: 'full' })
       .expect(200);
     const body = SearchPlacesResponseSchema.parse(first.body);
     expect(body.places[0]).toEqual({
@@ -67,13 +72,13 @@ describe('HTTP do geocoding (contrato v2)', () => {
 
     await request(app.getHttpServer())
       .get(API_PATHS.searchPlaces)
-      .query({ q: 'estádio do morumbis' })
+      .query({ q: 'estádio do morumbis', mode: 'full' })
       .expect(200);
     expect(fetchFn.calls).toHaveLength(1);
   });
 
   it('q curto ou ausente vira 400 com ApiErrorBody', async () => {
-    for (const query of [{ q: 'sé' }, {}]) {
+    for (const query of [{ q: 's' }, {}]) {
       const res = await request(app.getHttpServer())
         .get(API_PATHS.searchPlaces)
         .query(query)
@@ -85,7 +90,7 @@ describe('HTTP do geocoding (contrato v2)', () => {
   it('Nominatim fora do ar vira 503 com ApiErrorBody', async () => {
     const res = await request(app.getHttpServer())
       .get(API_PATHS.searchPlaces)
-      .query({ q: 'falha' })
+      .query({ q: 'falha', mode: 'full' })
       .expect(503);
     expect(ApiErrorBodySchema.parse(res.body)).toEqual({
       code: 'SOURCE_UNAVAILABLE',

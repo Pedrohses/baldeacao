@@ -5,6 +5,7 @@ import { Test } from '@nestjs/testing';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { McpModule } from '../../src/mcp/mcp.module';
+import { SearchStopsByNameUseCase } from '../../src/modules/transit/application/use-cases/search-stops-by-name.use-case';
 import { SearchPlacesUseCase } from '../../src/modules/geocoding/application/use-cases/search-places.use-case';
 import type { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
 import { GeocodeCache } from '../../src/modules/geocoding/domain/ports/geocode-cache.port';
@@ -106,6 +107,7 @@ function buildTestingModule(fakes: McpFakes) {
       GetLineDetailsUseCase,
       FindNearbyStopsUseCase,
       GetStopArrivalsUseCase,
+      SearchStopsByNameUseCase,
       { provide: RouteRepository, useValue: new InMemoryRouteRepository() },
       { provide: StopRepository, useValue: new InMemoryStopRepository() },
       { provide: ArrivalsProvider, useValue: fakes.arrivals },
@@ -116,6 +118,7 @@ function buildTestingModule(fakes: McpFakes) {
       GetLineDetailsUseCase,
       FindNearbyStopsUseCase,
       GetStopArrivalsUseCase,
+      SearchStopsByNameUseCase,
     ],
   })
   class FakeTransitModule {}
@@ -132,6 +135,8 @@ function buildTestingModule(fakes: McpFakes) {
   @Module({
     providers: [
       SearchPlacesUseCase,
+      SearchStopsByNameUseCase,
+      { provide: StopRepository, useValue: new InMemoryStopRepository() },
       { provide: Geocoder, useValue: fakes.geocoder },
       { provide: GeocodeCache, useValue: fakes.geocodeCache },
     ],

@@ -100,6 +100,22 @@ export class InMemoryStopRepository extends StopRepository {
       .slice(0, limit);
     return Promise.resolve(found);
   }
+
+  readonly searchCalls: Array<{ text: string; limit: number }> = [];
+
+  searchByName(text: string, limit: number): Promise<Stop[]> {
+    this.searchCalls.push({ text, limit });
+    const fold = (s: string) =>
+      s
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '')
+        .toLowerCase();
+    const needle = fold(text);
+    const found = this.stops
+      .filter((s) => fold(s.name).includes(needle))
+      .sort((a, b) => a.name.length - b.name.length);
+    return Promise.resolve(found.slice(0, limit));
+  }
 }
 
 /** Distância em metros na esfera; só para o adaptador de teste (produção usa PostGIS). */

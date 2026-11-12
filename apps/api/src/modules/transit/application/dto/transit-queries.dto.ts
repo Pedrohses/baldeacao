@@ -1,6 +1,6 @@
 import type { LineShape } from '../../domain/entities/line-shape.entity';
 import type { Route } from '../../domain/entities/route.entity';
-import type { NearbyStop } from '../../domain/entities/stop.entity';
+import type { NearbyStop, Stop } from '../../domain/entities/stop.entity';
 import type { Coordinates } from '../../domain/value-objects/coordinates';
 
 export interface SearchLinesInput {
@@ -32,4 +32,14 @@ export interface FindNearbyStopsInput {
 
 export interface FindNearbyStopsOutput {
   stops: NearbyStop[];
+}
+
+export interface SearchStopsByNameInput {
+  text: string;
+  /** Padrão 8, máximo 20. */
+  limit?: number;
+}
+
+export interface SearchStopsByNameOutput {
+  stops: Stop[];
 }

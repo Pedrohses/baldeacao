@@ -178,7 +178,7 @@ export class PlanTripTool extends McpTool {
         longitude: Number(coords[2]),
       };
     }
-    const { places } = await this.searchPlaces.execute({ query: text });
+    const { places } = await this.searchPlaces.execute({ query: text, mode: 'full' });
     const place = places[0];
     if (!place) return null;
     return {
