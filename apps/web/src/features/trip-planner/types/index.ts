@@ -7,10 +7,15 @@ import type { ReactNode } from 'react';
  */
 export interface PlaceInputProps {
   id: string;
+  /** Nome acessível ("Origem", "Destino"); o visual fica no placeholder. */
   label: string;
   value: Place | null;
   onChange: (place: Place | null) => void;
   placeholder?: string;
+  autoFocus?: boolean;
+  onPickOnMap?: () => void;
 }
 
 export type RenderPlaceInput = (props: PlaceInputProps) => ReactNode;
+
+export type TripField = 'origin' | 'destination';

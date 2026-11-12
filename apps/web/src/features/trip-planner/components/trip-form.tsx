@@ -1,161 +1,96 @@
 'use client';
 
-import type { Place, TripRequest } from '@baldeacao/types';
-import { useId, useState, type FormEvent } from 'react';
+import type { Place } from '@baldeacao/types';
+import { useId } from 'react';
 
-import { buildTripRequest, type TripFormErrors } from '../schemas';
-import type { RenderPlaceInput } from '../types';
+import { SwapIcon } from '@/shared/ui/icons';
+
+import type { RenderPlaceInput, TripField } from '../types';
 
 export interface TripFormProps {
   /** Campo de lugar (a página passa o PlaceAutocomplete de features/place-search). */
   renderPlaceInput: RenderPlaceInput;
-  onSubmit: (request: TripRequest) => void;
-  isSubmitting?: boolean;
-  initialOrigin?: Place | null;
-  initialDestination?: Place | null;
+  origin: Place | null;
+  destination: Place | null;
+  onOriginChange: (place: Place | null) => void;
+  onDestinationChange: (place: Place | null) => void;
+  onSwap: () => void;
+  /** Campo que recebe o foco ao abrir a tela. */
+  autoFocus?: TripField | null;
+  /** "Escolher no mapa" no campo indicado. */
+  onPickOnMap?: (field: TripField) => void;
+  /** Erro do par origem e destino (ex.: iguais). */
+  error?: string | null;
 }
 
-function FieldError({ id, message }: { id: string; message: string | undefined }) {
-  if (!message) return null;
-  return (
-    <p id={id} role="alert" className="mt-1 text-sm text-red-700">
-      {message}
-    </p>
-  );
-}
-
-/** Origem, destino, inverter e hora de saída opcional; entrega um TripRequest válido. */
+/**
+ * Cartão compacto de origem (anel) e destino (alfinete) ligados por linha pontilhada, com
+ * botão de inverter. Sem botão de buscar: a busca roda sozinha quando as duas pontas existem.
+ */
 export function TripForm({
   renderPlaceInput,
-  onSubmit,
-  isSubmitting = false,
-  initialOrigin = null,
-  initialDestination = null,
+  origin,
+  destination,
+  onOriginChange,
+  onDestinationChange,
+  onSwap,
+  autoFocus = null,
+  onPickOnMap,
+  error,
 }: TripFormProps) {
   const baseId = useId();
-  const [origin, setOrigin] = useState<Place | null>(initialOrigin);
-  const [destination, setDestination] = useState<Place | null>(initialDestination);
-  const [departAt, setDepartAt] = useState('');
-  const [errors, setErrors] = useState<TripFormErrors>({});
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const result = buildTripRequest({ origin, destination, departAt });
-    if (!result.success) {
-      setErrors(result.errors);
-      return;
-    }
-    setErrors({});
-    onSubmit(result.request);
-  }
-
-  function clearError(field: keyof TripFormErrors) {
-    setErrors((current) => (current[field] ? { ...current, [field]: undefined } : current));
-  }
-
-  function handleSwap() {
-    setOrigin(destination);
-    setDestination(origin);
-    setErrors({});
-  }
+  const errorId = `${baseId}-error`;
 
   return (
-    <form onSubmit={handleSubmit} noValidate aria-label="Planejar viagem" className="space-y-3">
-      <div className="flex items-end gap-2">
-        <div className="min-w-0 flex-1 space-y-3">
-          <div>
-            {renderPlaceInput({
-              id: `${baseId}-origin`,
-              label: 'Origem',
-              value: origin,
-              onChange: (place) => {
-                setOrigin(place);
-                clearError('origin');
-              },
-              placeholder: 'De onde você sai?',
-            })}
-            <FieldError id={`${baseId}-origin-error`} message={errors.origin} />
-          </div>
-          <div>
-            {renderPlaceInput({
-              id: `${baseId}-destination`,
-              label: 'Destino',
-              value: destination,
-              onChange: (place) => {
-                setDestination(place);
-                clearError('destination');
-              },
-              placeholder: 'Para onde você vai?',
-            })}
-            <FieldError id={`${baseId}-destination-error`} message={errors.destination} />
-          </div>
+    <form
+      role="search"
+      aria-label="Origem e destino"
+      aria-describedby={error ? errorId : undefined}
+      onSubmit={(event) => event.preventDefault()}
+      noValidate
+    >
+      <div className="flex items-center gap-1 rounded-md border border-border bg-surface p-1 pl-3">
+        <div aria-hidden="true" className="flex w-4 shrink-0 flex-col items-center self-stretch py-5">
+          <span className="size-3.5 shrink-0 rounded-full border-[3px] border-text" />
+          <span className="my-1 w-0 flex-1 border-l-2 border-dotted border-muted" />
+          <svg viewBox="0 0 16 20" className="h-4 w-3.5 shrink-0 fill-brand">
+            <path d="M8 20s7-6.2 7-11.5A7 7 0 0 0 1 8.5C1 13.8 8 20 8 20Zm0-8.5a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
+          </svg>
+        </div>
+        <div className="min-w-0 flex-1 divide-y divide-border">
+          {renderPlaceInput({
+            id: `${baseId}-origin`,
+            label: 'Origem',
+            value: origin,
+            onChange: onOriginChange,
+            placeholder: 'De onde?',
+            autoFocus: autoFocus === 'origin',
+            ...(onPickOnMap ? { onPickOnMap: () => onPickOnMap('origin') } : {}),
+          })}
+          {renderPlaceInput({
+            id: `${baseId}-destination`,
+            label: 'Destino',
+            value: destination,
+            onChange: onDestinationChange,
+            placeholder: 'Para onde?',
+            autoFocus: autoFocus === 'destination',
+            ...(onPickOnMap ? { onPickOnMap: () => onPickOnMap('destination') } : {}),
+          })}
         </div>
         <button
           type="button"
-          onClick={handleSwap}
+          onClick={onSwap}
           aria-label="Inverter origem e destino"
-          className="mb-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-neutral-300 bg-white hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted hover:bg-surface-2 hover:text-text"
         >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-            focusable="false"
-            className="size-5"
-          >
-            <path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4" />
-          </svg>
+          <SwapIcon />
         </button>
       </div>
-
-      <div>
-        <label
-          htmlFor={`${baseId}-depart-at`}
-          className="mb-1 block text-sm font-medium text-neutral-800"
-        >
-          Hora de saída (opcional)
-        </label>
-        <div className="flex gap-2">
-          <input
-            id={`${baseId}-depart-at`}
-            type="datetime-local"
-            value={departAt}
-            onChange={(event) => setDepartAt(event.target.value)}
-            aria-invalid={errors.departAt ? true : undefined}
-            aria-describedby={
-              errors.departAt ? `${baseId}-depart-at-error` : `${baseId}-depart-at-hint`
-            }
-            className="h-10 min-w-0 flex-1 rounded-lg border border-neutral-300 bg-white px-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-          />
-          {departAt ? (
-            <button
-              type="button"
-              onClick={() => setDepartAt('')}
-              className="h-10 shrink-0 rounded-lg border border-neutral-300 bg-white px-3 text-sm hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
-            >
-              Sair agora
-            </button>
-          ) : null}
-        </div>
-        {errors.departAt ? null : (
-          <p id={`${baseId}-depart-at-hint`} className="mt-1 text-sm text-neutral-600">
-            Sem hora, a viagem parte agora.
-          </p>
-        )}
-        <FieldError id={`${baseId}-depart-at-error`} message={errors.departAt} />
-      </div>
-
-      <button
-        type="submit"
-        disabled={isSubmitting}
-        className="h-11 w-full rounded-lg bg-blue-700 px-4 font-semibold text-white hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 disabled:opacity-60"
-      >
-        {isSubmitting ? 'Buscando...' : 'Buscar itinerários'}
-      </button>
+      {error ? (
+        <p id={errorId} role="alert" className="mt-2 text-sm text-danger">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }

@@ -30,9 +30,12 @@ export function itineraryToGeoJson(itinerary: Itinerary | null): ItineraryFeatur
   };
 }
 
-/** Caixa [[oeste, sul], [leste, norte]] de todos os pontos do itinerário. */
-export function itineraryBounds(itinerary: Itinerary): [[number, number], [number, number]] | null {
-  const points = itinerary.legs.flatMap((leg) => leg.points);
+/** Caixa [[oeste, sul], [leste, norte]] dos pontos do itinerário (ou só dos trechos dados). */
+export function itineraryBounds(
+  itinerary: Itinerary,
+  legs: readonly Itinerary['legs'][number][] = itinerary.legs,
+): [[number, number], [number, number]] | null {
+  const points = legs.flatMap((leg) => leg.points);
   if (points.length === 0) return null;
   const lons = points.map((p) => p.lon);
   const lats = points.map((p) => p.lat);

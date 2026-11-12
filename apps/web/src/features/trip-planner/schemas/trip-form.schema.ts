@@ -1,60 +1,53 @@
 import { PlaceSchema, TripRequestSchema, type TripRequest } from '@baldeacao/types';
 import { z } from 'zod';
 
-// `departAt` vem de <input type="datetime-local">: "AAAA-MM-DDTHH:mm" na hora local, ou vazio.
-export const tripFormSchema = z
-  .object({
-    origin: PlaceSchema.nullable(),
-    destination: PlaceSchema.nullable(),
-    departAt: z.string(),
-  })
-  .superRefine((values, ctx) => {
-    if (!values.origin) {
-      ctx.addIssue({ code: 'custom', path: ['origin'], message: 'Escolha a origem na lista.' });
-    }
-    if (!values.destination) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['destination'],
-        message: 'Escolha o destino na lista.',
-      });
-    }
-    if (values.origin && values.destination && values.origin.id === values.destination.id) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['destination'],
-        message: 'Origem e destino precisam ser diferentes.',
-      });
-    }
-    if (values.departAt && Number.isNaN(new Date(values.departAt).getTime())) {
-      ctx.addIssue({ code: 'custom', path: ['departAt'], message: 'Hora de saída inválida.' });
-    }
-  });
+import { type TripTime, tripTimeFields } from '../utils/trip-time';
 
-export type TripFormValues = z.infer<typeof tripFormSchema>;
+export const MAX_ITINERARIES = 3;
 
-export type TripFormErrors = Partial<Record<keyof TripFormValues, string>>;
+export const tripFormSchema = z.object({
+  origin: PlaceSchema.nullable(),
+  destination: PlaceSchema.nullable(),
+});
 
+export type TripFormValues = z.infer<typeof tripFormSchema> & { time: TripTime };
+
+/** Pedido pronto, ainda incompleto (sem erro a mostrar) ou inválido (com mensagem). */
 export type TripFormResult =
-  { success: true; request: TripRequest } | { success: false; errors: TripFormErrors };
+  | { status: 'ready'; request: TripRequest }
+  | { status: 'incomplete' }
+  | { status: 'invalid'; message: string };
 
-/** Valida o formulário e monta o TripRequest do contrato; sem hora de saída, parte agora. */
-export function buildTripRequest(values: TripFormValues): TripFormResult {
+const SAME_PLACE_METERS = 30;
+
+function distanceMeters(a: { lat: number; lon: number }, b: { lat: number; lon: number }): number {
+  const rad = Math.PI / 180;
+  const x = (b.lon - a.lon) * rad * Math.cos(((a.lat + b.lat) / 2) * rad);
+  const y = (b.lat - a.lat) * rad;
+  return Math.hypot(x, y) * 6_371_000;
+}
+
+/**
+ * Monta o TripRequest assim que origem e destino estão definidos (a busca é automática).
+ * Sem hora escolhida, parte agora.
+ */
+export function buildTripRequest(values: TripFormValues, now: Date = new Date()): TripFormResult {
   const parsed = tripFormSchema.safeParse(values);
-  if (!parsed.success) {
-    const errors: TripFormErrors = {};
-    for (const issue of parsed.error.issues) {
-      const field = issue.path[0] as keyof TripFormValues;
-      errors[field] ??= issue.message;
-    }
-    return { success: false, errors };
+  if (!parsed.success) return { status: 'incomplete' };
+  const { origin, destination } = parsed.data;
+  if (!origin || !destination) return { status: 'incomplete' };
+  if (
+    origin.id === destination.id ||
+    distanceMeters(origin.location, destination.location) < SAME_PLACE_METERS
+  ) {
+    return { status: 'invalid', message: 'Origem e destino precisam ser diferentes.' };
   }
-
-  const { origin, destination, departAt } = parsed.data;
-  const request = TripRequestSchema.parse({
-    from: origin!.location,
-    to: destination!.location,
-    ...(departAt ? { departAt: new Date(departAt).toISOString() } : {}),
+  const request = TripRequestSchema.safeParse({
+    from: origin.location,
+    to: destination.location,
+    ...tripTimeFields(values.time, now),
+    maxItineraries: MAX_ITINERARIES,
   });
-  return { success: true, request };
+  if (!request.success) return { status: 'invalid', message: 'Hora da viagem inválida.' };
+  return { status: 'ready', request: request.data };
 }

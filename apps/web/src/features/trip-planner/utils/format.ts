@@ -1,7 +1,7 @@
 import type { Leg, TripMode } from '@baldeacao/types';
 
 // Horários exibidos no fuso da cidade atendida (São Paulo), não no do aparelho.
-const CITY_TIME_ZONE = 'America/Sao_Paulo';
+export const CITY_TIME_ZONE = 'America/Sao_Paulo';
 
 const timeFormatter = new Intl.DateTimeFormat('pt-BR', {
   hour: '2-digit',
@@ -9,8 +9,9 @@ const timeFormatter = new Intl.DateTimeFormat('pt-BR', {
   timeZone: CITY_TIME_ZONE,
 });
 
-export const WALK_COLOR = '#525252';
-export const FALLBACK_TRANSIT_COLOR = '#1D4ED8';
+// Cinza "muted" do tema e petróleo da marca (o paint do mapa não lê variáveis CSS).
+export const WALK_COLOR = '#4F5D67';
+export const FALLBACK_TRANSIT_COLOR = '#0B4F5C';
 
 export const MODE_LABELS: Record<TripMode, string> = {
   walk: 'A pé',
@@ -44,7 +45,40 @@ export function formatTransfers(transfers: number): string {
   return transfers === 1 ? '1 baldeação' : `${transfers} baldeações`;
 }
 
-/** Cor do trecho em "#RRGGBB": cinza na caminhada, cor da linha (GTFS) ou azul padrão. */
+export function formatStops(count: number): string {
+  return count === 1 ? '1 parada' : `${count} paradas`;
+}
+
+/** Nome curto da linha: "METRÔ L4" vira "L4", "CPTM L9" vira "L9". */
+export function shortRouteName(name: string | null): string | null {
+  if (!name) return null;
+  return name.replace(/^(METR[ÔO]|CPTM)\s+/i, '').trim() || name;
+}
+
+/** Nomes genéricos do OTP ("Destino", "Origem") viram texto corrido: "o destino", "a origem". */
+export function placeLabel(name: string): string {
+  const normalized = name.trim().toLocaleLowerCase('pt-BR');
+  if (normalized === 'destino') return 'o destino';
+  if (normalized === 'origem') return 'a origem';
+  return name;
+}
+
+export type DepartureTone = 'now' | 'soon' | 'later';
+
+/** "Sai agora" (menos de 2 min), "Sai em 4 min" (até 1 h) ou "Sai às 08:30". */
+export function formatDeparture(startAt: string, now: Date): { text: string; tone: DepartureTone } {
+  const minutes = Math.floor((Date.parse(startAt) - now.getTime()) / 60_000);
+  if (minutes < 2) return { text: 'Sai agora', tone: 'now' };
+  if (minutes <= 60) return { text: `Sai em ${minutes} min`, tone: 'soon' };
+  return { text: `Sai às ${formatTime(startAt)}`, tone: 'later' };
+}
+
+/** Minutos entre o fim de um trecho e o começo de outro (espera da baldeação). */
+export function minutesBetween(fromIso: string, toIso: string): number {
+  return Math.max(0, Math.round((Date.parse(toIso) - Date.parse(fromIso)) / 60_000));
+}
+
+/** Cor do trecho em "#RRGGBB": cinza na caminhada, cor da linha (GTFS) ou a cor da marca. */
 export function legColor(leg: Pick<Leg, 'mode' | 'routeColor'>): string {
   if (leg.mode === 'walk') return WALK_COLOR;
   return leg.routeColor ? `#${leg.routeColor.toUpperCase()}` : FALLBACK_TRANSIT_COLOR;
