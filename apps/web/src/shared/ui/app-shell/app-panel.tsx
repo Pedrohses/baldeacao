@@ -155,8 +155,9 @@ export function AppPanel({
       </h1>
       <div
         className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-4"
-        // Só a parte visível rola: sem isso o fim da lista ficaria fora da tela.
-        style={{ maxHeight: `calc(${height}px - var(--nav-h) - ${HANDLE_PX}px)` }}
+        // Ocupa exatamente a parte visível: o fim da lista não some sob a barra e listas
+        // suspensas (sugestões de lugar) têm espaço sem serem cortadas pela rolagem.
+        style={{ height: `calc(${height}px - var(--nav-h) - ${HANDLE_PX}px)` }}
       >
         {children}
       </div>
