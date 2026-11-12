@@ -5,6 +5,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import {
   InMemoryGeocodeCache,
+  InMemoryKnownPlaceRepository,
   fakeNominatimFetch,
   readNominatimFixture,
 } from '../../../../../test/support/geocoding-in-memory';
@@ -14,6 +15,7 @@ import { StopRepository } from '../../../transit/domain/ports/stop-repository.po
 import { SearchPlacesUseCase } from '../../application/use-cases/search-places.use-case';
 import { GeocodeCache } from '../../domain/ports/geocode-cache.port';
 import { Geocoder } from '../../domain/ports/geocoder.port';
+import { KnownPlaceRepository } from '../../domain/ports/known-place-repository.port';
 import { NominatimClient } from '../../infrastructure/adapters/nominatim.client';
 import { NominatimGeocoderAdapter } from '../../infrastructure/adapters/nominatim-geocoder.adapter';
 import { PlacesController } from './places.controller';
@@ -49,6 +51,7 @@ describe('HTTP do geocoding (contrato v2)', () => {
         },
         { provide: Geocoder, useClass: NominatimGeocoderAdapter },
         { provide: GeocodeCache, useValue: new InMemoryGeocodeCache() },
+        { provide: KnownPlaceRepository, useValue: new InMemoryKnownPlaceRepository() },
       ],
     }).compile();
     app = moduleRef.createNestApplication();

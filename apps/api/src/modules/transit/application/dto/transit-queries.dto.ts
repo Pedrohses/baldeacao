@@ -42,4 +42,6 @@ export interface SearchStopsByNameInput {
 
 export interface SearchStopsByNameOutput {
   stops: Stop[];
+  /** Ids (de `stops`) que são estações de metrô ou trem. */
+  stationIds: string[];
 }

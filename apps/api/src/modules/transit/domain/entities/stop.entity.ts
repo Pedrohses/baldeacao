@@ -33,3 +33,9 @@ export interface NearbyStop {
   stop: Stop;
   distanceM: number;
 }
+
+/** Parada achada pelo nome; `isStation` quando é estação de metrô ou trem. */
+export interface StopNameMatch {
+  stop: Stop;
+  isStation: boolean;
+}

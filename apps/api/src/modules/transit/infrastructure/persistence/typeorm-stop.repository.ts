@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import type { NearbyStop, Stop } from '../../domain/entities/stop.entity';
+import type { NearbyStop, StopNameMatch } from '../../domain/entities/stop.entity';
 import { StopRepository } from '../../domain/ports/stop-repository.port';
 import type { Coordinates } from '../../domain/value-objects/coordinates';
 import { StopMapper, type StopRow } from './transit.mapper';
@@ -55,7 +55,7 @@ const SEARCH_BY_NAME_SQL = `
                 ELSE 1 END AS station_dup
     FROM cand c CROSS JOIN q
   )
-  SELECT source_id, stop_id, code, name, description,
+  SELECT source_id, stop_id, code, name, description, is_station,
          ST_Y(location::geometry) AS lat, ST_X(location::geometry) AS lon
   FROM ranked
   WHERE station_dup = 1
@@ -81,12 +81,11 @@ export class TypeormStopRepository extends StopRepository {
     }));
   }
 
-  async searchByName(text: string, limit: number): Promise<Stop[]> {
-    const rows = await this.dataSource.query<StopRow[]>(SEARCH_BY_NAME_SQL, [
-      text,
-      limit,
-      text.length < 3,
-    ]);
-    return rows.map((row) => StopMapper.toDomain(row));
+  async searchByName(text: string, limit: number): Promise<StopNameMatch[]> {
+    const rows = await this.dataSource.query<Array<StopRow & { is_station: boolean }>>(
+      SEARCH_BY_NAME_SQL,
+      [text, limit, text.length < 3],
+    );
+    return rows.map((row) => ({ stop: StopMapper.toDomain(row), isStation: row.is_station }));
   }
 }

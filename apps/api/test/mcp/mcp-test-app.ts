@@ -10,6 +10,7 @@ import { SearchPlacesUseCase } from '../../src/modules/geocoding/application/use
 import type { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
 import { GeocodeCache } from '../../src/modules/geocoding/domain/ports/geocode-cache.port';
 import { Geocoder } from '../../src/modules/geocoding/domain/ports/geocoder.port';
+import { KnownPlaceRepository } from '../../src/modules/geocoding/domain/ports/known-place-repository.port';
 import { GeocodingModule } from '../../src/modules/geocoding/geocoding.module';
 import { PlanTripUseCase } from '../../src/modules/routing/application/use-cases/plan-trip.use-case';
 import type { Itinerary } from '../../src/modules/routing/domain/entities/itinerary.entity';
@@ -30,7 +31,7 @@ import { RouteRepository } from '../../src/modules/transit/domain/ports/route-re
 import { StopRepository } from '../../src/modules/transit/domain/ports/stop-repository.port';
 import { TransitModule } from '../../src/modules/transit/transit.module';
 import { InMemoryPositionsStore } from '../realtime/in-memory-realtime';
-import { InMemoryGeocodeCache } from '../support/geocoding-in-memory';
+import { InMemoryGeocodeCache, InMemoryKnownPlaceRepository } from '../support/geocoding-in-memory';
 import { InMemoryRouteRepository, InMemoryStopRepository } from '../support/transit-in-memory';
 
 /** Previsões por parada; uma parada mapeada para Error faz a fonte falhar. */
@@ -139,6 +140,7 @@ function buildTestingModule(fakes: McpFakes) {
       { provide: StopRepository, useValue: new InMemoryStopRepository() },
       { provide: Geocoder, useValue: fakes.geocoder },
       { provide: GeocodeCache, useValue: fakes.geocodeCache },
+      { provide: KnownPlaceRepository, useValue: new InMemoryKnownPlaceRepository() },
     ],
     exports: [SearchPlacesUseCase],
   })
