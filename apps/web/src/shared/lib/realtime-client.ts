@@ -35,7 +35,12 @@ export function createRealtimeClient({
 
   function getSocket(): RealtimeSocket {
     if (socket) return socket;
-    const created: RealtimeSocket = io(url, { autoConnect: false, ...socketOptions });
+    const created: RealtimeSocket = io(url, {
+      autoConnect: false,
+      // Direto por WebSocket: o polling inicial do Engine.IO repetia requisições à toa.
+      transports: ['websocket'],
+      ...socketOptions,
+    });
 
     // O servidor perde as salas ao reconectar: reassina os canais ativos.
     created.on('connect', () => {
