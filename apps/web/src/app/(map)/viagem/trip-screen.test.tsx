@@ -18,7 +18,7 @@ const planned = (itineraries: Itinerary[], notices: PlanTripNotice[] = []) => ({
 });
 
 vi.mock('@/shared/ui/map', () => ({
-  BaseMap: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
+  MapLayers: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
   CenterPicker: ({ onConfirm }: { onConfirm: (c: { lat: number; lon: number }) => void }) => (
     <button type="button" onClick={() => onConfirm({ lat: -23.55, lon: -46.63 })}>
       confirmar mira

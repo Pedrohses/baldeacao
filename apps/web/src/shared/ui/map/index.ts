@@ -21,3 +21,4 @@ export {
   USER_LOCATION_ZOOM,
   UserLocationLayer,
 } from './user-location';
+export { MapLayers, MapLayersOutlet, resetMapLayers } from './map-layers';

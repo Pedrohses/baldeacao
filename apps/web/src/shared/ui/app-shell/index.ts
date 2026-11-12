@@ -1,6 +1,6 @@
 export { AppNav, NAV_ITEMS, isActivePath } from './app-nav';
 export { AppPanel, type AppPanelProps } from './app-panel';
-export { AppShell } from './app-shell';
+export { AppShell, SCREEN_CLASS } from './app-shell';
 export {
   DESKTOP_PANEL_WIDTH_PX,
   LOW_SNAP_PX,

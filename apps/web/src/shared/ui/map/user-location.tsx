@@ -1,6 +1,6 @@
 'use client';
 
-import { type CSSProperties, useEffect, useRef } from 'react';
+import { type CSSProperties, useEffect } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
 import { locate, locateIfPermitted, useGeolocation } from '@/shared/hooks/use-geolocation';
@@ -10,6 +10,9 @@ import { useMapColors } from './map-colors';
 
 export const USER_LOCATION_SOURCE_ID = 'user-location';
 export const USER_LOCATION_ZOOM = 15;
+
+// O mapa persiste entre as abas: centralizar no usuário só na primeira abertura, não a cada volta.
+let centeredOnce = false;
 
 /** Ponto azul do usuário (anel claro + miolo da marca). Fica dentro do BaseMap. */
 export function UserLocationLayer() {
@@ -57,11 +60,9 @@ export interface LocateButtonProps {
 export function LocateButton({ className = '', style, centerOnMount = true }: LocateButtonProps) {
   const { current: map } = useMap();
   const { status } = useGeolocation();
-  const centeredRef = useRef(false);
-
   useEffect(() => {
-    if (!map || !centerOnMount || centeredRef.current) return;
-    centeredRef.current = true;
+    if (!map || !centerOnMount || centeredOnce) return;
+    centeredOnce = true;
     void locateIfPermitted().then((position) => {
       if (position) map.jumpTo({ center: [position.lon, position.lat], zoom: USER_LOCATION_ZOOM });
     });

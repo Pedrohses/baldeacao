@@ -5,20 +5,20 @@ import Link from 'next/link';
 import { useState } from 'react';
 
 import { LineHeader, RouteShapeLayer, useLineDetails } from '@/features/lines';
-import { MapViewportSync, StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
+import { StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
 import { PlaceKindIcon, useMapPointPlace, useRecentPlaces } from '@/features/place-search';
 import { NearbyStopsList, STOPS_MIN_ZOOM, StopSheet, StopsLayer } from '@/features/stops';
 import { buildTripHref } from '@/features/trip-planner';
 import { useGeolocation } from '@/shared/hooks/use-geolocation';
 import { useIsDesktop } from '@/shared/hooks/use-media-query';
-import { AppPanel, LOW_SNAP_PX, type PanelSnap } from '@/shared/ui/app-shell';
+import { AppPanel, LOW_SNAP_PX, type PanelSnap, SCREEN_CLASS } from '@/shared/ui/app-shell';
 import { CloseIcon, SearchIcon } from '@/shared/ui/icons';
 import {
-  BaseMap,
   DroppedPin,
   LocateButton,
   MAP_COLORS,
   MapFlyTo,
+  MapLayers,
   MapLongPress,
   UserLocationLayer,
 } from '@/shared/ui/map';
@@ -178,9 +178,8 @@ export function MapScreen() {
   }
 
   return (
-    <main className="relative h-full w-full">
-      <BaseMap initialViewState={viewport} showNavigation={isDesktop}>
-        <MapViewportSync />
+    <main className={SCREEN_CLASS}>
+      <MapLayers>
         <MapLongPress onLongPress={setPin} />
         <MapFlyTo target={flyTarget} />
         <RouteShapeLayer routeId={routeId} />
@@ -206,7 +205,7 @@ export function MapScreen() {
           // No celular fica logo acima do painel na altura baixa.
           {...(isDesktop ? {} : { style: { bottom: LOW_SNAP_PX + 12 } })}
         />
-      </BaseMap>
+      </MapLayers>
       <StaleDataNotice />
       <AppPanel title="Mapa de São Paulo" titleHidden snap={snap} onSnapChange={setSnap}>
         {content}

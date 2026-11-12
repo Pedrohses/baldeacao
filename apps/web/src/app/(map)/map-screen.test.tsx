@@ -25,7 +25,7 @@ vi.mock('react-map-gl/maplibre', () => ({
 
 // Mapa sem WebGL: o toque longo vira um botão de teste e o alfinete mostra só o cartão.
 vi.mock('@/shared/ui/map', () => ({
-  BaseMap: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
+  MapLayers: ({ children }: { children?: ReactNode }) => <div data-testid="map">{children}</div>,
   MAP_COLORS: { brand: '#C7361F' },
   useMapColors: () => ({
     brand: '#C7361F',
