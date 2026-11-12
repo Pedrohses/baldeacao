@@ -124,9 +124,13 @@ Três agentes em paralelo (fases 4 e 5).
 | A3-03 ✅ | A3 | Medir memória do OTP com o grafo de SP e registrar no `projeto.md` (via orquestrador) | A3-02 | Número medido e anotado |
 | A4-01 ✅ | A4 | Servidor MCP (Streamable HTTP) montado em `src/mcp`, com limite de requisições por IP | Portão 1 | Inspector do MCP lista o servidor |
 | A4-02 ✅ | A4 | Tools `buscar_linha`, `paradas_proximas`, `previsao_chegada`, `onibus_da_linha`, `status_dados` | A4-01 | Testes e2e com o cliente do SDK passam |
-| A4-03 | A4 | Tool `planejar_viagem` sobre os casos de uso do A3 | A3-02, A4-01 | Tool devolve itinerário em linguagem clara |
+| A4-03 ✅ | A4 | Tool `planejar_viagem` sobre os casos de uso do A3 | A3-02, A4-01 | Tool devolve itinerário em linguagem clara |
 | F3-01 ✅ | F3 | `place-search`: `PlaceAutocomplete` com debounce | Portão 1 | Teste com service mockado |
 | F3-02 ✅ | F3 | `trip-planner`: `TripForm`, `ItineraryList` e `ItineraryLayer`, rota `/viagem` | F3-01 | Itinerário de fixture aparece no mapa e na lista |
+
+**Registro da Onda 2 (2026-11-12):** as 10 tasks integradas (api 252 testes, web 83). OTP 2.10.0 no compose (perfil `otp`, `pnpm otp:prepare`). Verificado com dados reais: `POST /trips/plan` Morumbis -> Tietê com 3 itinerários (L4 + L1; uma opção com ônibus 746H-10); busca de lugar real com cache (3 ms na repetição); tool `planejar_viagem` via MCP respondendo em português; fluxo completo em `/viagem` no Chrome headless, sem erros.
+Acabamento pendente no front (`trip-planner`): ícone de metrô/trem usa o de ônibus; "Metrô METRÔ L4" repetido e "até Destino" (limpar como na tool MCP); `fitBounds` sem padding para o painel lateral.
+Decisões da Onda 2 fora dos documentos: MCP stateless com resposta JSON, 60 req/min por IP (CF-Connecting-IP só vindo do loopback); `planConnection` do OTP; cache do Nominatim 30 dias (1 dia sem resultado); `apiPost` no api-client do web; o filtro de erros HTTP ainda está duplicado nos controllers do A3 (mover para `shared/presentation`).
 
 **Portão 2 (integração):** o orquestrador expõe a API local por Cloudflare Tunnel, conecta o servidor MCP no Claude e confere: o Claude responde previsão de chegada e planeja "do Morumbis ao Tietê" com dado real. Esse é o post 2.
 
