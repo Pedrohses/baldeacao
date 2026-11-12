@@ -132,6 +132,8 @@ Três agentes em paralelo (fases 4 e 5).
 Acabamento pendente no front (`trip-planner`): ícone de metrô/trem usa o de ônibus; "Metrô METRÔ L4" repetido e "até Destino" (limpar como na tool MCP); `fitBounds` sem padding para o painel lateral.
 Decisões da Onda 2 fora dos documentos: MCP stateless com resposta JSON, 60 req/min por IP (CF-Connecting-IP só vindo do loopback); `planConnection` do OTP; cache do Nominatim 30 dias (1 dia sem resultado); `apiPost` no api-client do web; o filtro de erros HTTP ainda está duplicado nos controllers do A3 (mover para `shared/presentation`).
 
+**Redesign de UX/UI (2026-11-12):** especificação em `.claude/code-architecture/redesign-ux.md`; P0 e P1 integrados (shell com abas, "Para onde?", paradas perto, Ir para cá/Sair daqui, busca que aceita o digitado, /viagem com busca automática e linha do tempo, heatmap de ônibus, tokens, Atkinson, modo escuro, favicon). Autocompletar usa busca local de paradas/estações (`mode=quick`, 2 a 18 ms); Nominatim só na busca confirmada (`mode=full`), por exigência da política dele. REST e Socket.IO comprimidos (posições de 2,2 MB para 184 KB). P2 pendente: aba Linhas, mapa persistente entre abas, estilo escuro do mapa, posições filtradas por área, `GET /places/reverse`.
+
 **Portão 2 (integração):** o orquestrador expõe a API local por Cloudflare Tunnel, conecta o servidor MCP no Claude e confere: o Claude responde previsão de chegada e planeja "do Morumbis ao Tietê" com dado real. Esse é o post 2.
 
 ## Onda 3 - Experiência
