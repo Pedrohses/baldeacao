@@ -12,6 +12,10 @@ import {
   PlanTripUseCase,
 } from '../../application/use-cases/plan-trip.use-case';
 import type { Itinerary, Leg, TripMode } from '../../domain/entities/itinerary.entity';
+import {
+  type PlanTripNotice,
+  SERVICE_AREA_RADIUS_M,
+} from '../../domain/value-objects/plan-trip-notice';
 import { toTripDateTime } from './trip-time';
 
 const timeInput = z.string().trim().min(1).max(40).optional();
@@ -58,10 +62,12 @@ const outputSchema = {
   cidade: z.string(),
   origem: placeOutput,
   destino: placeOutput,
+  avisos: z.array(z.enum(['origin_outside_service_area', 'destination_outside_service_area'])),
   itinerarios: z.array(
     z.object({
       saida: z.string(),
       chegada: z.string(),
+      tambem_as: z.array(z.string()),
       duracao_min: z.number(),
       baldeacoes: z.number(),
       caminhada_metros: z.number(),
@@ -120,7 +126,8 @@ export class PlanTripTool extends McpTool {
           'Planeja uma viagem de transporte público (ônibus, metrô e trem, com caminhada) entre dois lugares ' +
           'informados em texto, saindo agora, a partir de uma hora ou para chegar até uma hora ' +
           '(ex.: "Como chego do Tatuapé à Paulista saindo às 8h?"). Devolve as opções com duração, ' +
-          'horários, baldeações e cada trecho.',
+          'horários, baldeações e cada trecho, as saídas seguintes com as mesmas linhas ("também às") ' +
+          'e avisos quando a origem ou o destino ficam longe de qualquer parada.',
         inputSchema,
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: true },
@@ -135,7 +142,7 @@ export class PlanTripTool extends McpTool {
           const to = await this.locate(destino);
           if (!to) return toolError(notFound('o destino', destino));
 
-          const { itineraries } = await this.planTrip.execute({
+          const { itineraries, notices } = await this.planTrip.execute({
             from: { lat: from.latitude, lon: from.longitude },
             to: { lat: to.latitude, lon: to.longitude },
             departAt: saida ? toTripDateTime(saida, city.timeZone) : undefined,
@@ -146,23 +153,26 @@ export class PlanTripTool extends McpTool {
             cidade: city.name,
             origem: from,
             destino: to,
+            avisos: notices,
             itinerarios: itineraries.map(toItineraryOutput),
           };
 
           const route = `de ${from.nome} para ${to.nome}`;
+          const warnings = describeNotices(notices, from, to, city.name);
           if (itineraries.length === 0) {
-            return toolText(
+            const empty =
               `Não encontrei itinerário de transporte público ${route} nesse horário. ` +
-                'Tente outro horário ou lugares mais próximos de uma linha.',
-              structured,
-            );
+              (notices.length > 0
+                ? 'Escolha um ponto mais perto de uma linha.'
+                : 'Tente outro horário ou lugares mais próximos de uma linha.');
+            return toolText([...warnings, empty].join('\n\n'), structured);
           }
           const blocks = itineraries.map((it, i) => describeItinerary(it, i + 1, city.timeZone));
           const header =
             itineraries.length === 1
               ? `1 opção ${route}:`
               : `${itineraries.length} opções ${route}:`;
-          return toolText([header, ...blocks].join('\n\n'), structured);
+          return toolText([...warnings, header, ...blocks].join('\n\n'), structured);
         }),
     );
   }
@@ -214,12 +224,43 @@ function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(1).replace('.', ',')} km`;
 }
 
+/** "08:10", "08:10 e 08:20", "08:10, 08:20 e 08:30". */
+function joinClocks(isos: string[], timeZone: string): string {
+  const clocks = isos.map((iso) => formatClock(iso, timeZone));
+  if (clocks.length <= 1) return clocks.join('');
+  return `${clocks.slice(0, -1).join(', ')} e ${clocks[clocks.length - 1]}`;
+}
+
+/** Explica em português cada aviso de área de atendimento. */
+function describeNotices(
+  notices: PlanTripNotice[],
+  from: PlaceOutput,
+  to: PlaceOutput,
+  cityName: string,
+): string[] {
+  const radius = `${SERVICE_AREA_RADIUS_M / 1000} km`;
+  return notices.map((notice) => {
+    const [which, place] =
+      notice === 'origin_outside_service_area' ? ['da origem', from] : ['do destino', to];
+    return (
+      `Atenção: não há parada de ônibus, metrô ou trem a até ${radius} ${which} (${place.nome}). ` +
+      `O lugar pode estar fora da área atendida em ${cityName}, ` +
+      'e o trajeto pode exigir uma caminhada longa até a primeira parada.'
+    );
+  });
+}
+
 function describeItinerary(it: Itinerary, index: number, timeZone: string): string {
   const transfers =
     it.transfers === 0 ? 'sem baldeação' : plural(it.transfers, 'baldeação', 'baldeações');
+  const also =
+    it.alsoDepartsAt && it.alsoDepartsAt.length > 0
+      ? ` Também às ${joinClocks(it.alsoDepartsAt, timeZone)}, com as mesmas linhas.`
+      : '';
   const header =
     `Opção ${index}: ${formatDuration(it.durationS)}, saída ${formatClock(it.startAt, timeZone)}, ` +
-    `chegada ${formatClock(it.endAt, timeZone)}, ${transfers}, ${formatDistance(it.walkDistanceM)} a pé.`;
+    `chegada ${formatClock(it.endAt, timeZone)}, ${transfers}, ${formatDistance(it.walkDistanceM)} a pé.` +
+    also;
   const steps = it.legs.map((leg, i) => `${i + 1}. ${describeLeg(leg, timeZone)}`);
   return [header, ...steps].join('\n');
 }
@@ -250,6 +291,7 @@ function toItineraryOutput(it: Itinerary) {
   return {
     saida: it.startAt,
     chegada: it.endAt,
+    tambem_as: it.alsoDepartsAt ?? [],
     duracao_min: minutes(it.durationS),
     baldeacoes: it.transfers,
     caminhada_metros: Math.round(it.walkDistanceM),

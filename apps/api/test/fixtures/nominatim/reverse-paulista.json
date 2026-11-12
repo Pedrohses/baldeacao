@@ -1,0 +1,29 @@
+{
+  "place_id": 11843210,
+  "licence": "Data © OpenStreetMap contributors, ODbL 1.0. http://osm.org/copyright",
+  "osm_type": "way",
+  "osm_id": 4335741,
+  "lat": "-23.5632871",
+  "lon": "-46.6544130",
+  "category": "highway",
+  "type": "primary",
+  "place_rank": 26,
+  "importance": 0.10667666666666664,
+  "addresstype": "road",
+  "name": "Avenida Paulista",
+  "display_name": "Avenida Paulista, Bela Vista, São Paulo, Região Imediata de São Paulo, Região Metropolitana de São Paulo, Região Geográfica Intermediária de São Paulo, São Paulo, Região Sudeste, 01310-200, Brasil",
+  "address": {
+    "road": "Avenida Paulista",
+    "suburb": "Bela Vista",
+    "city": "São Paulo",
+    "municipality": "Região Imediata de São Paulo",
+    "state_district": "Região Metropolitana de São Paulo",
+    "state": "São Paulo",
+    "ISO3166-2-lvl4": "BR-SP",
+    "region": "Região Sudeste",
+    "postcode": "01310-200",
+    "country": "Brasil",
+    "country_code": "br"
+  },
+  "boundingbox": ["-23.5653660", "-23.5612035", "-46.6578250", "-46.6510018"]
+}

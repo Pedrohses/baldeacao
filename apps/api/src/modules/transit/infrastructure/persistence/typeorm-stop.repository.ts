@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import type { NearbyStop, Stop } from '../../domain/entities/stop.entity';
+import type { NearbyStop, StopNameMatch } from '../../domain/entities/stop.entity';
 import { StopRepository } from '../../domain/ports/stop-repository.port';
 import type { Coordinates } from '../../domain/value-objects/coordinates';
 import { StopMapper, type StopRow } from './transit.mapper';
@@ -55,12 +55,19 @@ const SEARCH_BY_NAME_SQL = `
                 ELSE 1 END AS station_dup
     FROM cand c CROSS JOIN q
   )
-  SELECT source_id, stop_id, code, name, description,
+  SELECT source_id, stop_id, code, name, description, is_station,
          ST_Y(location::geometry) AS lat, ST_X(location::geometry) AS lon
   FROM ranked
   WHERE station_dup = 1
   ORDER BY is_station DESC, rank, length(name), name, stop_id
   LIMIT $2`;
+
+// EXISTS para no primeiro achado; ST_DWithin usa o índice GIST de stops.location.
+const EXISTS_WITHIN_SQL = `
+  SELECT EXISTS (
+    SELECT 1 FROM stops s
+    WHERE ST_DWithin(s.location, ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography, $3)
+  ) AS found`;
 
 @Injectable()
 export class TypeormStopRepository extends StopRepository {
@@ -81,12 +88,20 @@ export class TypeormStopRepository extends StopRepository {
     }));
   }
 
-  async searchByName(text: string, limit: number): Promise<Stop[]> {
-    const rows = await this.dataSource.query<StopRow[]>(SEARCH_BY_NAME_SQL, [
-      text,
-      limit,
-      text.length < 3,
+  async searchByName(text: string, limit: number): Promise<StopNameMatch[]> {
+    const rows = await this.dataSource.query<Array<StopRow & { is_station: boolean }>>(
+      SEARCH_BY_NAME_SQL,
+      [text, limit, text.length < 3],
+    );
+    return rows.map((row) => ({ stop: StopMapper.toDomain(row), isStation: row.is_station }));
+  }
+
+  async existsWithin(center: Coordinates, radiusM: number): Promise<boolean> {
+    const [row] = await this.dataSource.query<Array<{ found: boolean }>>(EXISTS_WITHIN_SQL, [
+      center.lon,
+      center.lat,
+      radiusM,
     ]);
-    return rows.map((row) => StopMapper.toDomain(row));
+    return row?.found === true;
   }
 }

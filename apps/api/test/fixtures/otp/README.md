@@ -11,6 +11,11 @@ em polyline do Google (precisão 5).
   segundo só de ônibus (875A-10, sem cor).
 - `plan-connection-no-route.json`: `routingErrors` com `NO_TRANSIT_CONNECTION` e `edges` vazio.
 - `graphql-validation-error.json`: erro de validação do GraphQL, sem `data`.
+- `plan-connection-repeated-departures.json`: resposta real do OTP local (2.10, GTFS da
+  SPTrans) para Av. Paulista 1578 até o Morumbi saindo às 14h, com `first: 12`. As mesmas
+  linhas se repetem em saídas a cada minuto (L4 + 746H-10 seis vezes, 917H-10 e 857R-10 duas)
+  e há uma opção só de ônibus (6262-10 + 775F-10). `legGeometry` foi zerada para encolher o
+  arquivo (o mapper cai na reta entre as pontas).
 
 Montadas no formato real (o OTP ainda não roda localmente); paradas e horários são
 ilustrativos. Regerar quando o OTP local subir, com a mesma consulta. Os testes nunca chamam

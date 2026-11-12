@@ -1,4 +1,4 @@
-import type { Place } from '../entities/place.entity';
+import type { Coordinates, Place } from '../entities/place.entity';
 
 /** Fonte externa de geocodificação (texto livre para lugares). */
 export abstract class Geocoder {
@@ -7,4 +7,7 @@ export abstract class Geocoder {
    * Falha da fonte vira SourceUnavailableError.
    */
   abstract search(query: string, limit: number): Promise<Place[]>;
+
+  /** Lugar (endereço ou ponto de interesse) mais próximo do ponto; null quando não há. */
+  abstract reverse(location: Coordinates): Promise<Place | null>;
 }

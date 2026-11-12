@@ -10,6 +10,7 @@ import { SearchPlacesUseCase } from '../../src/modules/geocoding/application/use
 import type { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
 import { GeocodeCache } from '../../src/modules/geocoding/domain/ports/geocode-cache.port';
 import { Geocoder } from '../../src/modules/geocoding/domain/ports/geocoder.port';
+import { KnownPlaceRepository } from '../../src/modules/geocoding/domain/ports/known-place-repository.port';
 import { GeocodingModule } from '../../src/modules/geocoding/geocoding.module';
 import { PlanTripUseCase } from '../../src/modules/routing/application/use-cases/plan-trip.use-case';
 import type { Itinerary } from '../../src/modules/routing/domain/entities/itinerary.entity';
@@ -22,6 +23,7 @@ import { RealtimeModule } from '../../src/modules/realtime/realtime.module';
 import { FindNearbyStopsUseCase } from '../../src/modules/transit/application/use-cases/find-nearby-stops.use-case';
 import { GetLineDetailsUseCase } from '../../src/modules/transit/application/use-cases/get-line-details.use-case';
 import { GetStopArrivalsUseCase } from '../../src/modules/transit/application/use-cases/get-stop-arrivals.use-case';
+import { HasNearbyStopUseCase } from '../../src/modules/transit/application/use-cases/has-nearby-stop.use-case';
 import { SearchLinesUseCase } from '../../src/modules/transit/application/use-cases/search-lines.use-case';
 import type { Arrival } from '../../src/modules/transit/domain/entities/arrival.entity';
 import { ArrivalsCache } from '../../src/modules/transit/domain/ports/arrivals-cache.port';
@@ -30,7 +32,7 @@ import { RouteRepository } from '../../src/modules/transit/domain/ports/route-re
 import { StopRepository } from '../../src/modules/transit/domain/ports/stop-repository.port';
 import { TransitModule } from '../../src/modules/transit/transit.module';
 import { InMemoryPositionsStore } from '../realtime/in-memory-realtime';
-import { InMemoryGeocodeCache } from '../support/geocoding-in-memory';
+import { InMemoryGeocodeCache, InMemoryKnownPlaceRepository } from '../support/geocoding-in-memory';
 import { InMemoryRouteRepository, InMemoryStopRepository } from '../support/transit-in-memory';
 
 /** Previsões por parada; uma parada mapeada para Error faz a fonte falhar. */
@@ -76,6 +78,10 @@ export class InMemoryGeocoder extends Geocoder {
     }
     return Promise.resolve([]);
   }
+
+  reverse(): Promise<Place | null> {
+    return Promise.resolve(null);
+  }
 }
 
 /** Planejador falso com resultado trocável e registro das consultas. */
@@ -91,12 +97,23 @@ export class ControllableTripPlanner extends TripPlanner {
   }
 }
 
+/** Paradas do transit com área de atendimento controlável (pontos fora do raio de propósito). */
+export class ServiceAreaStopRepository extends InMemoryStopRepository {
+  /** Coordenadas ("lat,lon") tratadas como sem parada perto. */
+  readonly outside = new Set<string>();
+
+  override existsWithin(center: { lat: number; lon: number }): Promise<boolean> {
+    return Promise.resolve(!this.outside.has(`${center.lat},${center.lon}`));
+  }
+}
+
 export interface McpFakes {
   arrivals: InMemoryArrivalsProvider;
   positions: FlakyPositionsStore;
   geocoder: InMemoryGeocoder;
   geocodeCache: InMemoryGeocodeCache;
   planner: ControllableTripPlanner;
+  stops: ServiceAreaStopRepository;
 }
 
 /** Monta o McpModule real com os módulos de contexto trocados por versões em memória. */
@@ -108,8 +125,9 @@ function buildTestingModule(fakes: McpFakes) {
       FindNearbyStopsUseCase,
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
+      HasNearbyStopUseCase,
       { provide: RouteRepository, useValue: new InMemoryRouteRepository() },
-      { provide: StopRepository, useValue: new InMemoryStopRepository() },
+      { provide: StopRepository, useValue: fakes.stops },
       { provide: ArrivalsProvider, useValue: fakes.arrivals },
       { provide: ArrivalsCache, useValue: new NoopArrivalsCache() },
     ],
@@ -119,6 +137,7 @@ function buildTestingModule(fakes: McpFakes) {
       FindNearbyStopsUseCase,
       GetStopArrivalsUseCase,
       SearchStopsByNameUseCase,
+      HasNearbyStopUseCase,
     ],
   })
   class FakeTransitModule {}
@@ -139,13 +158,19 @@ function buildTestingModule(fakes: McpFakes) {
       { provide: StopRepository, useValue: new InMemoryStopRepository() },
       { provide: Geocoder, useValue: fakes.geocoder },
       { provide: GeocodeCache, useValue: fakes.geocodeCache },
+      { provide: KnownPlaceRepository, useValue: new InMemoryKnownPlaceRepository() },
     ],
     exports: [SearchPlacesUseCase],
   })
   class FakeGeocodingModule {}
 
   @Module({
-    providers: [PlanTripUseCase, { provide: TripPlanner, useValue: fakes.planner }],
+    providers: [
+      PlanTripUseCase,
+      HasNearbyStopUseCase,
+      { provide: StopRepository, useValue: fakes.stops },
+      { provide: TripPlanner, useValue: fakes.planner },
+    ],
     exports: [PlanTripUseCase],
   })
   class FakeRoutingModule {}
@@ -173,6 +198,7 @@ export async function startMcpApp(): Promise<{
     geocoder: new InMemoryGeocoder(),
     geocodeCache: new InMemoryGeocodeCache(),
     planner: new ControllableTripPlanner(),
+    stops: new ServiceAreaStopRepository(),
   };
   const moduleRef = await buildTestingModule(fakes).compile();
   const app = moduleRef.createNestApplication({ logger: false });

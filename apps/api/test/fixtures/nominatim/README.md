@@ -7,6 +7,9 @@ no formato jsonv2 do Nominatim 5.x (campos `category`, `addresstype`, `address`,
   (`leisure/stadium`, vira `poi`), ponto de ônibus (`highway/bus_stop`, vira `stop`), rua
   (`highway/residential`, vira `address`) e estação (`railway/station`, vira `stop`).
 - `search-empty.json`: busca sem resultado (o Nominatim devolve `[]`).
+- `reverse-paulista.json`: `GET /reverse?format=jsonv2&zoom=18&addressdetails=1` num ponto da
+  Av. Paulista (um objeto, não lista; rua vira `address`).
+- `reverse-unable.json`: reverse sem lugar (o Nominatim devolve `{ "error": ... }` com HTTP 200).
 
 Montadas à mão no formato real (sem chamar o Nominatim público); ids e coordenadas
 são do OSM, mas podem ter mudado desde então. Os testes nunca chamam o Nominatim real.

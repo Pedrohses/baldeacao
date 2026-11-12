@@ -42,4 +42,6 @@ export interface Itinerary {
   /** Baldeações. */
   transfers: number;
   legs: Leg[];
+  /** Saídas seguintes com os mesmos trechos (mesmas linhas), ISO 8601; ausente quando não há. */
+  alsoDepartsAt?: string[];
 }

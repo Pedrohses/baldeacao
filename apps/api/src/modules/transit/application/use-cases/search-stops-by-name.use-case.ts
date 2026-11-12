@@ -23,6 +23,10 @@ export class SearchStopsByNameUseCase {
       Math.max(1, Math.trunc(input.limit ?? SEARCH_STOPS_DEFAULT_LIMIT)),
       SEARCH_STOPS_MAX_LIMIT,
     );
-    return { stops: await this.stops.searchByName(text, limit) };
+    const matches = await this.stops.searchByName(text, limit);
+    return {
+      stops: matches.map((match) => match.stop),
+      stationIds: matches.filter((match) => match.isStation).map((match) => match.stop.id),
+    };
   }
 }

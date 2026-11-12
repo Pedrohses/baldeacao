@@ -132,6 +132,11 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
     it('respeita o limite', async () => {
       expect(await stops.findNearby(paulista, 50_000, 3)).toHaveLength(3);
     });
+
+    it('existsWithin diz se há parada no raio', async () => {
+      expect(await stops.existsWithin({ lat: -23.565, lon: -46.6559 }, 1000)).toBe(true);
+      expect(await stops.existsWithin({ lat: -24.2, lon: -46.6559 }, 1000)).toBe(false);
+    });
   });
 
   describe('TypeormStopRepository.searchByName (pg_trgm + unaccent)', () => {
@@ -153,18 +158,19 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
 
     it('acha por trecho do nome sem diferenciar acento nem caixa', async () => {
       const found = await stops.searchByName('PAULISTA', 8);
-      expect(found.map((s) => s.id)).toEqual(['4301848']);
-      expect((await stops.searchByName('se', 8))[0]?.name).toBe('Sé');
-      expect((await stops.searchByName('conceicao', 8)).map((s) => s.id)).toEqual(['B2']);
+      expect(found.map((s) => s.stop.id)).toEqual(['4301848']);
+      expect((await stops.searchByName('se', 8))[0]?.stop.name).toBe('Sé');
+      expect((await stops.searchByName('conceicao', 8)).map((s) => s.stop.id)).toEqual(['B2']);
     });
 
     it('estações primeiro, uma por nome, depois nomes mais curtos', async () => {
       const found = await stops.searchByName('luz', 8);
-      expect(found.map((s) => s.id)).toEqual(['M1', 'B1', 'B2']);
+      expect(found.map((s) => s.stop.id)).toEqual(['M1', 'B1', 'B2']);
+      expect(found.map((s) => s.isStation)).toEqual([true, false, false]);
     });
 
     it('tolera erro de digitação e respeita o limite', async () => {
-      expect((await stops.searchByName('paulistta', 8)).map((s) => s.id)).toContain('4301848');
+      expect((await stops.searchByName('paulistta', 8)).map((s) => s.stop.id)).toContain('4301848');
       expect(await stops.searchByName('av', 2)).toHaveLength(2);
     });
 

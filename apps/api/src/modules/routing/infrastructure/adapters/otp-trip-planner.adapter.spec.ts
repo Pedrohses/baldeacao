@@ -1,6 +1,7 @@
 import { ItinerarySchema } from '@baldeacao/types';
 import { fakeOtpFetch, readOtpFixture } from '../../../../../test/support/routing-in-memory';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
+import { groupItineraries } from '../../domain/value-objects/itinerary-grouping';
 import type { TripPlanQuery } from '../../domain/value-objects/trip-plan-query';
 import { OtpClient } from './otp.client';
 import { stripFeedPrefix, tripModeFromOtp } from './otp-itinerary.mapper';
@@ -12,6 +13,7 @@ const QUERY: TripPlanQuery = {
   to: { lat: -23.5342, lon: -46.6339 },
   time: { departAt: '2026-11-12T08:00:00-03:00' },
   maxItineraries: 3,
+  candidates: 12,
 };
 
 function plannerWith(fetchFn: typeof fetch, baseUrl: string | null = 'http://otp.test:8080') {
@@ -40,7 +42,7 @@ describe('OtpTripPlannerAdapter', () => {
           location: { coordinate: { latitude: -23.5342, longitude: -46.6339 } },
         },
         dateTime: { earliestDeparture: '2026-11-12T08:00:00-03:00' },
-        first: 3,
+        first: 12,
       },
     });
   });
@@ -161,5 +163,33 @@ describe('mapeamento do OTP', () => {
     expect(stripFeedPrefix('1:875A-10')).toBe('875A-10');
     expect(stripFeedPrefix('sptrans:A:B')).toBe('A:B');
     expect(stripFeedPrefix('875A-10')).toBe('875A-10');
+  });
+
+  it('saídas repetidas do OTP local (fixture real, 12 itinerários) viram 4 opções distintas', async () => {
+    const fetchFn = fakeOtpFetch(readOtpFixture('plan-connection-repeated-departures.json'));
+    const raw = await plannerWith(fetchFn).plan(QUERY);
+    expect(raw).toHaveLength(12);
+
+    const grouped = groupItineraries(raw, 5);
+    const lines = grouped.map((it) =>
+      it.legs.filter((leg) => leg.mode !== 'walk').map((leg) => leg.routeShortName),
+    );
+    expect(lines).toEqual([
+      ['METRÔ L4', '746H-10'],
+      ['917H-10', 'METRÔ L4', '746H-10'],
+      ['857R-10', 'METRÔ L4', '746H-10'],
+      ['6262-10', '775F-10'],
+    ]);
+    expect(grouped.map((it) => it.startAt)).toEqual(
+      Array(4).fill('2026-11-12T14:00:00-03:00') as string[],
+    );
+    expect(grouped.map((it) => it.alsoDepartsAt)).toEqual([
+      ['2026-11-12T14:01:00-03:00', '2026-11-12T14:02:00-03:00', '2026-11-12T14:03:00-03:00'],
+      ['2026-11-12T14:01:00-03:00'],
+      ['2026-11-12T14:01:00-03:00'],
+      undefined,
+    ]);
+    for (const it of grouped) expect(() => ItinerarySchema.parse(it)).not.toThrow();
+    expect(groupItineraries(raw, 2)).toHaveLength(2);
   });
 });

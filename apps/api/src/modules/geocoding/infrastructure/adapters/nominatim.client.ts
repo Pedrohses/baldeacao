@@ -43,12 +43,7 @@ export class NominatimClient {
   }
 
   async search(query: string, limit: number): Promise<NominatimSearchResult[]> {
-    if (!this.options.userAgent?.trim()) {
-      throw new SourceUnavailableError(
-        NOMINATIM_SOURCE,
-        'A busca de lugares está desativada: configure NOMINATIM_USER_AGENT.',
-      );
-    }
+    this.assertConfigured();
     const params = new URLSearchParams({
       q: query,
       format: 'jsonv2',
@@ -59,25 +54,60 @@ export class NominatimClient {
       'accept-language': 'pt-BR',
       limit: String(limit),
     });
-    const response = await this.scheduler.schedule(() =>
-      this.http.get(`search?${params.toString()}`),
-    );
-    if (!response.ok) {
-      throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, {
-        cause: new Error(`HTTP ${response.status}`),
-      });
-    }
-    let body: unknown;
-    try {
-      body = response.json();
-    } catch (error) {
-      throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, { cause: error });
-    }
+    const body = await this.getJson(`search?${params.toString()}`);
     if (!Array.isArray(body)) {
       throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, {
         cause: new Error('Resposta do Nominatim não é uma lista'),
       });
     }
     return body as NominatimSearchResult[];
+  }
+
+  /**
+   * `/reverse` no nível de prédio/rua (zoom 18). null quando o Nominatim não acha lugar
+   * (ele responde 200 com `{ "error": "Unable to geocode" }`).
+   */
+  async reverse(lat: number, lon: number): Promise<NominatimSearchResult | null> {
+    this.assertConfigured();
+    const params = new URLSearchParams({
+      lat: String(lat),
+      lon: String(lon),
+      format: 'jsonv2',
+      zoom: '18',
+      addressdetails: '1',
+      'accept-language': 'pt-BR',
+    });
+    const body = await this.getJson(`reverse?${params.toString()}`);
+    if (typeof body !== 'object' || body === null || Array.isArray(body)) {
+      throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, {
+        cause: new Error('Resposta do reverse do Nominatim não é um objeto'),
+      });
+    }
+    if ('error' in body) return null;
+    return body as NominatimSearchResult;
+  }
+
+  private assertConfigured(): void {
+    if (!this.options.userAgent?.trim()) {
+      throw new SourceUnavailableError(
+        NOMINATIM_SOURCE,
+        'A busca de lugares está desativada: configure NOMINATIM_USER_AGENT.',
+      );
+    }
+  }
+
+  /** GET pela fila de 1 req/s; HTTP de erro ou JSON inválido viram SourceUnavailableError. */
+  private async getJson(path: string): Promise<unknown> {
+    const response = await this.scheduler.schedule(() => this.http.get(path));
+    if (!response.ok) {
+      throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, {
+        cause: new Error(`HTTP ${response.status}`),
+      });
+    }
+    try {
+      return response.json();
+    } catch (error) {
+      throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, { cause: error });
+    }
   }
 }

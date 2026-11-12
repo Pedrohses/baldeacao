@@ -1,8 +1,14 @@
 // Adaptadores em memória do contexto geocoding (testes de caso de uso e de HTTP).
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import type { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
+import type { Coordinates, Place } from '../../src/modules/geocoding/domain/entities/place.entity';
 import { GeocodeCache } from '../../src/modules/geocoding/domain/ports/geocode-cache.port';
+import {
+  type KnownPlaceMatch,
+  type KnownPlaceRecord,
+  KnownPlaceRepository,
+} from '../../src/modules/geocoding/domain/ports/known-place-repository.port';
+import { haversineM } from './transit-in-memory';
 
 export const NOMINATIM_FIXTURES_DIR = join(__dirname, '..', 'fixtures', 'nominatim');
 
@@ -42,4 +48,46 @@ export function fakeNominatimFetch(
   }) as typeof fetch & { calls: typeof calls };
   fn.calls = calls;
   return fn;
+}
+
+function fold(text: string): string {
+  return text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+}
+
+/** Lugares conhecidos em memória (busca por trecho do nome, sem acento). */
+export class InMemoryKnownPlaceRepository extends KnownPlaceRepository {
+  readonly replaced: KnownPlaceRecord[][] = [];
+
+  constructor(private readonly places: KnownPlaceMatch[] = []) {
+    super();
+  }
+
+  searchByName(text: string, limit: number): Promise<KnownPlaceMatch[]> {
+    const needle = fold(text);
+    return Promise.resolve(
+      this.places
+        .filter((match) => fold(match.place.name).includes(needle))
+        .sort((a, b) => b.importance - a.importance)
+        .slice(0, limit),
+    );
+  }
+
+  findNearest(
+    center: Coordinates,
+    radiusM: number,
+  ): Promise<{ place: Place; distanceM: number } | null> {
+    const nearest = this.places
+      .map((match) => ({ place: match.place, distanceM: haversineM(center, match.place.location) }))
+      .filter((found) => found.distanceM <= radiusM)
+      .sort((a, b) => a.distanceM - b.distanceM)[0];
+    return Promise.resolve(nearest ?? null);
+  }
+
+  replaceAll(records: KnownPlaceRecord[]): Promise<number> {
+    this.replaced.push(records);
+    return Promise.resolve(records.length);
+  }
 }

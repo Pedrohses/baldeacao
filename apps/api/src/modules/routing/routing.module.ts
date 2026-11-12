@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppConfig } from '../../config/app-config';
+import { TransitModule } from '../transit/transit.module';
 import { PlanTripUseCase } from './application/use-cases/plan-trip.use-case';
 import { TripPlanner } from './domain/ports/trip-planner.port';
 import { OtpClient } from './infrastructure/adapters/otp.client';
@@ -7,6 +8,7 @@ import { OtpTripPlannerAdapter } from './infrastructure/adapters/otp-trip-planne
 import { TripsController } from './presentation/http/trips.controller';
 
 @Module({
+  imports: [TransitModule],
   controllers: [TripsController],
   providers: [
     PlanTripUseCase,

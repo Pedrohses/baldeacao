@@ -2,7 +2,11 @@
 // Dados alinhados ao recorte sptrans-mini (mesmos ids e coordenadas).
 import { LineShape } from '../../src/modules/transit/domain/entities/line-shape.entity';
 import { Route } from '../../src/modules/transit/domain/entities/route.entity';
-import { type NearbyStop, Stop } from '../../src/modules/transit/domain/entities/stop.entity';
+import {
+  type NearbyStop,
+  Stop,
+  type StopNameMatch,
+} from '../../src/modules/transit/domain/entities/stop.entity';
 import { RouteRepository } from '../../src/modules/transit/domain/ports/route-repository.port';
 import { StopRepository } from '../../src/modules/transit/domain/ports/stop-repository.port';
 import type { Coordinates } from '../../src/modules/transit/domain/value-objects/coordinates';
@@ -101,9 +105,16 @@ export class InMemoryStopRepository extends StopRepository {
     return Promise.resolve(found);
   }
 
+  existsWithin(center: Coordinates, radiusM: number): Promise<boolean> {
+    return Promise.resolve(this.stops.some((stop) => haversineM(center, stop.location) <= radiusM));
+  }
+
   readonly searchCalls: Array<{ text: string; limit: number }> = [];
 
-  searchByName(text: string, limit: number): Promise<Stop[]> {
+  /** Ids tratados como estação de metrô ou trem. */
+  readonly stationIds = new Set<string>();
+
+  searchByName(text: string, limit: number): Promise<StopNameMatch[]> {
     this.searchCalls.push({ text, limit });
     const fold = (s: string) =>
       s
@@ -113,7 +124,8 @@ export class InMemoryStopRepository extends StopRepository {
     const needle = fold(text);
     const found = this.stops
       .filter((s) => fold(s.name).includes(needle))
-      .sort((a, b) => a.name.length - b.name.length);
+      .sort((a, b) => a.name.length - b.name.length)
+      .map((stop) => ({ stop, isStation: this.stationIds.has(stop.id) }));
     return Promise.resolve(found.slice(0, limit));
   }
 }

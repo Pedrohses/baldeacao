@@ -1,5 +1,6 @@
 import {
   InMemoryGeocodeCache,
+  InMemoryKnownPlaceRepository,
   fakeNominatimFetch,
   readNominatimFixture,
 } from '../../../../../test/support/geocoding-in-memory';
@@ -45,13 +46,21 @@ class FakeGeocoder extends Geocoder {
       ? Promise.reject(this.result)
       : Promise.resolve(this.result);
   }
+  reverse(): Promise<Place | null> {
+    return Promise.resolve(null);
+  }
 }
 
 describe('SearchPlacesUseCase', () => {
   it('segunda busca igual (mesmo com caixa e espaços diferentes) não chama o geocoder', async () => {
     const cache = new InMemoryGeocodeCache();
     const geocoder = new FakeGeocoder();
-    const useCase = new SearchPlacesUseCase(cache, geocoder, noStops());
+    const useCase = new SearchPlacesUseCase(
+      cache,
+      geocoder,
+      noStops(),
+      new InMemoryKnownPlaceRepository(),
+    );
 
     const first = await useCase.execute({ query: '  Praça da  Sé ', mode: 'full' });
     const second = await useCase.execute({ query: 'praça da sé', mode: 'full' });
@@ -74,6 +83,7 @@ describe('SearchPlacesUseCase', () => {
         }),
       ),
       noStops(),
+      new InMemoryKnownPlaceRepository(),
     );
     const first = await useCase.execute({ query: 'Estádio do Morumbis', mode: 'full' });
     const second = await useCase.execute({ query: 'estádio do morumbis', mode: 'full' });
@@ -85,7 +95,12 @@ describe('SearchPlacesUseCase', () => {
   it('cache longo (30 dias) com resultado e curto (1 dia) sem resultado; expirado busca de novo', async () => {
     const cache = new InMemoryGeocodeCache();
     const geocoder = new FakeGeocoder([]);
-    const useCase = new SearchPlacesUseCase(cache, geocoder, noStops());
+    const useCase = new SearchPlacesUseCase(
+      cache,
+      geocoder,
+      noStops(),
+      new InMemoryKnownPlaceRepository(),
+    );
 
     await useCase.execute({ query: 'lugar que não existe', mode: 'full' });
     expect(cache.entries.get('lugar que não existe')?.expiresAtMs).toBe(
@@ -96,7 +111,12 @@ describe('SearchPlacesUseCase', () => {
     expect(geocoder.calls).toHaveLength(2);
 
     const withResult = new InMemoryGeocodeCache();
-    await new SearchPlacesUseCase(withResult, new FakeGeocoder(), noStops()).execute({
+    await new SearchPlacesUseCase(
+      withResult,
+      new FakeGeocoder(),
+      noStops(),
+      new InMemoryKnownPlaceRepository(),
+    ).execute({
       query: 'sé sé',
       mode: 'full',
     });
@@ -105,7 +125,12 @@ describe('SearchPlacesUseCase', () => {
 
   it('texto com menos de 2 caracteres é recusado sem consultar nada', async () => {
     const geocoder = new FakeGeocoder();
-    const useCase = new SearchPlacesUseCase(new InMemoryGeocodeCache(), geocoder, noStops());
+    const useCase = new SearchPlacesUseCase(
+      new InMemoryGeocodeCache(),
+      geocoder,
+      noStops(),
+      new InMemoryKnownPlaceRepository(),
+    );
     await expect(useCase.execute({ query: '  s  ', mode: 'full' })).rejects.toBeInstanceOf(
       InvalidPlaceQueryError,
     );
@@ -118,6 +143,7 @@ describe('SearchPlacesUseCase', () => {
       cache,
       new FakeGeocoder(new SourceUnavailableError('nominatim')),
       noStops(),
+      new InMemoryKnownPlaceRepository(),
     );
     await expect(useCase.execute({ query: 'paulista', mode: 'full' })).rejects.toBeInstanceOf(
       SourceUnavailableError,
@@ -131,7 +157,12 @@ describe('SearchPlacesUseCase', () => {
     it('quick devolve só paradas locais (id stop:<id>, sem acento) e não chama Nominatim nem cache', async () => {
       const cache = new InMemoryGeocodeCache();
       const geocoder = new FakeGeocoder();
-      const useCase = new SearchPlacesUseCase(cache, geocoder, stops());
+      const useCase = new SearchPlacesUseCase(
+        cache,
+        geocoder,
+        stops(),
+        new InMemoryKnownPlaceRepository(),
+      );
 
       const { places } = await useCase.execute({ query: 'PAULISTA', mode: 'quick' });
 
@@ -148,11 +179,49 @@ describe('SearchPlacesUseCase', () => {
       expect(cache.entries.size).toBe(0);
     });
 
+    it('quick junta paradas e lugares conhecidos do OSM, estação antes e lugar antes de parada comum', async () => {
+      const botanico = new Place({
+        id: 'osm:relation:5349780',
+        name: 'Jardim Botânico de São Paulo',
+        address: 'Avenida Miguel Estéfano, 3031, Água Funda, São Paulo',
+        kind: 'poi',
+        location: { lat: -23.6418, lon: -46.6253 },
+      });
+      const repository = new InMemoryStopRepository();
+      repository.stationIds.add(stopLiberdade.id);
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new FakeGeocoder(),
+        new SearchStopsByNameUseCase(repository),
+        new InMemoryKnownPlaceRepository([
+          { place: botanico, importance: 8 },
+          {
+            place: new Place({
+              ...botanico,
+              id: 'osm:way:1',
+              name: 'Av. Liberdade (praça)',
+              location: { lat: -23.5, lon: -46.5 },
+            }),
+            importance: 3,
+          },
+        ]),
+      );
+      const jardim = await useCase.execute({ query: 'jardim bot', mode: 'quick' });
+      expect(jardim.places).toEqual([botanico]);
+      const av = await useCase.execute({ query: 'av', mode: 'quick' });
+      expect(av.places.map((p) => p.id)).toEqual([
+        `stop:${stopLiberdade.id}`,
+        'osm:way:1',
+        `stop:${stopPaulista.id}`,
+      ]);
+    });
+
     it('quick aceita 2 caracteres', async () => {
       const useCase = new SearchPlacesUseCase(
         new InMemoryGeocodeCache(),
         new FakeGeocoder(),
         stops(),
+        new InMemoryKnownPlaceRepository(),
       );
       const { places } = await useCase.execute({ query: 'ib', mode: 'quick' });
       expect(places.map((p) => p.id)).toEqual([`stop:${stopLiberdade.id}`]);
@@ -174,7 +243,12 @@ describe('SearchPlacesUseCase', () => {
         location: { lat: -22.9, lon: -47.0 },
       });
       const geocoder = new FakeGeocoder([SE, duplicate, far]);
-      const useCase = new SearchPlacesUseCase(new InMemoryGeocodeCache(), geocoder, stops());
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        geocoder,
+        stops(),
+        new InMemoryKnownPlaceRepository(),
+      );
 
       const { places } = await useCase.execute({ query: 'paulista', mode: 'full' });
 
@@ -187,6 +261,7 @@ describe('SearchPlacesUseCase', () => {
         new InMemoryGeocodeCache(),
         new FakeGeocoder(new SourceUnavailableError('nominatim')),
         stops(),
+        new InMemoryKnownPlaceRepository(),
       );
       const { places } = await useCase.execute({ query: 'paulista', mode: 'full' });
       expect(places.map((p) => p.id)).toEqual(['stop:4301848']);

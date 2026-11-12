@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { Place } from '../../domain/entities/place.entity';
+import type { Coordinates, Place } from '../../domain/entities/place.entity';
 import { Geocoder } from '../../domain/ports/geocoder.port';
 import { NominatimClient } from './nominatim.client';
 import { NominatimPlaceMapper } from './nominatim-place.mapper';
@@ -19,5 +19,10 @@ export class NominatimGeocoderAdapter extends Geocoder {
     const reduced = results.length === 0 ? streetOnlyQuery(normalized) : null;
     if (reduced) results = await this.client.search(reduced, limit);
     return NominatimPlaceMapper.toDomainList(results).slice(0, limit);
+  }
+
+  async reverse(location: Coordinates): Promise<Place | null> {
+    const result = await this.client.reverse(location.lat, location.lon);
+    return result ? NominatimPlaceMapper.toDomain(result) : null;
   }
 }
