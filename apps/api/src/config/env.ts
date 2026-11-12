@@ -15,6 +15,10 @@ export const envSchema = z.object({
   DATABASE_URL: z.url(),
   REDIS_URL: z.url(),
   OLHOVIVO_TOKEN: optionalString,
+  OLHOVIVO_USER_AGENT: z.preprocess(
+    (value) => (value === '' ? undefined : value),
+    z.string().default('baldeacao/0.1'),
+  ),
   OTP_URL: optionalUrl,
   NOMINATIM_USER_AGENT: optionalString,
 });
