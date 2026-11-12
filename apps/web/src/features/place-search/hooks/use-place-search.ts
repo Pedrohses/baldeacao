@@ -7,7 +7,7 @@ import { placeKeys, placesService } from '../services';
 import { useDebouncedValue } from './use-debounced-value';
 
 export const PLACE_SEARCH_DEBOUNCE_MS = 300;
-export const PLACE_SEARCH_MIN_LENGTH = 3;
+export const PLACE_SEARCH_MIN_LENGTH = 2;
 
 export type PlaceSearchStatus = 'idle' | 'too-short' | 'loading' | 'error' | 'empty' | 'success';
 

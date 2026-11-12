@@ -15,7 +15,11 @@ export const API_PATHS = {
   stopArrivals: (stopId: string) => `/stops/${encodeURIComponent(stopId)}/arrivals`,
   /** Snapshot de posições. Query opcional: `routeId`; sem ela, todas as linhas. */
   vehiclePositions: '/vehicles/positions',
-  /** v2: busca de lugar (Nominatim com cache). Query: `q` (mínimo 3 caracteres). */
+  /**
+   * v2: busca de lugar. Query: `q` (mínimo 2 caracteres) e `mode`:
+   * `quick` (padrão, autocompletar) busca só paradas e estações locais, sem Nominatim;
+   * `full` (busca confirmada) junta o local com endereços do Nominatim (com cache).
+   */
   searchPlaces: '/places/search',
   /** v2: planejar viagem (OpenTripPlanner). POST com corpo TripRequest. */
   planTrip: '/trips/plan',
@@ -73,7 +77,13 @@ export type ApiErrorBody = z.infer<typeof ApiErrorBodySchema>;
 
 // ---- v2 (Onda 2) ----
 
-export const SearchPlacesQuerySchema = z.object({ q: z.string().trim().min(3) });
+export const SearchPlacesModeSchema = z.enum(['quick', 'full']);
+export type SearchPlacesMode = z.infer<typeof SearchPlacesModeSchema>;
+
+export const SearchPlacesQuerySchema = z.object({
+  q: z.string().trim().min(2),
+  mode: SearchPlacesModeSchema.default('quick'),
+});
 export type SearchPlacesQuery = z.infer<typeof SearchPlacesQuerySchema>;
 
 export const SearchPlacesResponseSchema = z.object({ places: z.array(PlaceSchema) });

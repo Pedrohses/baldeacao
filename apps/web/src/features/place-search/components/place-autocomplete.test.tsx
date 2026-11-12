@@ -76,14 +76,14 @@ describe('PlaceAutocomplete', () => {
     expect(input).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('não busca com menos de 3 caracteres e avisa o mínimo', async () => {
+  it('não busca com menos de 2 caracteres e avisa o mínimo', async () => {
     const spy = vi.spyOn(placesService, 'search');
     const input = renderAutocomplete();
 
-    type(input, 'Mo');
+    type(input, 'M');
     await advance(500);
     expect(spy).not.toHaveBeenCalled();
-    expect(screen.getByRole('status')).toHaveTextContent('Digite pelo menos 3 caracteres.');
+    expect(screen.getByRole('status')).toHaveTextContent('Digite pelo menos 2 caracteres.');
   });
 
   it('navega pelas sugestões com as setas e escolhe com Enter', async () => {
