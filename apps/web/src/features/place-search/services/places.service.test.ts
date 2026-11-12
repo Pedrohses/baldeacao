@@ -9,20 +9,20 @@ afterEach(() => {
 });
 
 describe('placesService.search', () => {
-  it('chama /places/search com o texto codificado e devolve os lugares validados', async () => {
+  it('chama /places/search com o texto codificado e o modo e devolve os lugares validados', async () => {
     const fetchMock = vi.fn().mockResolvedValue(Response.json({ places: [placeOriginExample] }));
     vi.stubGlobal('fetch', fetchMock);
 
-    await expect(placesService.search('Av. Paulista & 1000')).resolves.toEqual([
+    await expect(placesService.search('Av. Paulista & 1000', 'full')).resolves.toEqual([
       placeOriginExample,
     ]);
     expect(fetchMock.mock.calls[0]?.[0]).toBe(
-      'http://localhost:3001/places/search?q=Av.+Paulista+%26+1000',
+      'http://localhost:3001/places/search?q=Av.+Paulista+%26+1000&mode=full',
     );
   });
 
   it('rejeita resposta fora do contrato', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(Response.json({ places: [{ id: 1 }] })));
-    await expect(placesService.search('Morumbis')).rejects.toBeInstanceOf(ApiError);
+    await expect(placesService.search('Morumbis', 'quick')).rejects.toBeInstanceOf(ApiError);
   });
 });

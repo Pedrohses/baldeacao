@@ -6,3 +6,12 @@ export {
   type PlaceSearchStatus,
   usePlaceSearch,
 } from './use-place-search';
+export {
+  RECENT_PLACES_KEY,
+  RECENT_PLACES_MAX,
+  addRecentPlace,
+  isRememberable,
+  resetRecentPlacesCache,
+  useRecentPlaces,
+} from './use-recent-places';
+export { useResolvePlace } from './use-resolve-place';
