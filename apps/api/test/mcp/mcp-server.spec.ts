@@ -29,13 +29,14 @@ describe('Servidor MCP (Streamable HTTP, stateless)', () => {
     expect(res.headers.get('mcp-session-id')).toBeNull();
   });
 
-  it('lista as 5 tools com descrição em português e schema de entrada e saída', async () => {
+  it('lista as 6 tools com descrição em português e schema de entrada e saída', async () => {
     const client = await connectClient(url);
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual([
       'buscar_linha',
       'onibus_da_linha',
       'paradas_proximas',
+      'planejar_viagem',
       'previsao_chegada',
       'status_dados',
     ]);

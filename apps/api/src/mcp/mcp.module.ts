@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { GeocodingModule } from '../modules/geocoding/geocoding.module';
 import { RealtimeModule } from '../modules/realtime/realtime.module';
+import { RoutingModule } from '../modules/routing/routing.module';
 import { TransitModule } from '../modules/transit/transit.module';
 import { McpController } from './mcp.controller';
 import { McpServerFactory } from './mcp-server.factory';
@@ -17,6 +19,8 @@ import { MCP_TOOL_CLASSES, MCP_TOOLS } from './mcp-tools';
     // Fornecem os casos de uso exportados que as tools usam.
     TransitModule,
     RealtimeModule,
+    GeocodingModule,
+    RoutingModule,
     // O guard fica só no McpController: o resto da API não tem esse limite.
     ThrottlerModule.forRoot({ throttlers: [{ ...MCP_THROTTLE }] }),
   ],
