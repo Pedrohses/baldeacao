@@ -101,6 +101,9 @@ const outputSchema = {
 
 type PlaceOutput = z.infer<typeof placeOutput>;
 
+/** Velocidade a pé conservadora para saber se o tempo do trecho inclui espera. */
+const WALK_SPEED_M_S = 0.8;
+
 const COORDINATES = /^\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/;
 
 // Artigo e nome do veículo para "Pegue o ônibus", "Pegue a balsa".
@@ -289,7 +292,11 @@ function describeLeg(leg: Leg, timeZone: string): string {
   if (leg.mode === 'walk') {
     // O adaptador do OTP rotula o ponto final como "Destino"; no texto fica "até o destino".
     const target = leg.to.name === 'Destino' ? 'o destino' : leg.to.name;
-    return `Caminhe ${formatDistance(leg.distanceM)} até ${target} (${formatDuration(leg.durationS)}).`;
+    // Tempo do trecho como o OTP deu; acima do tempo a pé (0,8 m/s), a diferença é espera.
+    const walkingS = leg.distanceM / WALK_SPEED_M_S;
+    const waits = minutes(leg.durationS) > Math.max(1, minutes(walkingS));
+    const time = `${formatDuration(leg.durationS)}${waits ? ', inclui espera' : ''}`;
+    return `Caminhe ${formatDistance(leg.distanceM)} até ${target} (${time}).`;
   }
   // O GTFS da SPTrans nomeia metrô e trem como "METRÔ L4" e "CPTM L9"; o veículo já está no texto.
   const shortName = leg.routeShortName?.replace(/^(METR[ÔO]|CPTM)\s+/i, '');

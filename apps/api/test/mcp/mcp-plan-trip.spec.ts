@@ -153,6 +153,19 @@ describe('Tool MCP planejar_viagem', () => {
     });
   });
 
+  it('caminhada curta com tempo longo explica que inclui espera', async () => {
+    const [first, ...rest] = itineraryExample.legs;
+    fakes.planner.result = [
+      { ...itineraryExample, legs: [{ ...first!, distanceM: 29, durationS: 240 }, ...rest] },
+    ];
+    const result = await plan({ origem: 'Morumbis', destino: 'Terminal Tietê' });
+    expect(textOf(result)).toContain(
+      '1. Caminhe 30 m até Av. Giovanni Gronchi (4 min, inclui espera).',
+    );
+    // Tempo coerente com a distância não ganha a explicação.
+    expect(textOf(result)).toContain('Caminhe 300 m até Terminal Rodoviário Tietê (3 min).');
+  });
+
   it('pede endereço mais específico quando não acha a origem', async () => {
     const result = await plan({ origem: 'Lugar Nenhum', destino: 'Tietê' });
     expect(result.isError).toBe(true);
