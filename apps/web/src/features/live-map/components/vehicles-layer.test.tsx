@@ -1,9 +1,13 @@
 import { vehicleSnapshotExample } from '@baldeacao/types/examples';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 
+import { initialMapState, useMapStore } from '../hooks/use-map-store';
 import { useVehiclePositions } from '../hooks/use-vehicle-positions';
+import { createFakeMap, type FakeMap } from './fake-map.test-utils';
 import { VEHICLES_LAYER_ID, VEHICLES_SOURCE_ID, VehiclesLayer } from './vehicles-layer';
+
+const mapRef = vi.hoisted(() => ({ current: undefined as unknown }));
 
 // Sem WebGL no jsdom: Source e Layer viram elementos que expõem as props.
 vi.mock('react-map-gl/maplibre', () => ({
@@ -12,9 +16,10 @@ vi.mock('react-map-gl/maplibre', () => ({
       {children}
     </div>
   ),
-  Layer: ({ id, type }: { id: string; type: string }) => (
-    <div data-testid="layer" data-id={id} data-type={type} />
+  Layer: ({ id, type, paint }: { id: string; type: string; paint: unknown }) => (
+    <div data-testid="layer" data-id={id} data-type={type} data-paint={JSON.stringify(paint)} />
   ),
+  useMap: () => ({ current: mapRef.current }),
 }));
 
 vi.mock('../hooks/use-vehicle-positions', () => ({ useVehiclePositions: vi.fn() }));
@@ -30,6 +35,14 @@ function renderedGeoJson() {
 }
 
 describe('VehiclesLayer', () => {
+  let map: FakeMap;
+
+  beforeEach(() => {
+    useMapStore.setState(initialMapState);
+    map = createFakeMap();
+    mapRef.current = map;
+  });
+
   it('renderiza os veículos da fixture como pontos GeoJSON', () => {
     mockData(vehicleSnapshotExample);
     render(<VehiclesLayer routeId="875A-10" />);
@@ -53,5 +66,27 @@ describe('VehiclesLayer', () => {
     render(<VehiclesLayer />);
 
     expect(renderedGeoJson()).toEqual({ type: 'FeatureCollection', features: [] });
+  });
+
+  it('leva o updatedAt do snapshot para o store', () => {
+    mockData(vehicleSnapshotExample);
+    render(<VehiclesLayer />);
+
+    expect(useMapStore.getState().dataUpdatedAt).toBe(vehicleSnapshotExample.updatedAt);
+  });
+
+  it('seleciona o veículo clicado e o destaca na camada', () => {
+    mockData(vehicleSnapshotExample);
+    const { unmount } = render(<VehiclesLayer />);
+
+    act(() => {
+      map.fire(`click:${VEHICLES_LAYER_ID}`, { features: [{ properties: { vehicleId: '11433' } }] });
+    });
+
+    expect(useMapStore.getState().selection).toEqual({ kind: 'vehicle', vehicleId: '11433' });
+    expect(screen.getByTestId('layer').getAttribute('data-paint')).toContain('"11433"');
+
+    unmount();
+    expect(map.listenerCount(`click:${VEHICLES_LAYER_ID}`)).toBe(0);
   });
 });
