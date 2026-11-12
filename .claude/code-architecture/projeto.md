@@ -60,6 +60,7 @@ Cada tool aceita a cidade como parâmetro opcional (padrão: São Paulo). Sem au
 3. Tempo real + mapa: worker da Olho Vivo, Redis, WebSocket, ônibus se movendo no mapa.
 4. MCP: módulo MCP exposto por túnel gratuito (Cloudflare Tunnel) e conectado ao Claude.
 5. Roteamento: OTP no Compose, geocodificação, rota A até B; medir memória do OTP.
+   - Medido em 2026-11-12 (OTP 2.10.0, GTFS SPTrans completo + OSM recortado da Grande SP, 151 MB): grafo de 312 MB gerado em 1m12s com heap de 5 GB; em execução o container usa ~2,3 GB de RAM (heap máximo 4 GB). Para a VM de produção, reservar ~3 GB para o OTP.
 6. Experiência SBB: favoritos no aparelho, acompanhar viagem, páginas SEO, PWA.
 7. Deploy: VM Oracle Always Free (mesmo Compose + Caddy), Neon, Vercel, subdomínio gratuito.
 8. Expansão: novos adaptadores (metropolitano via Artesp, Guarulhos), depois outras capitais.

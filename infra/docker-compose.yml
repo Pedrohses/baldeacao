@@ -42,7 +42,8 @@ services:
       - ./otp/data:/var/opentripplanner
     profiles: ['otp']
     healthcheck:
-      test: ['CMD-SHELL', 'curl -fs http://localhost:8080/otp/ >/dev/null || exit 1']
+      # A imagem não tem curl nem wget; usa o /dev/tcp do bash.
+      test: ['CMD', 'bash', '-c', 'exec 3<>/dev/tcp/127.0.0.1/8080 && printf "GET /otp/ HTTP/1.0\\r\\n\\r\\n" >&3 && head -1 <&3 | grep -q 200']
       interval: 15s
       timeout: 5s
       retries: 20

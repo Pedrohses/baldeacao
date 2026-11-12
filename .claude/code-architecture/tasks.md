@@ -119,14 +119,14 @@ Três agentes em paralelo (fases 4 e 5).
 
 | ID | Agente | Tarefa | Depende de | Pronto quando |
 | --- | --- | --- | --- | --- |
-| A3-01 | A3 | Geocoding: adaptador Nominatim com limite de 1 req/s, cache em `geocode_cache` e endpoint de busca de lugar | Portão 1 | Testes com fixture; segunda busca igual não chama o Nominatim |
-| A3-02 | A3 | Routing: adaptador do OTP (GraphQL) e endpoint de planejar viagem devolvendo `Itinerary[]` | Portão 1 | Itinerário com baldeação ônibus + trilho no teste com fixture |
-| A3-03 | A3 | Medir memória do OTP com o grafo de SP e registrar no `projeto.md` (via orquestrador) | A3-02 | Número medido e anotado |
-| A4-01 | A4 | Servidor MCP (Streamable HTTP) montado em `src/mcp`, com limite de requisições por IP | Portão 1 | Inspector do MCP lista o servidor |
-| A4-02 | A4 | Tools `buscar_linha`, `paradas_proximas`, `previsao_chegada`, `onibus_da_linha`, `status_dados` | A4-01 | Testes e2e com o cliente do SDK passam |
+| A3-01 ✅ | A3 | Geocoding: adaptador Nominatim com limite de 1 req/s, cache em `geocode_cache` e endpoint de busca de lugar | Portão 1 | Testes com fixture; segunda busca igual não chama o Nominatim |
+| A3-02 ✅ | A3 | Routing: adaptador do OTP (GraphQL) e endpoint de planejar viagem devolvendo `Itinerary[]` | Portão 1 | Itinerário com baldeação ônibus + trilho no teste com fixture |
+| A3-03 ✅ | A3 | Medir memória do OTP com o grafo de SP e registrar no `projeto.md` (via orquestrador) | A3-02 | Número medido e anotado |
+| A4-01 ✅ | A4 | Servidor MCP (Streamable HTTP) montado em `src/mcp`, com limite de requisições por IP | Portão 1 | Inspector do MCP lista o servidor |
+| A4-02 ✅ | A4 | Tools `buscar_linha`, `paradas_proximas`, `previsao_chegada`, `onibus_da_linha`, `status_dados` | A4-01 | Testes e2e com o cliente do SDK passam |
 | A4-03 | A4 | Tool `planejar_viagem` sobre os casos de uso do A3 | A3-02, A4-01 | Tool devolve itinerário em linguagem clara |
-| F3-01 | F3 | `place-search`: `PlaceAutocomplete` com debounce | Portão 1 | Teste com service mockado |
-| F3-02 | F3 | `trip-planner`: `TripForm`, `ItineraryList` e `ItineraryLayer`, rota `/viagem` | F3-01 | Itinerário de fixture aparece no mapa e na lista |
+| F3-01 ✅ | F3 | `place-search`: `PlaceAutocomplete` com debounce | Portão 1 | Teste com service mockado |
+| F3-02 ✅ | F3 | `trip-planner`: `TripForm`, `ItineraryList` e `ItineraryLayer`, rota `/viagem` | F3-01 | Itinerário de fixture aparece no mapa e na lista |
 
 **Portão 2 (integração):** o orquestrador expõe a API local por Cloudflare Tunnel, conecta o servidor MCP no Claude e confere: o Claude responde previsão de chegada e planeja "do Morumbis ao Tietê" com dado real. Esse é o post 2.
 
