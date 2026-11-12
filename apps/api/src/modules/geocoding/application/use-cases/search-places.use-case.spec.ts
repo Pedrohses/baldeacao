@@ -10,6 +10,7 @@ import {
   stopLiberdade,
   stopPaulista,
 } from '../../../../../test/support/transit-in-memory';
+import { Stop } from '../../../transit/domain/entities/stop.entity';
 import { SearchStopsByNameUseCase } from '../../../transit/application/use-cases/search-stops-by-name.use-case';
 import { Place } from '../../domain/entities/place.entity';
 import { InvalidPlaceQueryError } from '../../domain/errors/invalid-place-query.error';
@@ -227,7 +228,7 @@ describe('SearchPlacesUseCase', () => {
       expect(places.map((p) => p.id)).toEqual([`stop:${stopLiberdade.id}`]);
     });
 
-    it('full junta locais primeiro e Nominatim, sem duplicar o mesmo lugar', async () => {
+    it('full ordena locais e Nominatim juntos pela qualidade, sem duplicar o mesmo lugar', async () => {
       const duplicate = new Place({
         id: 'osm:node:9',
         name: 'Av. Paulista',
@@ -252,7 +253,9 @@ describe('SearchPlacesUseCase', () => {
 
       const { places } = await useCase.execute({ query: 'paulista', mode: 'full' });
 
-      expect(places.map((p) => p.id)).toEqual(['stop:4301848', 'osm:node:1', 'osm:node:10']);
+      // "Av. Paulista" (endereço) e a parada "Av. Paulista 1578" a menos de 200 m são o mesmo
+      // lugar; o endereço casa o nome inteiro e fica. Praça da Sé não casa "paulista".
+      expect(places.map((p) => p.id)).toEqual(['osm:node:9', 'osm:node:10', 'osm:node:1']);
       expect(geocoder.calls).toHaveLength(1);
     });
 
@@ -265,6 +268,82 @@ describe('SearchPlacesUseCase', () => {
       );
       const { places } = await useCase.execute({ query: 'paulista', mode: 'full' });
       expect(places.map((p) => p.id)).toEqual(['stop:4301848']);
+    });
+  });
+
+  describe('ranking com município e apelidos', () => {
+    // "Município" de teste: tudo ao norte de -23.8 e a leste de -46.85.
+    const inCity = (p: { lat: number; lon: number }) => p.lat > -23.8 && p.lon > -46.85;
+
+    it('estação vira kind station; parada de ônibus fica stop', async () => {
+      const repository = new InMemoryStopRepository();
+      repository.stationIds.add(stopLiberdade.id);
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new FakeGeocoder(),
+        new SearchStopsByNameUseCase(repository),
+        new InMemoryKnownPlaceRepository(),
+      );
+      const { places } = await useCase.execute({ query: 'av', mode: 'quick' });
+      expect(places.map((p) => [p.id, p.kind])).toEqual([
+        [`stop:${stopLiberdade.id}`, 'station'],
+        [`stop:${stopPaulista.id}`, 'stop'],
+      ]);
+    });
+
+    it('quick acha pelo apelido e joga para baixo o homônimo de outra cidade', async () => {
+      const mercadao = new Place({
+        id: 'osm:relation:4602996',
+        name: 'Mercado Municipal de São Paulo',
+        address: null,
+        kind: 'poi',
+        location: { lat: -23.5417, lon: -46.6297 },
+      });
+      const jundiai = new Place({
+        id: 'osm:way:398442647',
+        name: 'Mercadão Vila Arens',
+        address: null,
+        kind: 'poi',
+        location: { lat: -23.19, lon: -46.89 },
+      });
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new FakeGeocoder(),
+        noStops(),
+        new InMemoryKnownPlaceRepository(
+          [
+            { place: jundiai, importance: 5 },
+            { place: mercadao, importance: 7, aliases: ['Mercado Municipal', 'Mercadão'] },
+          ],
+          inCity,
+        ),
+      );
+      const { places } = await useCase.execute({ query: 'Mercadão', mode: 'quick' });
+      expect(places.map((p) => p.id)).toEqual([mercadao.id, jundiai.id]);
+    });
+
+    it('full: endereço do Nominatim com o mesmo número acima da parada de outro número', async () => {
+      const vergueiro = new Place({
+        id: 'osm:node:3185',
+        name: 'Rua Vergueiro, 3185',
+        address: 'Rua Vergueiro, 3185, Vila Mariana, São Paulo',
+        kind: 'address',
+        location: { lat: -23.588, lon: -46.634 },
+      });
+      const stop356 = new Stop({
+        ...stopPaulista,
+        id: '1000',
+        name: 'R. Vergueiro, 356',
+        location: { lat: -23.567, lon: -46.64 },
+      });
+      const useCase = new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new FakeGeocoder([vergueiro]),
+        new SearchStopsByNameUseCase(new InMemoryStopRepository([stop356])),
+        new InMemoryKnownPlaceRepository([], inCity),
+      );
+      const { places } = await useCase.execute({ query: 'R. Vergueiro, 3185', mode: 'full' });
+      expect(places[0]?.id).toBe(vergueiro.id);
     });
   });
 });

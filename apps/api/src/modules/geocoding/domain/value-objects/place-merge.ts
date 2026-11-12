@@ -1,4 +1,5 @@
 import type { Place } from '../entities/place.entity';
+import { distanceM } from './service-city';
 
 /** Dois lugares com nome parecido a menos disso são tratados como o mesmo. */
 export const SAME_PLACE_DISTANCE_M = 200;
@@ -12,22 +13,12 @@ function fold(text: string): string {
     .trim();
 }
 
-function distanceM(a: Place, b: Place): number {
-  const rad = (deg: number) => (deg * Math.PI) / 180;
-  const dLat = rad(b.location.lat - a.location.lat);
-  const dLon = rad(b.location.lon - a.location.lon);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(rad(a.location.lat)) * Math.cos(rad(b.location.lat)) * Math.sin(dLon / 2) ** 2;
-  return 2 * 6_371_008.8 * Math.asin(Math.sqrt(h));
-}
-
 function isSamePlace(a: Place, b: Place): boolean {
   if (a.id === b.id) return true;
   const nameA = fold(a.name);
   const nameB = fold(b.name);
   const similarName = nameA === nameB || nameA.includes(nameB) || nameB.includes(nameA);
-  return similarName && distanceM(a, b) <= SAME_PLACE_DISTANCE_M;
+  return similarName && distanceM(a.location, b.location) <= SAME_PLACE_DISTANCE_M;
 }
 
 /** Junta as listas na ordem dada (`primary` primeiro), sem repetir o mesmo lugar, até `limit`. */

@@ -35,7 +35,8 @@ async function main(): Promise<void> {
     const result = await app.get(ImportKnownPlacesUseCase).execute(input);
     logger.log(
       `Concluído em ${result.durationMs} ms: ${result.imported} lugares importados ` +
-        `(${result.extracted} extraídos, ${result.skipped} sem nome ou fora das categorias).`,
+        `(${result.extracted} extraídos, ${result.skipped} sem nome ou fora das categorias); ` +
+        `limite do município ${result.cityBoundary ? 'importado' : 'não encontrado'}.`,
     );
   } finally {
     await app.close();

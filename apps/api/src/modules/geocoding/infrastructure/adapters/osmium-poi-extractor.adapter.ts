@@ -21,6 +21,9 @@ export const OSMIUM_TAG_FILTERS = [
   'nwr/railway=station',
   'nwr/landuse=cemetery',
   'nwr/historic',
+  'nwr/place=suburb,quarter,neighbourhood',
+  // Limites municipais: o do município atendido penaliza na busca o que fica fora dele.
+  'r/admin_level=8',
 ];
 
 interface GeoJsonFeature {
