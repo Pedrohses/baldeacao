@@ -1,6 +1,8 @@
 'use client';
 
-import type { Itinerary } from '@baldeacao/types';
+import type { Itinerary, PlanTripNotice } from '@baldeacao/types';
+
+import type { TripField } from '../types';
 
 import { ItineraryCard } from './itinerary-card';
 
@@ -17,6 +19,53 @@ export interface ItineraryListProps {
   onRetry?: () => void;
   onChangeTime?: () => void;
   onSwap?: () => void;
+  /** Avisos do planejador (ex.: destino fora da área atendida). */
+  notices?: readonly PlanTripNotice[];
+  /** "Editar origem" / "Editar destino" nos avisos: devolve o foco ao campo. */
+  onEditField?: (field: TripField) => void;
+}
+
+const NOTICE_COPY: Record<PlanTripNotice, { field: TripField; text: string; action: string }> = {
+  origin_outside_service_area: {
+    field: 'origin',
+    text: 'A origem fica fora da área atendida pela SPTrans (nenhuma parada a até 1 km). Confira se escolheu o lugar certo.',
+    action: 'Editar origem',
+  },
+  destination_outside_service_area: {
+    field: 'destination',
+    text: 'O destino fica fora da área atendida pela SPTrans (nenhuma parada a até 1 km). Confira se escolheu o lugar certo.',
+    action: 'Editar destino',
+  },
+};
+
+function Notices({
+  notices,
+  onEditField,
+}: {
+  notices: readonly PlanTripNotice[];
+  onEditField: ((field: TripField) => void) | undefined;
+}) {
+  return (
+    <ul aria-label="Avisos" className="space-y-2">
+      {notices.map((notice) => {
+        const copy = NOTICE_COPY[notice];
+        return (
+          <li key={notice} role="alert" className="rounded-md border border-warn/40 bg-warn/10 p-3">
+            <p>{copy.text}</p>
+            {onEditField ? (
+              <button
+                type="button"
+                onClick={() => onEditField(copy.field)}
+                className={`${SECONDARY_BUTTON} mt-2 bg-surface`}
+              >
+                {copy.action}
+              </button>
+            ) : null}
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
 
 const SECONDARY_BUTTON = 'h-11 rounded-sm border border-border px-4 text-sm font-bold';
@@ -46,6 +95,8 @@ export function ItineraryList({
   onRetry,
   onChangeTime,
   onSwap,
+  notices = [],
+  onEditField,
 }: ItineraryListProps) {
   if (status === 'idle') return null;
   if (status === 'loading') {
@@ -74,6 +125,10 @@ export function ItineraryList({
       </div>
     );
   }
+  const noticeBlock =
+    notices.length > 0 ? <Notices notices={notices} onEditField={onEditField} /> : null;
+  // Fora da área atendida, o aviso explica o vazio melhor que "Nenhuma rota".
+  if (itineraries.length === 0 && noticeBlock) return noticeBlock;
   if (itineraries.length === 0) {
     return (
       <div className="space-y-2">
@@ -95,7 +150,8 @@ export function ItineraryList({
   }
 
   return (
-    <section aria-labelledby="itineraries-title">
+    <section aria-labelledby="itineraries-title" className="space-y-3">
+      {noticeBlock}
       <h2 id="itineraries-title" className="sr-only">
         Itinerários
       </h2>

@@ -53,6 +53,7 @@ export function TripScreen({ initial }: TripScreenProps) {
   const [snap, setSnap] = useState<PanelSnap>(initial.destination ? 'mid' : 'high');
   const [picking, setPicking] = useState<TripField | null>(null);
   const [timeOpen, setTimeOpen] = useState(false);
+  const [focusRequest, setFocusRequest] = useState<{ field: TripField; key: number } | null>(null);
   const padding = useMapPadding(snap);
 
   // Seleção (itinerário e trecho em foco) volta ao começo a cada pedido novo.
@@ -93,7 +94,8 @@ export function TripScreen({ initial }: TripScreenProps) {
       : plan.isError
         ? 'error'
         : 'success';
-  const itineraries = plan.data ?? [];
+  const itineraries = plan.data?.itineraries ?? [];
+  const notices = status === 'success' ? (plan.data?.notices ?? []) : [];
   const selected = status === 'success' ? (itineraries[current.index] ?? null) : null;
 
   function startPicking(field: TripField) {
@@ -139,6 +141,7 @@ export function TripScreen({ initial }: TripScreenProps) {
             autoFocus={initial.focus}
             onPickOnMap={startPicking}
             error={trip.error}
+            focusRequest={focusRequest}
           />
         </div>
         <div className="mt-3">
@@ -165,6 +168,11 @@ export function TripScreen({ initial }: TripScreenProps) {
             onRetry={() => void plan.refetch()}
             onChangeTime={() => setTimeOpen(true)}
             onSwap={trip.swap}
+            notices={notices}
+            onEditField={(field) => {
+              setFocusRequest((previous) => ({ field, key: (previous?.key ?? 0) + 1 }));
+              if (!isDesktop) setSnap('high');
+            }}
             {...(plan.error ? { errorMessage: plan.error.message } : {})}
           />
         </div>

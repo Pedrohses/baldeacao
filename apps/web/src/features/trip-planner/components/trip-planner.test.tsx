@@ -1,4 +1,4 @@
-import type { Itinerary, TripRequest } from '@baldeacao/types';
+import type { Itinerary, PlanTripNotice, TripRequest } from '@baldeacao/types';
 import { itineraryExample, tripRequestExample } from '@baldeacao/types/examples';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, render, screen, within } from '@testing-library/react';
@@ -10,6 +10,11 @@ import { tripPlannerService } from '../services';
 import { ItineraryLayer } from './itinerary-layer';
 import { ItineraryList, type ItineraryListStatus } from './itinerary-list';
 import { ItineraryTimeline } from './itinerary-timeline';
+
+const planned = (itineraries: Itinerary[], notices: PlanTripNotice[] = []) => ({
+  itineraries,
+  notices,
+});
 
 const mapMock = vi.hoisted(() => ({
   sources: [] as { id: string; data: unknown }[],
@@ -75,7 +80,7 @@ function Harness({ request }: { request: TripRequest | null }) {
       : plan.isError
         ? 'error'
         : 'success';
-  const itineraries = plan.data ?? [];
+  const itineraries = plan.data?.itineraries ?? [];
   const selected = itineraries[selectedIndex] ?? null;
   return (
     <>
@@ -123,7 +128,7 @@ beforeEach(() => {
 
 describe('cartão de itinerário', () => {
   it('mostra horários, duração, linhas e o resumo "Sai em"', async () => {
-    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([itineraryExample]);
+    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([itineraryExample]));
     renderHarness(tripRequestExample);
 
     expect(screen.getByRole('status')).toHaveTextContent('Procurando itinerários...');
@@ -147,7 +152,7 @@ describe('cartão de itinerário', () => {
   });
 
   it('encurta "METRÔ L4" para "L4" e mostra "Sai agora" a menos de 2 min', async () => {
-    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([metroL4]);
+    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([metroL4]));
     renderHarness(tripRequestExample);
 
     const option = await screen.findByRole('button', { name: /Das 07:57/ });
@@ -156,8 +161,22 @@ describe('cartão de itinerário', () => {
     expect(option).not.toHaveTextContent('ao vivo');
   });
 
+  it('mostra as saídas seguintes das mesmas linhas', async () => {
+    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(
+      planned([
+        {
+          ...itineraryExample,
+          alsoDepartsAt: ['2026-11-12T08:06:00-03:00', '2026-11-12T08:12:00-03:00'],
+        },
+      ]),
+    );
+    renderHarness(tripRequestExample);
+    const option = await screen.findByRole('button', { name: /Das 08:00/ });
+    expect(within(option).getByTestId('also-departs')).toHaveTextContent('Também às 08:06, 08:12');
+  });
+
   it('trocar de itinerário redesenha o mapa com os trechos escolhidos', async () => {
-    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([itineraryExample, directBus]);
+    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([itineraryExample, directBus]));
     renderHarness(tripRequestExample);
 
     const second = await screen.findByRole('button', { name: /Das 08:10 às 09:20/ });
@@ -169,7 +188,7 @@ describe('cartão de itinerário', () => {
   });
 
   it('mostra estado vazio e de erro com "Tentar de novo"', async () => {
-    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([]);
+    const spy = vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([]));
     const { unmount } = renderHarness(tripRequestExample);
     expect(
       await screen.findByText('Nenhuma rota de transporte para esse trajeto agora.'),
@@ -182,7 +201,7 @@ describe('cartão de itinerário', () => {
     );
     renderHarness(tripRequestExample);
     expect(await screen.findByRole('alert')).toHaveTextContent('O planejador está com problemas');
-    spy.mockResolvedValue([itineraryExample]);
+    spy.mockResolvedValue(planned([itineraryExample]));
     fireEvent.click(screen.getByRole('button', { name: 'Tentar de novo' }));
     expect(await screen.findByRole('button', { name: /Das 08:00/ })).toBeInTheDocument();
   });
@@ -199,7 +218,7 @@ describe('cartão de itinerário', () => {
 
 describe('linha do tempo e camadas do itinerário', () => {
   it('descreve cada trecho, a baldeação e a chegada', async () => {
-    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([itineraryExample]);
+    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([itineraryExample]));
     renderHarness(tripRequestExample);
     const timeline = await screen.findByRole('list', { name: 'Trechos da viagem' });
 
@@ -221,15 +240,15 @@ describe('linha do tempo e camadas do itinerário', () => {
       ...itineraryExample.legs[3]!,
       to: { ...itineraryExample.legs[3]!.to, name: 'Destino' },
     };
-    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([
-      { ...itineraryExample, legs: [...itineraryExample.legs.slice(0, 3), lastWalk] },
-    ]);
+    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(
+      planned([{ ...itineraryExample, legs: [...itineraryExample.legs.slice(0, 3), lastWalk] }]),
+    );
     renderHarness(tripRequestExample);
     expect(await screen.findByText('Caminhe 300 m (3 min) até o destino')).toBeInTheDocument();
   });
 
   it('desenha os trechos, enquadra com a folga do painel e destaca o trecho tocado', async () => {
-    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue([itineraryExample]);
+    vi.spyOn(tripPlannerService, 'plan').mockResolvedValue(planned([itineraryExample]));
     renderHarness(tripRequestExample);
     await screen.findByRole('list', { name: 'Trechos da viagem' });
 

@@ -1,7 +1,15 @@
 'use client';
 
 import type { Place } from '@baldeacao/types';
-import { Fragment, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+} from 'react';
 
 import { locate } from '@/shared/hooks/use-geolocation';
 import { CrosshairIcon, LocateIcon, SearchIcon } from '@/shared/ui/icons';
@@ -31,6 +39,8 @@ export interface PlaceAutocompleteProps {
   autoFocus?: boolean;
   /** Atalho "Escolher no mapa": quem compõe a tela liga a mira no mapa. */
   onPickOnMap?: () => void;
+  /** Trocar o número põe o foco no campo e seleciona o texto. */
+  focusKey?: number;
 }
 
 type Option =
@@ -66,6 +76,7 @@ export function PlaceAutocomplete({
   id,
   autoFocus,
   onPickOnMap,
+  focusKey,
 }: PlaceAutocompleteProps) {
   const generatedId = useId();
   const inputId = id ?? `place-${generatedId}`;
@@ -79,6 +90,7 @@ export function PlaceAutocomplete({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [resolve, setResolve] = useState<ResolveState>({ status: 'idle' });
   const requestRef = useRef(0);
+  const inputRef = useRef<HTMLInputElement>(null);
   const resolveFull = useResolvePlace();
   const { recents, addRecent } = useRecentPlaces();
 
@@ -89,6 +101,12 @@ export function PlaceAutocomplete({
     if (value) setText(value.name);
     else if (text === prevValue?.name) setText('');
   }
+
+  useEffect(() => {
+    if (focusKey === undefined) return;
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, [focusKey]);
 
   const trimmed = text.trim();
   const search = usePlaceSearch(text, value === null && resolve.status !== 'choices');
@@ -306,6 +324,7 @@ export function PlaceAutocomplete({
   return (
     <div className="relative min-w-0 flex-1">
       <input
+        ref={inputRef}
         id={inputId}
         type="text"
         role="combobox"
