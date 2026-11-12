@@ -1,1 +1,1 @@
-export {};
+export { useLineDetails } from './use-line-details';
