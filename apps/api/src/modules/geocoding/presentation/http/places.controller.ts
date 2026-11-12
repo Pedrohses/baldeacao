@@ -14,6 +14,8 @@ import {
   type SearchPlacesResponse,
 } from '@baldeacao/types';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
+import { friendlySourceMessage } from '../../../../shared/presentation/source-messages';
+import { formatZodIssues } from '../../../../shared/presentation/zod-issues';
 import { ReversePlaceUseCase } from '../../application/use-cases/reverse-place.use-case';
 import { SearchPlacesUseCase } from '../../application/use-cases/search-places.use-case';
 import type { Place } from '../../domain/entities/place.entity';
@@ -29,6 +31,19 @@ function toResponsePlace(place: Place) {
   };
 }
 
+/** Mensagem própria para q curto e para mode inválido; o resto pelo mapeador pt-BR. */
+function searchQueryMessage(issues: Parameters<typeof formatZodIssues>[0]): string {
+  const fields = new Set(issues.map((issue) => String(issue.path[0] ?? '')));
+  const parts: string[] = [];
+  if (fields.has('q')) {
+    parts.push('Digite pelo menos 2 caracteres no parâmetro q para buscar um lugar.');
+  }
+  if (fields.has('mode')) parts.push('Parâmetro mode inválido: use "quick" ou "full".');
+  const others = issues.filter((issue) => !['q', 'mode'].includes(String(issue.path[0] ?? '')));
+  if (others.length > 0) parts.push(`Parâmetros inválidos (${formatZodIssues(others)}).`);
+  return parts.join(' ');
+}
+
 function toHttpError(error: unknown): unknown {
   if (error instanceof InvalidPlaceQueryError) {
     return new BadRequestException({
@@ -39,7 +54,7 @@ function toHttpError(error: unknown): unknown {
   if (error instanceof SourceUnavailableError) {
     return new ServiceUnavailableException({
       code: error.code,
-      message: error.message,
+      message: friendlySourceMessage(error),
     } satisfies ApiErrorBody);
   }
   return error;
@@ -59,7 +74,7 @@ export class PlacesController {
     if (!parsed.success) {
       throw new BadRequestException({
         code: 'INVALID_QUERY',
-        message: 'Digite pelo menos 2 caracteres no parâmetro q para buscar um lugar.',
+        message: searchQueryMessage(parsed.error.issues),
       } satisfies ApiErrorBody);
     }
     try {

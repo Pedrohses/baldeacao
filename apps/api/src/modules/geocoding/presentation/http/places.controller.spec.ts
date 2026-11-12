@@ -108,6 +108,17 @@ describe('HTTP do geocoding (contrato v2)', () => {
     }
   });
 
+  it('mode inválido tem mensagem própria', async () => {
+    const res = await request(app.getHttpServer())
+      .get(API_PATHS.searchPlaces)
+      .query({ q: 'paulista', mode: 'tudo' })
+      .expect(400);
+    expect(ApiErrorBodySchema.parse(res.body)).toEqual({
+      code: 'INVALID_QUERY',
+      message: 'Parâmetro mode inválido: use "quick" ou "full".',
+    });
+  });
+
   it('Nominatim fora do ar vira 503 com ApiErrorBody', async () => {
     const res = await request(app.getHttpServer())
       .get(API_PATHS.searchPlaces)
@@ -115,7 +126,8 @@ describe('HTTP do geocoding (contrato v2)', () => {
       .expect(503);
     expect(ApiErrorBodySchema.parse(res.body)).toEqual({
       code: 'SOURCE_UNAVAILABLE',
-      message: expect.stringContaining('nominatim') as string,
+      message:
+        'A busca de endereços está indisponível no momento. Tente novamente em instantes ou informe outro lugar.',
     });
   });
 

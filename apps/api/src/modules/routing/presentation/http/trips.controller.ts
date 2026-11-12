@@ -14,6 +14,8 @@ import {
   TripRequestSchema,
 } from '@baldeacao/types';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
+import { friendlySourceMessage } from '../../../../shared/presentation/source-messages';
+import { formatZodIssues } from '../../../../shared/presentation/zod-issues';
 import { PlanTripUseCase } from '../../application/use-cases/plan-trip.use-case';
 import { InvalidTripRequestError } from '../../domain/errors/invalid-trip-request.error';
 
@@ -27,9 +29,7 @@ export class TripsController {
   async plan(@Body() body: unknown): Promise<PlanTripResponse> {
     const parsed = TripRequestSchema.safeParse(body);
     if (!parsed.success) {
-      const details = parsed.error.issues
-        .map((issue) => `${issue.path.join('.') || 'corpo'}: ${issue.message}`)
-        .join('; ');
+      const details = formatZodIssues(parsed.error.issues, 'corpo');
       throw new BadRequestException({
         code: 'INVALID_QUERY',
         message: `Pedido de viagem inválido (${details}).`,
@@ -48,7 +48,7 @@ export class TripsController {
       if (error instanceof SourceUnavailableError) {
         throw new ServiceUnavailableException({
           code: error.code,
-          message: error.message,
+          message: friendlySourceMessage(error),
         } satisfies ApiErrorBody);
       }
       throw error;

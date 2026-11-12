@@ -109,6 +109,10 @@ export class InMemoryStopRepository extends StopRepository {
     return Promise.resolve(found);
   }
 
+  exists(stopId: string): Promise<boolean> {
+    return Promise.resolve(this.stops.some((stop) => stop.id === stopId));
+  }
+
   existsWithin(center: Coordinates, radiusM: number): Promise<boolean> {
     return Promise.resolve(this.stops.some((stop) => haversineM(center, stop.location) <= radiusM));
   }

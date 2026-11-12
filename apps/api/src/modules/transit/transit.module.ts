@@ -4,6 +4,7 @@ import { FindNearbyStopsUseCase } from './application/use-cases/find-nearby-stop
 import { GetLineDetailsUseCase } from './application/use-cases/get-line-details.use-case';
 import { GetServicePeriodUseCase } from './application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from './application/use-cases/has-nearby-stop.use-case';
+import { LineExistsUseCase } from './application/use-cases/line-exists.use-case';
 import { GetStopArrivalsUseCase } from './application/use-cases/get-stop-arrivals.use-case';
 import { SearchLinesUseCase } from './application/use-cases/search-lines.use-case';
 import { SearchStopsByNameUseCase } from './application/use-cases/search-stops-by-name.use-case';
@@ -28,6 +29,7 @@ const USE_CASES = [
   SearchStopsByNameUseCase,
   HasNearbyStopUseCase,
   GetServicePeriodUseCase,
+  LineExistsUseCase,
 ];
 
 @Module({

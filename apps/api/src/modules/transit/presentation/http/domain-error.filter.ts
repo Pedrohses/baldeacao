@@ -7,6 +7,8 @@ import {
 } from '@nestjs/common';
 import type { ApiErrorBody } from '@baldeacao/types';
 import { DomainError } from '../../../../shared/domain/errors/domain-error';
+import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
+import { friendlySourceMessage } from '../../../../shared/presentation/source-messages';
 
 // Só o que o filtro usa da resposta do Express (sem depender de @types/express).
 interface JsonResponse {
@@ -16,6 +18,7 @@ interface JsonResponse {
 const STATUS_BY_CODE: Record<string, number> = {
   INVALID_QUERY: HttpStatus.BAD_REQUEST,
   LINE_NOT_FOUND: HttpStatus.NOT_FOUND,
+  STOP_NOT_FOUND: HttpStatus.NOT_FOUND,
   SOURCE_UNAVAILABLE: HttpStatus.SERVICE_UNAVAILABLE,
   // Token ausente ou recusado: para o cliente, a fonte está indisponível.
   OLHO_VIVO_AUTH_FAILED: HttpStatus.SERVICE_UNAVAILABLE,
@@ -29,7 +32,14 @@ export class DomainErrorFilter implements ExceptionFilter<DomainError> {
   catch(error: DomainError, host: ArgumentsHost): void {
     const status: number = STATUS_BY_CODE[error.code] ?? HttpStatus.INTERNAL_SERVER_ERROR;
     if (status >= 500) this.logger.warn(`${error.code}: ${error.message}`);
-    const body: ApiErrorBody = { code: error.code, message: error.message };
+    // Fonte fora do ar ou token recusado: texto amigável, sem nome interno nem configuração.
+    const message =
+      error instanceof SourceUnavailableError
+        ? friendlySourceMessage(error)
+        : error.code === 'OLHO_VIVO_AUTH_FAILED'
+          ? friendlySourceMessage(new SourceUnavailableError('olho-vivo'))
+          : error.message;
+    const body: ApiErrorBody = { code: error.code, message };
     host.switchToHttp().getResponse<JsonResponse>().status(status).json(body);
   }
 }
