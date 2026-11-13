@@ -14,7 +14,8 @@
     "migration:run": "pnpm typeorm migration:run",
     "migration:revert": "pnpm typeorm migration:revert",
     "gtfs:import": "ts-node --transpile-only src/modules/sources/presentation/cli/gtfs-import.cli.ts",
-    "places:import": "ts-node --transpile-only src/modules/geocoding/presentation/cli/places-import.cli.ts"
+    "places:import": "ts-node --transpile-only src/modules/geocoding/presentation/cli/places-import.cli.ts",
+    "gtfs:prepare": "ts-node --transpile-only src/modules/sources/presentation/cli/gtfs-prepare.cli.ts"
   },
   "dependencies": {
     "@baldeacao/types": "workspace:*",

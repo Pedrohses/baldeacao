@@ -29,9 +29,10 @@ echo "Baixando GTFS da SPTrans..."
 curl -fL --retry 2 -A "baldeacao/0.1" -o data/sptrans.gtfs.zip "$GTFS_URL" \
   || curl -fL --retry 2 -A "baldeacao/0.1" -o data/sptrans.gtfs.zip "$GTFS_FALLBACK_URL"
 
-echo "Marcando frequências como exatas (exact_times=1)..."
-python3 gtfs-exact-times.py data/sptrans.gtfs.zip data/sptrans.gtfs.exact.zip
-mv data/sptrans.gtfs.exact.zip data/sptrans.gtfs.zip
+echo "Preparando o GTFS (exact_times=1 e reparo dos traçados)..."
+# Mesma rotina usada na importação para o Postgres: apps/api/src/modules/sources (gtfs:prepare).
+(cd ../../apps/api && pnpm -s gtfs:prepare "$OLDPWD/data/sptrans.gtfs.zip" "$OLDPWD/data/sptrans.gtfs.prepared.zip")
+mv data/sptrans.gtfs.prepared.zip data/sptrans.gtfs.zip
 
 echo "Gerando o grafo do OTP (pode levar vários minutos)..."
 docker run --rm -e JAVA_TOOL_OPTIONS="-Xmx${OTP_BUILD_HEAP:-6g}" \
