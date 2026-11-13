@@ -9,7 +9,12 @@ import { Geocoder } from '../../domain/ports/geocoder.port';
 import { KnownPlaceRepository } from '../../domain/ports/known-place-repository.port';
 import { type PlaceCandidate, rankPlaces } from '../../domain/value-objects/local-place-rank';
 import { COMPACT_ACCESS_RADIUS_M } from '../../domain/value-objects/place-access';
-import { isPostalCodeQuery, normalizePlaceQuery } from '../../domain/value-objects/place-query';
+import {
+  isPostalCodeQuery,
+  normalizePlaceQuery,
+  parseIntersectionQuery,
+} from '../../domain/value-objects/place-query';
+import { distanceM } from '../../domain/value-objects/service-city';
 import type { SearchPlacesInput, SearchPlacesOutput } from '../dto/search-places.dto';
 
 /** Mínimo para a busca local (autocompletar). */
@@ -22,6 +27,10 @@ export const SEARCH_PLACES_STOPS_POOL = 20;
 export const SEARCH_PLACES_KNOWN_POOL = 40;
 /** Importância de uma estação de metrô/trem (igual a railway=station em osm-poi-category). */
 export const STATION_IMPORTANCE = 8;
+/** Trechos pedidos por via ao procurar a esquina (as avenidas longas têm dezenas). */
+export const INTERSECTION_STREET_LIMIT = 40;
+/** Esquina: as duas vias têm pontos a até isto um do outro. */
+export const INTERSECTION_MAX_GAP_M = 300;
 /** Endereços mudam pouco: 30 dias. */
 export const GEOCODE_CACHE_TTL_S = 30 * 24 * 60 * 60;
 /** Busca sem resultado expira antes (1 dia), para um lugar novo no OSM aparecer logo. */
@@ -81,8 +90,10 @@ export class SearchPlacesUseCase {
 
     const local = await this.localCandidates(key);
     let remote: Place[];
+    let corner: Place[] | null = null;
     try {
       remote = await this.searchRemote(key, input.query);
+      corner = await this.searchIntersection(key);
     } catch (error) {
       // Com resultado local, a falha do Nominatim não derruba a busca.
       if (error instanceof SourceUnavailableError && local.length > 0) {
@@ -101,7 +112,12 @@ export class SearchPlacesUseCase {
     }));
     const candidates = await this.withCityFlags([...local, ...remoteCandidates]);
     const ranked = rankPlaces(key, candidates, SEARCH_PLACES_LIMIT);
-    return { places: await this.withGtfsStations(ranked) };
+    const places = await this.withGtfsStations(ranked);
+    // Esquina pedida: a esquina (ou a primeira via) vem antes do resto.
+    if (!corner) return { places };
+    const ids = new Set(corner.map((p) => p.id));
+    const rest = places.filter((p) => !ids.has(p.id));
+    return { places: [...corner, ...rest].slice(0, SEARCH_PLACES_LIMIT) };
   }
 
   /**
@@ -129,6 +145,41 @@ export class SearchPlacesUseCase {
     });
     if (!station) return place;
     return new Place({ ...place, id: `stop:${station.stop.id}`, location: station.stop.location });
+  }
+
+  /**
+   * "Esquina da X com a Y": busca as duas vias no Nominatim (cache antes de cada uma) e, entre
+   * os trechos devolvidos, pega o par mais próximo; a até 300 m, o ponto médio vira a esquina.
+   * Sem par perto, devolve os trechos da primeira via. null quando o texto não é esquina.
+   */
+  private async searchIntersection(key: string): Promise<Place[] | null> {
+    const streets = parseIntersectionQuery(key);
+    if (!streets) return null;
+    const [first, second] = streets;
+    const [a, b] = await Promise.all([this.streetPoints(first), this.streetPoints(second)]);
+    let best: { a: Place; b: Place; gap: number } | null = null;
+    for (const pa of a) {
+      for (const pb of b) {
+        const gap = distanceM(pa.location, pb.location);
+        if (!best || gap < best.gap) best = { a: pa, b: pb, gap };
+      }
+    }
+    if (!best || best.gap > INTERSECTION_MAX_GAP_M) {
+      const roads = a.filter((p) => !p.id.startsWith('stop:'));
+      return roads.length > 0 ? roads : null;
+    }
+    return [
+      new Place({
+        id: `corner:${best.a.id}:${best.b.id}`,
+        name: `${best.a.name} com ${best.b.name}`,
+        address: best.a.address,
+        kind: 'address',
+        location: {
+          lat: (best.a.location.lat + best.b.location.lat) / 2,
+          lon: (best.a.location.lon + best.b.location.lon) / 2,
+        },
+      }),
+    ];
   }
 
   /** Paradas, estações e lugares conhecidos que casam com o texto (sem ordem final). */
@@ -176,6 +227,42 @@ export class SearchPlacesUseCase {
     return candidates.map((c) =>
       byCandidate.has(c) ? { ...c, inCity: byCandidate.get(c) ?? null } : c,
     );
+  }
+
+  /**
+   * Pontos de uma via: trechos do Nominatim e paradas de ônibus com o nome dela ("Av. Ipiranga,
+   * 344" vira "Av. Ipiranga"), que costumam ficar perto das esquinas.
+   */
+  private async streetPoints(street: string): Promise<Place[]> {
+    const [roads, { stops, stationIds }] = await Promise.all([
+      this.searchStreet(street),
+      this.searchStops.execute({ text: street, limit: SEARCH_PLACES_STOPS_POOL }),
+    ]);
+    const stations = new Set(stationIds);
+    const onStreet = stops
+      .filter((stop) => !stations.has(stop.id) && /,\s*\d+\s*$/.test(stop.name))
+      .map(
+        (stop) =>
+          new Place({
+            id: `stop:${stop.id}`,
+            name: stop.name.replace(/,\s*\d+\s*$/, ''),
+            address: null,
+            kind: 'address',
+            location: stop.location,
+          }),
+      );
+    return [...roads, ...onStreet];
+  }
+
+  /** Trechos de uma via, com cache próprio ("street:paulista"). */
+  private async searchStreet(street: string): Promise<Place[]> {
+    const key = `street:${street}`;
+    const cached = await this.cache.get(key);
+    if (cached) return cached;
+    const places = await this.geocoder.searchStreet(street, INTERSECTION_STREET_LIMIT);
+    const ttl = places.length > 0 ? GEOCODE_CACHE_TTL_S : GEOCODE_EMPTY_CACHE_TTL_S;
+    await this.cache.set(key, street, places, ttl);
+    return places;
   }
 
   private async searchRemote(key: string, rawQuery: string): Promise<Place[]> {

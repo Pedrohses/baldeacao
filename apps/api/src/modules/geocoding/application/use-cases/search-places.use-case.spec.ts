@@ -464,4 +464,61 @@ describe('SearchPlacesUseCase', () => {
       location: gtfsStation.location,
     });
   });
+
+  describe('esquina', () => {
+    class StreetGeocoder extends Geocoder {
+      constructor(private readonly streets: Record<string, Place[]>) {
+        super();
+      }
+      search(): Promise<Place[]> {
+        return Promise.resolve([]);
+      }
+      override searchStreet(street: string): Promise<Place[]> {
+        return Promise.resolve(this.streets[street] ?? []);
+      }
+      reverse(): Promise<Place | null> {
+        return Promise.resolve(null);
+      }
+    }
+    const road = (id: string, name: string, lat: number, lon: number) =>
+      new Place({ id, name, address: null, kind: 'address', location: { lat, lon } });
+    const paulista = [
+      road('osm:way:1', 'Avenida Paulista', -23.5617, -46.6559),
+      road('osm:way:2', 'Avenida Paulista', -23.5562, -46.6621),
+    ];
+    const consolacao = [
+      road('osm:way:3', 'Rua da Consolação', -23.5559, -46.6627),
+      road('osm:way:4', 'Rua da Consolação', -23.546, -46.648),
+    ];
+
+    function corner(streets: Record<string, Place[]>) {
+      return new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new StreetGeocoder(streets),
+        noStops(),
+        new InMemoryKnownPlaceRepository(),
+        nearby(),
+      );
+    }
+
+    it('"esquina da X com a Y" devolve o ponto entre os trechos mais próximos', async () => {
+      const { places } = await corner({ paulista, consolação: consolacao }).execute({
+        query: 'esquina da Paulista com a Consolação',
+        mode: 'full',
+      });
+      expect(places[0]).toMatchObject({
+        name: 'Avenida Paulista com Rua da Consolação',
+        kind: 'address',
+      });
+      expect(places[0]?.location.lat).toBeCloseTo(-23.55605, 4);
+    });
+
+    it('vias longe uma da outra: ao menos a primeira via', async () => {
+      const { places } = await corner({ paulista, consolação: [consolacao[1]!] }).execute({
+        query: 'Paulista x Consolação',
+        mode: 'full',
+      });
+      expect(places.map((p) => p.id)).toEqual(['osm:way:1', 'osm:way:2']);
+    });
+  });
 });

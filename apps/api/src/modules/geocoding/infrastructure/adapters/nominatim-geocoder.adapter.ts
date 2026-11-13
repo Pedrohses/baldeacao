@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Coordinates, Place } from '../../domain/entities/place.entity';
 import { Geocoder } from '../../domain/ports/geocoder.port';
+import { SERVICE_CITY_NAME } from '../../domain/value-objects/service-city';
 import { NominatimClient } from './nominatim.client';
 import { NominatimPlaceMapper } from './nominatim-place.mapper';
 import { normalizeAddressQuery, postalCodeOnly, streetOnlyQuery } from './nominatim-query';
@@ -31,6 +32,15 @@ export class NominatimGeocoderAdapter extends Geocoder {
     const reduced = results.length === 0 ? streetOnlyQuery(normalized) : null;
     if (reduced) results = await this.client.search(reduced, limit);
     return NominatimPlaceMapper.toDomainList(results).slice(0, limit);
+  }
+
+  /** Só vias (category highway) da cidade atendida. */
+  override async searchStreet(street: string, limit: number): Promise<Place[]> {
+    const results = await this.client.searchStreet(street, SERVICE_CITY_NAME, limit);
+    return NominatimPlaceMapper.toDomainList(results.filter((r) => r.category === 'highway')).slice(
+      0,
+      limit,
+    );
   }
 
   async reverse(location: Coordinates): Promise<Place | null> {
