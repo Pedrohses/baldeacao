@@ -54,9 +54,20 @@ describe('LineHeader', () => {
     });
   });
 
-  it('usa cores padrão quando a linha não tem cor', () => {
+  it('sem cor no GTFS usa o neutro de linha, não a cor da marca', () => {
     render(<LineHeader line={{ ...routeExample, color: null, textColor: null }} />);
-    expect(screen.getByTestId('line-badge')).toHaveStyle({ backgroundColor: '#C7361F' });
+    const badge = screen.getByTestId('line-badge');
+    expect(badge).toHaveClass('bg-line-fallback', 'text-line-fallback-fg');
+    expect(badge.getAttribute('style')).toBeNull();
+  });
+
+  it('cor sem textColor ganha texto legível, e cor muito clara ganha contorno', () => {
+    const { rerender } = render(
+      <LineHeader line={{ ...routeExample, color: 'FFD100', textColor: null }} />,
+    );
+    expect(screen.getByTestId('line-badge')).toHaveStyle({ color: '#000000' });
+    rerender(<LineHeader line={{ ...routeExample, color: 'F5F5F5', textColor: null }} />);
+    expect(screen.getByTestId('line-badge')).toHaveClass('border-border-strong');
   });
 });
 

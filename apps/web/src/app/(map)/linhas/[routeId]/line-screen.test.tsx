@@ -31,7 +31,8 @@ vi.mock('@/shared/ui/map', () => ({
   UserLocationLayer: () => null,
   useMapColors: () => ({
     brand: '#C7361F',
-    brandRgb: '199, 54, 31',
+    vehicleIdle: '#5A4A40',
+    lineFallback: '#5A4A40',
     text: '#000',
     surface: '#fff',
   }),

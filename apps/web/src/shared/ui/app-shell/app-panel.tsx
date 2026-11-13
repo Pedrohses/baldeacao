@@ -154,7 +154,7 @@ export function AppPanel({
         {title}
       </h1>
       <div
-        className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-4"
+        className="scrollbar-none min-h-0 overflow-y-auto overscroll-contain px-4 pb-4"
         // Ocupa exatamente a parte visível: o fim da lista não some sob a barra e listas
         // suspensas (sugestões de lugar) têm espaço sem serem cortadas pela rolagem.
         style={{ height: `calc(${height}px - var(--nav-h) - ${HANDLE_PX}px)` }}

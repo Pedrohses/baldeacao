@@ -1,12 +1,13 @@
 // Alturas do painel no celular, medidas a partir do pé da janela. A barra de abas (64 px) fica
-// por cima do painel: a altura baixa soma a barra para sobrar 152 px visíveis (alça de 44 px,
-// "Para onde?" de 56 px e uma fileira de recentes).
+// por cima do painel: a altura baixa soma a barra para sobrar 216 px visíveis (alça de 44 px,
+// "Para onde?" de 56 px, o título da lista e a primeira parada com a próxima chegada), no padrão
+// "próxima partida na dobra".
 export type PanelSnap = 'low' | 'mid' | 'high';
 
 export const PANEL_SNAPS: readonly PanelSnap[] = ['low', 'mid', 'high'];
 
 export const NAV_HEIGHT_PX = 64;
-export const LOW_SNAP_PX = 216;
+export const LOW_SNAP_PX = 280;
 export const DESKTOP_PANEL_WIDTH_PX = 400;
 
 /** A alça alterna baixa, média e alta, e da alta volta para a baixa. */

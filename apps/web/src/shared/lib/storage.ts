@@ -71,3 +71,18 @@ export function removeFavoriteStop(stopId: string): boolean {
     readFavoriteStops().filter((s) => s.id !== stopId),
   );
 }
+
+// Dicas de uso mostradas uma vez só: guardam só "já vista".
+const HintSeenSchema = z.literal(true);
+
+export function hintKey(hint: string): string {
+  return `hint-seen:${hint}`;
+}
+
+export function isHintSeen(hint: string): boolean {
+  return readStorage(hintKey(hint), HintSeenSchema) === true;
+}
+
+export function markHintSeen(hint: string): boolean {
+  return writeStorage(hintKey(hint), true);
+}

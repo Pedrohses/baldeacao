@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
-import { readStorage, removeStorage, writeStorage } from './storage';
+import { isHintSeen, markHintSeen, readStorage, removeStorage, writeStorage } from './storage';
 
 const schema = z.object({ count: z.number() });
 
@@ -29,5 +29,13 @@ describe('storage', () => {
       throw new DOMException('cheio', 'QuotaExceededError');
     });
     expect(writeStorage('demo', { count: 1 })).toBe(false);
+  });
+});
+
+describe('dicas de uso', () => {
+  it('lembra que a dica foi vista', () => {
+    expect(isHintSeen('ponto-no-mapa')).toBe(false);
+    expect(markHintSeen('ponto-no-mapa')).toBe(true);
+    expect(isHintSeen('ponto-no-mapa')).toBe(true);
   });
 });

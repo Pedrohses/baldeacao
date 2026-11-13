@@ -6,3 +6,4 @@ export {
   type LineSearchStatus,
   useLineSearch,
 } from './use-line-search';
+export { addRecentLine, useRecentLines } from './use-recent-lines';

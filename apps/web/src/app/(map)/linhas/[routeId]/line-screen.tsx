@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { LineHeader, RouteShapeLayer, useLineDetails } from '@/features/lines';
+import { LineHeader, RouteShapeLayer, addRecentLine, useLineDetails } from '@/features/lines';
 import {
   StaleDataNotice,
   VehiclesLayer,
@@ -36,7 +36,12 @@ export function LineScreen({ routeId }: LineScreenProps) {
 
   const line = useLineDetails(routeId);
   const vehicles = useVehiclePositions(routeId);
-  const color = line.data?.line.color ? `#${line.data.line.color}` : colors.brand;
+  // Sem cor no GTFS, o neutro de linha (a cor da marca é só para ação e seleção).
+  const color = line.data?.line.color ? `#${line.data.line.color}` : colors.lineFallback;
+  const loadedLine = line.data?.line;
+  useEffect(() => {
+    if (loadedLine) addRecentLine(loadedLine);
+  }, [loadedLine]);
   const count = vehicles.data?.vehicles.length;
   const noLiveData = line.data?.line.type === 'subway' || line.data?.line.type === 'rail';
 

@@ -8,10 +8,18 @@ import { FavoriteStopButton } from '@/features/favorites';
 import { LineHeader, RouteShapeLayer, useLineDetails } from '@/features/lines';
 import { StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
 import { PlaceKindIcon, useMapPointPlace, useRecentPlaces } from '@/features/place-search';
-import { NearbyStopsList, STOPS_MIN_ZOOM, StopSheet, StopsLayer } from '@/features/stops';
+import {
+  NEARBY_LIST_LIMIT,
+  NEARBY_LINES_PER_STOP,
+  NearbyStopsList,
+  STOPS_MIN_ZOOM,
+  StopSheet,
+  StopsLayer,
+} from '@/features/stops';
 import { buildTripHref } from '@/features/trip-planner';
 import { useGeolocation } from '@/shared/hooks/use-geolocation';
 import { useIsDesktop } from '@/shared/hooks/use-media-query';
+import { useOneTimeHint } from '@/shared/hooks/use-one-time-hint';
 import {
   AppPanel,
   LOW_SNAP_PX,
@@ -23,15 +31,19 @@ import { CloseIcon, SearchIcon } from '@/shared/ui/icons';
 import {
   DroppedPin,
   LocateButton,
-  MAP_COLORS,
   MapFlyTo,
   MapLayers,
   MapLongPress,
   UserLocationLayer,
   VisibleCenterSync,
+  useMapColors,
 } from '@/shared/ui/map';
 
 const RECENT_CHIPS = 3;
+// No desktop o painel tem altura para mais paradas e mais chegadas por parada.
+const DESKTOP_NEARBY_LIMIT = 8;
+const DESKTOP_LINES_PER_STOP = 3;
+const MAP_POINT_HINT = 'ponto-no-mapa';
 const PRIMARY_ACTION =
   'inline-flex h-11 items-center justify-center rounded-sm bg-brand px-4 font-bold text-brand-fg';
 const SECONDARY_ACTION =
@@ -81,6 +93,8 @@ export function MapScreen() {
   const clearSelection = useMapStore((state) => state.clearSelection);
   const { position } = useGeolocation();
   const { recents } = useRecentPlaces();
+  const colors = useMapColors();
+  const pointHint = useOneTimeHint(MAP_POINT_HINT);
 
   const [selectedStop, setSelectedStop] = useState<Stop | null>(null);
   const [pin, setPin] = useState<Coordinates | null>(null);
@@ -96,7 +110,8 @@ export function MapScreen() {
   const routeId =
     selection?.kind === 'vehicle' || selection?.kind === 'line' ? selection.routeId : null;
   const line = useLineDetails(routeId);
-  const lineColor = line.data?.line.color ? `#${line.data.line.color}` : MAP_COLORS.brand;
+  // Sem cor no GTFS, o neutro de linha (a cor da marca é só para ação e seleção).
+  const lineColor = line.data?.line.color ? `#${line.data.line.color}` : colors.lineFallback;
 
   const stopsCenter =
     viewport.zoom >= STOPS_MIN_ZOOM ? { lat: viewport.latitude, lon: viewport.longitude } : null;
@@ -160,9 +175,9 @@ export function MapScreen() {
       <>
         <Link
           href={buildTripHref({ from: 'current-location', focus: 'destination' })}
-          className="flex h-14 items-center gap-3 rounded-md bg-surface-2 px-4 text-xl font-bold"
+          className="search-field flex h-14 items-center gap-3 rounded-md px-4 text-xl font-bold"
         >
-          <SearchIcon className="size-6 text-muted" />
+          <SearchIcon className="size-6 text-text" />
           Para onde?
         </Link>
         {recents.length > 0 ? (
@@ -180,18 +195,31 @@ export function MapScreen() {
             ))}
           </ul>
         ) : null}
-        <h2 className="mt-5 mb-1 text-base font-bold">
+        <h2 className="mt-4 mb-1 text-base font-bold">
           {position ? 'Paradas perto de você' : 'Paradas perto do centro do mapa'}
         </h2>
         <NearbyStopsList
           center={nearbyCenter}
           onSelectStop={(stop) => handleSelectStop(stop, true)}
+          limit={isDesktop ? DESKTOP_NEARBY_LIMIT : NEARBY_LIST_LIMIT}
+          linesPerStop={isDesktop ? DESKTOP_LINES_PER_STOP : NEARBY_LINES_PER_STOP}
         />
-        <p className="mt-4 text-sm text-muted">
-          {isDesktop
-            ? 'Clique com o botão direito no mapa para sair ou ir até um ponto.'
-            : 'Toque e segure no mapa para sair ou ir até um ponto.'}
-        </p>
+        {pointHint.visible ? (
+          <div className="mt-4 flex items-center gap-3 rounded-sm bg-surface-2 py-2 pr-2 pl-3 text-sm">
+            <p className="min-w-0 flex-1">
+              {isDesktop
+                ? 'Quer ir para um ponto do mapa? Clique nele com o botão direito.'
+                : 'Quer ir para um ponto do mapa? Toque e segure nele.'}
+            </p>
+            <button
+              type="button"
+              onClick={pointHint.dismiss}
+              className="inline-flex h-11 shrink-0 items-center rounded-sm px-3 font-bold transition-colors hover:bg-surface"
+            >
+              Entendi
+            </button>
+          </div>
+        ) : null}
       </>
     );
   }
@@ -200,7 +228,13 @@ export function MapScreen() {
     <main className={SCREEN_CLASS}>
       <MapLayers>
         <VisibleCenterSync padding={padding} onChange={setVisibleCenter} />
-        <MapLongPress onLongPress={setPin} />
+        <MapLongPress
+          onLongPress={(point) => {
+            setPin(point);
+            // Usou o recurso: a dica já cumpriu o papel.
+            if (pointHint.visible) pointHint.dismiss();
+          }}
+        />
         <MapFlyTo target={flyTarget} />
         <RouteShapeLayer routeId={routeId} />
         <StopsLayer

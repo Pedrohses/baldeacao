@@ -1,14 +1,8 @@
-export {
-  LINE_FALLBACK_COLOR,
-  LineBadge,
-  LineHeader,
-  LineSearch,
-  RouteShapeLayer,
-} from './components';
+export { LineHeader, LineSearch, RecentLinesList, RouteShapeLayer } from './components';
 export type {
-  LineBadgeProps,
   LineHeaderProps,
   LineSearchProps,
+  RecentLinesListProps,
   RouteShapeLayerProps,
 } from './components';
-export { useLineDetails, useLineSearch } from './hooks';
+export { addRecentLine, useLineDetails, useLineSearch, useRecentLines } from './hooks';

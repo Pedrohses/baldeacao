@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { type ReactNode, useId, useState } from 'react';
 
 import { SearchIcon } from '@/shared/ui/icons';
+import { LineBadge } from '@/shared/ui/line-badge';
 
 import { LINE_SEARCH_MIN_LENGTH, useLineSearch } from '../hooks';
-import { LineBadge } from './line-badge';
 
 const TYPE_LABELS: Record<Route['type'], string> = {
   bus: 'Ônibus',
@@ -25,10 +25,12 @@ export interface LineSearchProps {
   /** Link de cada resultado (a página decide a rota). */
   hrefFor: (line: Route) => string;
   autoFocus?: boolean;
+  /** Conteúdo mostrado enquanto nada foi digitado (a página compõe: linhas perto, recentes). */
+  idleContent?: ReactNode;
 }
 
 /** Campo de busca de linha (código ou nome) e a lista de resultados com o selo da linha. */
-export function LineSearch({ hrefFor, autoFocus = false }: LineSearchProps) {
+export function LineSearch({ hrefFor, autoFocus = false, idleContent = null }: LineSearchProps) {
   const inputId = useId();
   const statusId = `${inputId}-status`;
   const [text, setText] = useState('');
@@ -82,8 +84,8 @@ export function LineSearch({ hrefFor, autoFocus = false }: LineSearchProps) {
       <label htmlFor={inputId} className="sr-only">
         Buscar linha
       </label>
-      <div className="flex h-14 items-center gap-3 rounded-md bg-surface-2 px-4">
-        <SearchIcon className="size-6 shrink-0 text-muted" />
+      <div className="search-field flex h-14 items-center gap-3 rounded-md px-4">
+        <SearchIcon className="size-6 shrink-0 text-text" />
         <input
           id={inputId}
           type="search"
@@ -95,7 +97,7 @@ export function LineSearch({ hrefFor, autoFocus = false }: LineSearchProps) {
           placeholder="Número ou nome da linha"
           value={text}
           onChange={(event) => setText(event.target.value)}
-          className="h-full min-w-0 flex-1 bg-transparent text-lg placeholder:text-muted"
+          className="h-full min-w-0 flex-1 bg-transparent text-lg placeholder:text-muted focus:outline-none"
         />
       </div>
       <div
@@ -111,9 +113,13 @@ export function LineSearch({ hrefFor, autoFocus = false }: LineSearchProps) {
             <li key={line.id}>
               <Link
                 href={hrefFor(line)}
-                className="flex min-h-14 items-center gap-3 rounded-sm px-1 py-2 hover:bg-surface-2"
+                className="flex min-h-14 items-center gap-3 rounded-sm px-1 py-2 transition-colors hover:bg-surface-2"
               >
-                <LineBadge line={line} />
+                <LineBadge
+                  shortName={line.shortName}
+                  color={line.color}
+                  textColor={line.textColor}
+                />
                 <span className="min-w-0">
                   <span className="block truncate font-semibold">{line.longName}</span>
                   <span className="block text-sm text-muted">{TYPE_LABELS[line.type]}</span>
@@ -123,6 +129,7 @@ export function LineSearch({ hrefFor, autoFocus = false }: LineSearchProps) {
           ))}
         </ul>
       ) : null}
+      {search.status === 'idle' ? idleContent : null}
     </div>
   );
 }

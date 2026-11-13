@@ -115,7 +115,7 @@ describe('AppPanel', () => {
     fireEvent.pointerUp(handle, { pointerId: 1, clientY: 520 });
     fireEvent.click(handle);
 
-    // 216 + 180 = 396 px: a média (400 px) é a mais próxima.
+    // 280 + 180 = 460 px: a média (400 px) é a mais próxima.
     expect(onSnapChange).toHaveBeenCalledTimes(1);
     expect(onSnapChange).toHaveBeenCalledWith('mid');
   });
