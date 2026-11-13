@@ -72,10 +72,21 @@ export function isPortugueseMessage(message: string): boolean {
   return PORTUGUESE_CHARS.test(message) || words.some((word) => PORTUGUESE_WORDS.has(word));
 }
 
+/** Tira prefixos técnicos "(corpo: ...)" e a pontuação dupla "(...)." que a api manda. */
+export function cleanApiMessage(message: string): string {
+  return message
+    .replace(/\((?:corpo|query|params|parâmetros):\s*/gi, '(')
+    .replace(/\.\)\.?$/, ').')
+    .replace(/([.!?])\1+/g, '$1')
+    .trim();
+}
+
 /** Mensagem do corpo `{ code, message }` quando em português; senão a genérica do status. */
 function errorMessage(status: number, payload: unknown): string {
   const body = ApiErrorBodySchema.safeParse(payload);
-  if (body.success && isPortugueseMessage(body.data.message)) return body.data.message;
+  if (body.success && isPortugueseMessage(body.data.message)) {
+    return cleanApiMessage(body.data.message);
+  }
   return messageForStatus(status);
 }
 

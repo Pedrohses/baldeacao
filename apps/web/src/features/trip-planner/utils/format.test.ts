@@ -67,3 +67,13 @@ describe('formatação do itinerário', () => {
     });
   });
 });
+
+describe('caminhada com espera', () => {
+  it('separa caminhada e espera e omite trechos minúsculos', async () => {
+    const { walkWaitSeconds, isTinyWalk } = await import('./format');
+    expect(walkWaitSeconds({ distanceM: 47, durationS: 300 })).toBe(240);
+    expect(walkWaitSeconds({ distanceM: 600, durationS: 540 })).toBe(0);
+    expect(isTinyWalk({ mode: 'walk', distanceM: 12 })).toBe(true);
+    expect(isTinyWalk({ mode: 'walk', distanceM: 47 })).toBe(false);
+  });
+});

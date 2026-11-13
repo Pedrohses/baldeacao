@@ -38,6 +38,7 @@ export function LineScreen({ routeId }: LineScreenProps) {
   const vehicles = useVehiclePositions(routeId);
   const color = line.data?.line.color ? `#${line.data.line.color}` : colors.brand;
   const count = vehicles.data?.vehicles.length;
+  const noLiveData = line.data?.line.type === 'subway' || line.data?.line.type === 'rail';
 
   function showOnMap() {
     selectLine(routeId);
@@ -72,11 +73,13 @@ export function LineScreen({ routeId }: LineScreenProps) {
         </Link>
         <div className="mt-1">{header}</div>
         <p role="status" className="mt-3">
-          {count === undefined
-            ? vehicles.isError
-              ? 'Não foi possível ver os ônibus ao vivo agora.'
-              : 'Procurando os ônibus da linha...'
-            : vehiclesText(count)}
+          {noLiveData
+            ? 'Metrô e trem não têm posição ao vivo.'
+            : count === undefined
+              ? vehicles.isError
+                ? 'Não foi possível ver os ônibus ao vivo agora.'
+                : 'Procurando os ônibus da linha...'
+              : vehiclesText(count)}
         </p>
         {line.data && line.data.shapes.length > 1 ? (
           <p className="mt-1 text-sm text-muted">Ida em linha contínua, volta tracejada.</p>

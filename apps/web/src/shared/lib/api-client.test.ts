@@ -60,3 +60,12 @@ describe('api-client', () => {
     await expect(api.get('/x', schema)).rejects.toBeInstanceOf(ApiError);
   });
 });
+
+describe('cleanApiMessage', () => {
+  it('tira o prefixo técnico e a pontuação dupla', async () => {
+    const { cleanApiMessage } = await import('./api-client');
+    expect(cleanApiMessage('Pedido de viagem inválido (corpo: from.lat: obrigatório.).')).toBe(
+      'Pedido de viagem inválido (from.lat: obrigatório).',
+    );
+  });
+});

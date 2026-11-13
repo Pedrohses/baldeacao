@@ -8,6 +8,9 @@ import {
   formatTime,
   legColor,
   minutesBetween,
+  walkWaitSeconds,
+  WALK_SPEED_MS,
+  isTinyWalk,
   placeLabel,
 } from '../utils/format';
 import { LineChip } from './itinerary-card';
@@ -54,10 +57,13 @@ function Rail({ leg, transfer }: { leg: Leg; transfer: boolean }) {
 
 function LegText({ leg }: { leg: Leg }) {
   if (leg.mode === 'walk') {
+    const wait = walkWaitSeconds(leg);
     return (
       <p className="font-semibold">
-        Caminhe {formatDistance(leg.distanceM)} ({formatDuration(leg.durationS)}) até{' '}
-        {placeLabel(leg.to.name)}
+        {wait > 0
+          ? `Caminhe ${formatDistance(leg.distanceM)} (${formatDuration(leg.distanceM / WALK_SPEED_MS)}) e aguarde ${formatDuration(wait)}`
+          : `Caminhe ${formatDistance(leg.distanceM)} (${formatDuration(leg.durationS)})`}{' '}
+        até {placeLabel(leg.to.name)}
       </p>
     );
   }
@@ -112,6 +118,7 @@ export function ItineraryTimeline({
   return (
     <ol aria-label="Trechos da viagem" className="space-y-1">
       {itinerary.legs.map((leg, index) => {
+        if (isTinyWalk(leg)) return null;
         const previous = transferFrom[index] ?? null;
         const focused = focusedLeg === index;
         return (

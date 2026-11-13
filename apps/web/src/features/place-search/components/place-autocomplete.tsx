@@ -314,7 +314,7 @@ export function PlaceAutocomplete({
   const placeCount = options.filter((o) => o.type === 'place').length;
   const announcement =
     resolve.status === 'choices'
-      ? `${placeCount} endereços encontrados para ${resolve.query}.`
+      ? `${placeCount} ${placeCount === 1 ? 'resultado encontrado' : 'resultados encontrados'} para ${resolve.query}.`
       : showList && trimmed
         ? `${placeCount} sugestões disponíveis.`
         : '';
@@ -354,7 +354,7 @@ export function PlaceAutocomplete({
           setActiveIndex(-1);
           acceptTyped();
         }}
-        className={`w-full rounded-sm bg-transparent px-2 text-base placeholder:text-muted hover:bg-surface-2 ${
+        className={`w-full rounded-sm bg-transparent px-2 text-base placeholder:text-muted hover:bg-surface-2 focus-visible:outline-offset-[-3px] ${
           subtitle ? 'h-11 pt-1 font-semibold' : 'h-12'
         }`}
       />
@@ -362,7 +362,7 @@ export function PlaceAutocomplete({
         <p
           id={subtitleId}
           data-testid="place-subtitle"
-          className="-mt-1 truncate px-2 pb-1.5 text-sm text-muted"
+          className="mt-0.5 truncate px-2 pb-1.5 text-sm text-muted"
         >
           {subtitle}
         </p>

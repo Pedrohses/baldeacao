@@ -1,4 +1,5 @@
-import type { z } from 'zod';
+import { StopSchema, type Stop } from '@baldeacao/types';
+import { z } from 'zod';
 
 // Único ponto de acesso ao localStorage: modo privado, cota cheia e dado corrompido
 // nunca derrubam a tela; o que não passa no schema é tratado como ausente.
@@ -44,4 +45,29 @@ export function removeStorage(key: string): void {
   } catch {
     // sem armazenamento disponível: nada a remover
   }
+}
+
+// Paradas favoritas: lista de Stop validada na leitura; itens inválidos derrubam a lista toda.
+export const FAVORITE_STOPS_KEY = 'favorite-stops';
+export const FAVORITE_STOPS_MAX = 50;
+const FavoriteStopsSchema = z.array(StopSchema);
+
+export function readFavoriteStops(): Stop[] {
+  return readStorage(FAVORITE_STOPS_KEY, FavoriteStopsSchema) ?? [];
+}
+
+/** Salva a parada (no topo); já salva, só a move para o topo. */
+export function saveFavoriteStop(stop: Stop): boolean {
+  const next = [stop, ...readFavoriteStops().filter((s) => s.id !== stop.id)].slice(
+    0,
+    FAVORITE_STOPS_MAX,
+  );
+  return writeStorage(FAVORITE_STOPS_KEY, next);
+}
+
+export function removeFavoriteStop(stopId: string): boolean {
+  return writeStorage(
+    FAVORITE_STOPS_KEY,
+    readFavoriteStops().filter((s) => s.id !== stopId),
+  );
 }
