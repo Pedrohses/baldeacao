@@ -1,8 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { Controller, Delete, Get, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Logger, Post, Req, Res } from '@nestjs/common';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { McpServerFactory } from './mcp-server.factory';
-import { McpThrottlerGuard } from './mcp-throttler.guard';
 
 export const MCP_PATH = 'mcp';
 
@@ -15,7 +14,6 @@ type JsonBodyRequest = IncomingMessage & { body?: unknown };
  * servidor) e DELETE (encerrar sessão) só fazem sentido com sessão: respondem 405.
  */
 @Controller(MCP_PATH)
-@UseGuards(McpThrottlerGuard)
 export class McpController {
   private readonly logger = new Logger(McpController.name);
 

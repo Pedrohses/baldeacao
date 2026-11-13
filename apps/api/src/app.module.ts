@@ -9,12 +9,14 @@ import { SourcesModule } from './modules/sources/sources.module';
 import { TransitModule } from './modules/transit/transit.module';
 import { DatabaseModule } from './shared/infrastructure/database/database.module';
 import { RedisModule } from './shared/infrastructure/redis/redis.module';
+import { ThrottlingModule } from './shared/presentation/throttling/throttling.module';
 
 @Module({
   imports: [
     ConfigModule,
     DatabaseModule,
     RedisModule,
+    ThrottlingModule,
     HealthModule,
     TransitModule,
     SourcesModule,

@@ -1,1 +1,2005 @@
-{"data":{"planConnection":{"routingErrors":[],"edges":[{"node":{"start":"2026-11-12T14:00:00-03:00","end":"2026-11-12T15:09:55-03:00","duration":4195,"walkDistance":2089.33,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":1527,"distance":1678.62,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:00:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:25:27-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:28:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:42:27-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:42:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:48:06-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T14:57:06-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:08:01-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:08:01-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:09:55-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:01:00-03:00","end":"2026-11-12T15:10:55-03:00","duration":4195,"walkDistance":2089.33,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":1527,"distance":1678.62,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:01:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:26:27-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:29:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:43:27-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:43:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:49:06-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T14:58:06-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:09:01-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:09:01-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:10:55-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:02:00-03:00","end":"2026-11-12T15:11:55-03:00","duration":4195,"walkDistance":2089.33,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":1527,"distance":1678.62,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:02:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:27:27-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:30:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:44:27-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:44:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:50:06-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T14:59:06-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:10:01-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:10:01-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:11:55-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:03:00-03:00","end":"2026-11-12T15:12:55-03:00","duration":4195,"walkDistance":2089.33,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":1527,"distance":1678.62,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:03:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:28:27-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:31:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:45:27-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:45:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:51:06-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:00:06-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:11:01-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:11:01-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:12:55-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:04:00-03:00","end":"2026-11-12T15:13:55-03:00","duration":4195,"walkDistance":2089.33,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":1527,"distance":1678.62,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:04:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:29:27-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:32:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:46:27-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:46:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:52:06-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:01:06-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:12:01-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:12:01-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:13:55-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:00:00-03:00","end":"2026-11-12T15:14:27-03:00","duration":4467,"walkDistance":1392.8,"numberOfTransfers":2,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":667,"distance":808.56,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:00:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:11:07-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":252,"distance":695,"headsign":"Term. Pirituba","start":{"scheduledTime":"2026-11-12T14:19:07-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:23:19-03:00","estimated":null},"from":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"to":{"name":"Av. Paulista, 2452","lat":-23.556066,"lon":-46.662369,"stop":{"gtfsId":"sptrans:260016920"}},"route":{"gtfsId":"sptrans:917H-10","shortName":"917H-10","longName":"Term. Pirituba - Metrô Vl. Mariana","color":"509E2F"},"intermediateStops":[{"gtfsId":"sptrans:70016918"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":280,"distance":173.53,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:23:19-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:27:59-03:00","estimated":null},"from":{"name":"Av. Paulista, 2452","lat":-23.556066,"lon":-46.662369,"stop":{"gtfsId":"sptrans:260016920"}},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:32:59-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:46:59-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:46:59-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:52:38-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:01:38-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:12:33-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:12:33-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:14:27-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:05:00-03:00","end":"2026-11-12T15:14:55-03:00","duration":4195,"walkDistance":2089.33,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":1527,"distance":1678.62,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:05:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:30:27-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:33:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:47:27-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:47:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:53:06-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:02:06-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:13:01-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:13:01-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:14:55-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:00:00-03:00","end":"2026-11-12T15:15:08-03:00","duration":4508,"walkDistance":1244.45,"numberOfTransfers":2,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":667,"distance":808.56,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:00:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:11:07-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":453,"distance":1878,"headsign":"Term. Campo Limpo","start":{"scheduledTime":"2026-11-12T14:21:07-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:28:40-03:00","estimated":null},"from":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"to":{"name":"Oscar Freire C/B","lat":-23.560245,"lon":-46.671642,"stop":{"gtfsId":"sptrans:440015005"}},"route":{"gtfsId":"sptrans:857R-10","shortName":"857R-10","longName":"Term. Campo Limpo - Aclimação","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:260016919"},{"gtfsId":"sptrans:440015007"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":140,"distance":25.18,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:28:40-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:31:00-03:00","estimated":null},"from":{"name":"Oscar Freire C/B","lat":-23.560245,"lon":-46.671642,"stop":{"gtfsId":"sptrans:440015005"}},"to":{"name":"Oscar Freire","lat":-23.560414,"lon":-46.671819,"stop":{"gtfsId":"sptrans:4406631"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":700,"distance":6591,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:36:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:47:40-03:00","estimated":null},"from":{"name":"Oscar Freire","lat":-23.560414,"lon":-46.671819,"stop":{"gtfsId":"sptrans:4406631"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:47:40-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:53:19-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:02:19-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:13:14-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:13:14-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:15:08-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:01:00-03:00","end":"2026-11-12T15:15:27-03:00","duration":4467,"walkDistance":1392.8,"numberOfTransfers":2,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":667,"distance":808.56,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:01:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:12:07-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":252,"distance":695,"headsign":"Term. Pirituba","start":{"scheduledTime":"2026-11-12T14:20:07-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:24:19-03:00","estimated":null},"from":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"to":{"name":"Av. Paulista, 2452","lat":-23.556066,"lon":-46.662369,"stop":{"gtfsId":"sptrans:260016920"}},"route":{"gtfsId":"sptrans:917H-10","shortName":"917H-10","longName":"Term. Pirituba - Metrô Vl. Mariana","color":"509E2F"},"intermediateStops":[{"gtfsId":"sptrans:70016918"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":280,"distance":173.53,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:24:19-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:28:59-03:00","estimated":null},"from":{"name":"Av. Paulista, 2452","lat":-23.556066,"lon":-46.662369,"stop":{"gtfsId":"sptrans:260016920"}},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:33:59-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:47:59-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:47:59-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:53:38-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:02:38-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:13:33-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:13:33-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:15:27-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:06:00-03:00","end":"2026-11-12T15:15:55-03:00","duration":4195,"walkDistance":2089.33,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":1527,"distance":1678.62,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:06:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:31:27-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":840,"distance":7754,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:34:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:48:27-03:00","estimated":null},"from":{"name":"Paulista","lat":-23.555071,"lon":-46.662131,"stop":{"gtfsId":"sptrans:2600672"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:4406631"},{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:48:27-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:54:06-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:03:06-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:14:01-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:14:01-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:15:55-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:00:00-03:00","end":"2026-11-12T15:16:07-03:00","duration":4567,"walkDistance":631.25,"numberOfTransfers":1,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":223,"distance":288.97,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:00:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:03:43-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Parada 2 - Getúlio Vargas C/B","lat":-23.559239,"lon":-46.654314,"stop":{"gtfsId":"sptrans:70016562"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":882,"distance":4293,"headsign":"Ceasa","start":{"scheduledTime":"2026-11-12T14:18:43-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:33:25-03:00","estimated":null},"from":{"name":"Parada 2 - Getúlio Vargas C/B","lat":-23.559239,"lon":-46.654314,"stop":{"gtfsId":"sptrans:70016562"}},"to":{"name":"Gumercindo Saraiva","lat":-23.580097,"lon":-46.684995,"stop":{"gtfsId":"sptrans:630015032"}},"route":{"gtfsId":"sptrans:6262-10","shortName":"6262-10","longName":"Ceasa - Term. Bandeira","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:440015162"},{"gtfsId":"sptrans:440015159"},{"gtfsId":"sptrans:440015157"},{"gtfsId":"sptrans:6311354"},{"gtfsId":"sptrans:6311355"},{"gtfsId":"sptrans:6311356"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":204,"distance":198.85,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:33:25-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:36:49-03:00","estimated":null},"from":{"name":"Gumercindo Saraiva","lat":-23.580097,"lon":-46.684995,"stop":{"gtfsId":"sptrans:630015032"}},"to":{"name":"Tucumã","lat":-23.578969,"lon":-46.686024,"stop":{"gtfsId":"sptrans:630015022"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":1404,"distance":6097,"headsign":"Jd. Das Palmas","start":{"scheduledTime":"2026-11-12T14:50:49-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:14:13-03:00","estimated":null},"from":{"name":"Tucumã","lat":-23.578969,"lon":-46.686024,"stop":{"gtfsId":"sptrans:630015022"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:775F-10","shortName":"775F-10","longName":"Jd. Das Palmas - Hosp. Das Clínicas","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:6311375"},{"gtfsId":"sptrans:550015962"},{"gtfsId":"sptrans:550015963"},{"gtfsId":"sptrans:550015964"},{"gtfsId":"sptrans:550015965"},{"gtfsId":"sptrans:5507014"},{"gtfsId":"sptrans:550015968"},{"gtfsId":"sptrans:550011392"},{"gtfsId":"sptrans:5506680"},{"gtfsId":"sptrans:5507020"},{"gtfsId":"sptrans:550015983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:14:13-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:16:07-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}},{"node":{"start":"2026-11-12T14:01:00-03:00","end":"2026-11-12T15:16:08-03:00","duration":4508,"walkDistance":1244.45,"numberOfTransfers":2,"legs":[{"mode":"WALK","transitLeg":false,"realTime":false,"duration":667,"distance":808.56,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:01:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:12:07-03:00","estimated":null},"from":{"name":"Origem","lat":-23.5614,"lon":-46.6559,"stop":null},"to":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":453,"distance":1878,"headsign":"Term. Campo Limpo","start":{"scheduledTime":"2026-11-12T14:22:07-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:29:40-03:00","estimated":null},"from":{"name":"Av. Paulista, 1754","lat":-23.560303,"lon":-46.657365,"stop":{"gtfsId":"sptrans:70015949"}},"to":{"name":"Oscar Freire C/B","lat":-23.560245,"lon":-46.671642,"stop":{"gtfsId":"sptrans:440015005"}},"route":{"gtfsId":"sptrans:857R-10","shortName":"857R-10","longName":"Term. Campo Limpo - Aclimação","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:260016919"},{"gtfsId":"sptrans:440015007"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":140,"distance":25.18,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:29:40-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:32:00-03:00","estimated":null},"from":{"name":"Oscar Freire C/B","lat":-23.560245,"lon":-46.671642,"stop":{"gtfsId":"sptrans:440015005"}},"to":{"name":"Oscar Freire","lat":-23.560414,"lon":-46.671819,"stop":{"gtfsId":"sptrans:4406631"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"SUBWAY","transitLeg":true,"realTime":false,"duration":700,"distance":6591,"headsign":"VILA SÔNIA","start":{"scheduledTime":"2026-11-12T14:37:00-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:48:40-03:00","estimated":null},"from":{"name":"Oscar Freire","lat":-23.560414,"lon":-46.671819,"stop":{"gtfsId":"sptrans:4406631"}},"to":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"route":{"gtfsId":"sptrans:METRÔ L4","shortName":"METRÔ L4","longName":"VILA SÔNIA - LUZ","color":"FFFF00"},"intermediateStops":[{"gtfsId":"sptrans:6311368"},{"gtfsId":"sptrans:6311285"},{"gtfsId":"sptrans:6311287"},{"gtfsId":"sptrans:1211339"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":339,"distance":267.28,"headsign":null,"start":{"scheduledTime":"2026-11-12T14:48:40-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T14:54:19-03:00","estimated":null},"from":{"name":"São Paulo - Morumbi","lat":-23.586132,"lon":-46.723471,"stop":{"gtfsId":"sptrans:1211401"}},"to":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"route":null,"intermediateStops":null,"legGeometry":null},{"mode":"BUS","transitLeg":true,"realTime":false,"duration":655,"distance":1663,"headsign":"Sto. Amaro","start":{"scheduledTime":"2026-11-12T15:03:19-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:14:14-03:00","estimated":null},"from":{"name":"Av. Dep. Jacob Salvador Zveibil, 200","lat":-23.585133,"lon":-46.724477,"stop":{"gtfsId":"sptrans:120011371"}},"to":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"route":{"gtfsId":"sptrans:746H-10","shortName":"746H-10","longName":"Jd. Jaqueline - Sto. Amaro","color":"FF671F"},"intermediateStops":[{"gtfsId":"sptrans:550011420"},{"gtfsId":"sptrans:550011331"},{"gtfsId":"sptrans:5506955"},{"gtfsId":"sptrans:5506983"}],"legGeometry":null},{"mode":"WALK","transitLeg":false,"realTime":false,"duration":114,"distance":143.43,"headsign":null,"start":{"scheduledTime":"2026-11-12T15:14:14-03:00","estimated":null},"end":{"scheduledTime":"2026-11-12T15:16:08-03:00","estimated":null},"from":{"name":"Av. Giovanni Gronchi, 922","lat":-23.598921,"lon":-46.720907,"stop":{"gtfsId":"sptrans:550011328"}},"to":{"name":"Destino","lat":-23.6001,"lon":-46.7202,"stop":null},"route":null,"intermediateStops":null,"legGeometry":null}]}}]}}}
+{
+  "data": {
+    "planConnection": {
+      "routingErrors": [],
+      "edges": [
+        {
+          "node": {
+            "start": "2026-11-12T14:00:00-03:00",
+            "end": "2026-11-12T15:09:55-03:00",
+            "duration": 4195,
+            "walkDistance": 2089.33,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 1527,
+                "distance": 1678.62,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:00:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:25:27-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:28:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:42:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:42:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:48:06-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T14:57:06-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:08:01-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:08:01-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:09:55-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:01:00-03:00",
+            "end": "2026-11-12T15:10:55-03:00",
+            "duration": 4195,
+            "walkDistance": 2089.33,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 1527,
+                "distance": 1678.62,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:01:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:26:27-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:29:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:43:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:43:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:49:06-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T14:58:06-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:09:01-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:09:01-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:10:55-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:02:00-03:00",
+            "end": "2026-11-12T15:11:55-03:00",
+            "duration": 4195,
+            "walkDistance": 2089.33,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 1527,
+                "distance": 1678.62,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:02:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:27:27-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:30:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:44:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:44:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:50:06-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T14:59:06-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:10:01-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:10:01-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:11:55-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:03:00-03:00",
+            "end": "2026-11-12T15:12:55-03:00",
+            "duration": 4195,
+            "walkDistance": 2089.33,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 1527,
+                "distance": 1678.62,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:03:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:28:27-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:31:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:45:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:45:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:51:06-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:00:06-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:11:01-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:11:01-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:12:55-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:04:00-03:00",
+            "end": "2026-11-12T15:13:55-03:00",
+            "duration": 4195,
+            "walkDistance": 2089.33,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 1527,
+                "distance": 1678.62,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:04:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:29:27-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:32:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:46:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:46:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:52:06-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:01:06-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:12:01-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:12:01-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:13:55-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:00:00-03:00",
+            "end": "2026-11-12T15:14:27-03:00",
+            "duration": 4467,
+            "walkDistance": 1392.8,
+            "numberOfTransfers": 2,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 667,
+                "distance": 808.56,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:00:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:11:07-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 252,
+                "distance": 695,
+                "headsign": "Term. Pirituba",
+                "start": { "scheduledTime": "2026-11-12T14:19:07-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:23:19-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "to": {
+                  "name": "Av. Paulista, 2452",
+                  "lat": -23.556066,
+                  "lon": -46.662369,
+                  "stop": { "gtfsId": "sptrans:260016920" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:917H-10",
+                  "shortName": "917H-10",
+                  "longName": "Term. Pirituba - Metrô Vl. Mariana",
+                  "color": "509E2F"
+                },
+                "intermediateStops": [{ "gtfsId": "sptrans:70016918" }],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 280,
+                "distance": 173.53,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:23:19-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:27:59-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Paulista, 2452",
+                  "lat": -23.556066,
+                  "lon": -46.662369,
+                  "stop": { "gtfsId": "sptrans:260016920" }
+                },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:32:59-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:46:59-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:46:59-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:52:38-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:01:38-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:12:33-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:12:33-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:14:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:05:00-03:00",
+            "end": "2026-11-12T15:14:55-03:00",
+            "duration": 4195,
+            "walkDistance": 2089.33,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 1527,
+                "distance": 1678.62,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:05:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:30:27-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:33:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:47:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:47:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:53:06-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:02:06-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:13:01-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:13:01-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:14:55-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:00:00-03:00",
+            "end": "2026-11-12T15:15:08-03:00",
+            "duration": 4508,
+            "walkDistance": 1244.45,
+            "numberOfTransfers": 2,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 667,
+                "distance": 808.56,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:00:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:11:07-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 453,
+                "distance": 1878,
+                "headsign": "Term. Campo Limpo",
+                "start": { "scheduledTime": "2026-11-12T14:21:07-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:28:40-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "to": {
+                  "name": "Oscar Freire C/B",
+                  "lat": -23.560245,
+                  "lon": -46.671642,
+                  "stop": { "gtfsId": "sptrans:440015005" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:857R-10",
+                  "shortName": "857R-10",
+                  "longName": "Term. Campo Limpo - Aclimação",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:260016919" },
+                  { "gtfsId": "sptrans:440015007" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 140,
+                "distance": 25.18,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:28:40-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:31:00-03:00", "estimated": null },
+                "from": {
+                  "name": "Oscar Freire C/B",
+                  "lat": -23.560245,
+                  "lon": -46.671642,
+                  "stop": { "gtfsId": "sptrans:440015005" }
+                },
+                "to": {
+                  "name": "Oscar Freire",
+                  "lat": -23.560414,
+                  "lon": -46.671819,
+                  "stop": { "gtfsId": "sptrans:4406631" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 700,
+                "distance": 6591,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:36:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:47:40-03:00", "estimated": null },
+                "from": {
+                  "name": "Oscar Freire",
+                  "lat": -23.560414,
+                  "lon": -46.671819,
+                  "stop": { "gtfsId": "sptrans:4406631" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:47:40-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:53:19-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:02:19-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:13:14-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:13:14-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:15:08-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:01:00-03:00",
+            "end": "2026-11-12T15:15:27-03:00",
+            "duration": 4467,
+            "walkDistance": 1392.8,
+            "numberOfTransfers": 2,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 667,
+                "distance": 808.56,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:01:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:12:07-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 252,
+                "distance": 695,
+                "headsign": "Term. Pirituba",
+                "start": { "scheduledTime": "2026-11-12T14:20:07-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:24:19-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "to": {
+                  "name": "Av. Paulista, 2452",
+                  "lat": -23.556066,
+                  "lon": -46.662369,
+                  "stop": { "gtfsId": "sptrans:260016920" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:917H-10",
+                  "shortName": "917H-10",
+                  "longName": "Term. Pirituba - Metrô Vl. Mariana",
+                  "color": "509E2F"
+                },
+                "intermediateStops": [{ "gtfsId": "sptrans:70016918" }],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 280,
+                "distance": 173.53,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:24:19-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:28:59-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Paulista, 2452",
+                  "lat": -23.556066,
+                  "lon": -46.662369,
+                  "stop": { "gtfsId": "sptrans:260016920" }
+                },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:33:59-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:47:59-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:47:59-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:53:38-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:02:38-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:13:33-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:13:33-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:15:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:06:00-03:00",
+            "end": "2026-11-12T15:15:55-03:00",
+            "duration": 4195,
+            "walkDistance": 2089.33,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 1527,
+                "distance": 1678.62,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:06:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:31:27-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 840,
+                "distance": 7754,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:34:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:48:27-03:00", "estimated": null },
+                "from": {
+                  "name": "Paulista",
+                  "lat": -23.555071,
+                  "lon": -46.662131,
+                  "stop": { "gtfsId": "sptrans:2600672" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:4406631" },
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:48:27-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:54:06-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:03:06-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:14:01-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:14:01-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:15:55-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:00:00-03:00",
+            "end": "2026-11-12T15:16:07-03:00",
+            "duration": 4567,
+            "walkDistance": 631.25,
+            "numberOfTransfers": 1,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 223,
+                "distance": 288.97,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:00:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:03:43-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Parada 2 - Getúlio Vargas C/B",
+                  "lat": -23.559239,
+                  "lon": -46.654314,
+                  "stop": { "gtfsId": "sptrans:70016562" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 882,
+                "distance": 4293,
+                "headsign": "Ceasa",
+                "start": { "scheduledTime": "2026-11-12T14:18:43-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:33:25-03:00", "estimated": null },
+                "from": {
+                  "name": "Parada 2 - Getúlio Vargas C/B",
+                  "lat": -23.559239,
+                  "lon": -46.654314,
+                  "stop": { "gtfsId": "sptrans:70016562" }
+                },
+                "to": {
+                  "name": "Gumercindo Saraiva",
+                  "lat": -23.580097,
+                  "lon": -46.684995,
+                  "stop": { "gtfsId": "sptrans:630015032" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:6262-10",
+                  "shortName": "6262-10",
+                  "longName": "Ceasa - Term. Bandeira",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:440015162" },
+                  { "gtfsId": "sptrans:440015159" },
+                  { "gtfsId": "sptrans:440015157" },
+                  { "gtfsId": "sptrans:6311354" },
+                  { "gtfsId": "sptrans:6311355" },
+                  { "gtfsId": "sptrans:6311356" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 204,
+                "distance": 198.85,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:33:25-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:36:49-03:00", "estimated": null },
+                "from": {
+                  "name": "Gumercindo Saraiva",
+                  "lat": -23.580097,
+                  "lon": -46.684995,
+                  "stop": { "gtfsId": "sptrans:630015032" }
+                },
+                "to": {
+                  "name": "Tucumã",
+                  "lat": -23.578969,
+                  "lon": -46.686024,
+                  "stop": { "gtfsId": "sptrans:630015022" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 1404,
+                "distance": 6097,
+                "headsign": "Jd. Das Palmas",
+                "start": { "scheduledTime": "2026-11-12T14:50:49-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:14:13-03:00", "estimated": null },
+                "from": {
+                  "name": "Tucumã",
+                  "lat": -23.578969,
+                  "lon": -46.686024,
+                  "stop": { "gtfsId": "sptrans:630015022" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:775F-10",
+                  "shortName": "775F-10",
+                  "longName": "Jd. Das Palmas - Hosp. Das Clínicas",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:6311375" },
+                  { "gtfsId": "sptrans:550015962" },
+                  { "gtfsId": "sptrans:550015963" },
+                  { "gtfsId": "sptrans:550015964" },
+                  { "gtfsId": "sptrans:550015965" },
+                  { "gtfsId": "sptrans:5507014" },
+                  { "gtfsId": "sptrans:550015968" },
+                  { "gtfsId": "sptrans:550011392" },
+                  { "gtfsId": "sptrans:5506680" },
+                  { "gtfsId": "sptrans:5507020" },
+                  { "gtfsId": "sptrans:550015983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:14:13-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:16:07-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        },
+        {
+          "node": {
+            "start": "2026-11-12T14:01:00-03:00",
+            "end": "2026-11-12T15:16:08-03:00",
+            "duration": 4508,
+            "walkDistance": 1244.45,
+            "numberOfTransfers": 2,
+            "legs": [
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 667,
+                "distance": 808.56,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:01:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:12:07-03:00", "estimated": null },
+                "from": { "name": "Origem", "lat": -23.5614, "lon": -46.6559, "stop": null },
+                "to": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 453,
+                "distance": 1878,
+                "headsign": "Term. Campo Limpo",
+                "start": { "scheduledTime": "2026-11-12T14:22:07-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:29:40-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Paulista, 1754",
+                  "lat": -23.560303,
+                  "lon": -46.657365,
+                  "stop": { "gtfsId": "sptrans:70015949" }
+                },
+                "to": {
+                  "name": "Oscar Freire C/B",
+                  "lat": -23.560245,
+                  "lon": -46.671642,
+                  "stop": { "gtfsId": "sptrans:440015005" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:857R-10",
+                  "shortName": "857R-10",
+                  "longName": "Term. Campo Limpo - Aclimação",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:260016919" },
+                  { "gtfsId": "sptrans:440015007" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 140,
+                "distance": 25.18,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:29:40-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:32:00-03:00", "estimated": null },
+                "from": {
+                  "name": "Oscar Freire C/B",
+                  "lat": -23.560245,
+                  "lon": -46.671642,
+                  "stop": { "gtfsId": "sptrans:440015005" }
+                },
+                "to": {
+                  "name": "Oscar Freire",
+                  "lat": -23.560414,
+                  "lon": -46.671819,
+                  "stop": { "gtfsId": "sptrans:4406631" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "SUBWAY",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 700,
+                "distance": 6591,
+                "headsign": "VILA SÔNIA",
+                "start": { "scheduledTime": "2026-11-12T14:37:00-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:48:40-03:00", "estimated": null },
+                "from": {
+                  "name": "Oscar Freire",
+                  "lat": -23.560414,
+                  "lon": -46.671819,
+                  "stop": { "gtfsId": "sptrans:4406631" }
+                },
+                "to": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:METRÔ L4",
+                  "shortName": "METRÔ L4",
+                  "longName": "VILA SÔNIA - LUZ",
+                  "color": "FFFF00"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:6311368" },
+                  { "gtfsId": "sptrans:6311285" },
+                  { "gtfsId": "sptrans:6311287" },
+                  { "gtfsId": "sptrans:1211339" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 339,
+                "distance": 267.28,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T14:48:40-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T14:54:19-03:00", "estimated": null },
+                "from": {
+                  "name": "São Paulo - Morumbi",
+                  "lat": -23.586132,
+                  "lon": -46.723471,
+                  "stop": { "gtfsId": "sptrans:1211401" }
+                },
+                "to": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              },
+              {
+                "mode": "BUS",
+                "transitLeg": true,
+                "realTime": false,
+                "duration": 655,
+                "distance": 1663,
+                "headsign": "Sto. Amaro",
+                "start": { "scheduledTime": "2026-11-12T15:03:19-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:14:14-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Dep. Jacob Salvador Zveibil, 200",
+                  "lat": -23.585133,
+                  "lon": -46.724477,
+                  "stop": { "gtfsId": "sptrans:120011371" }
+                },
+                "to": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "route": {
+                  "gtfsId": "sptrans:746H-10",
+                  "shortName": "746H-10",
+                  "longName": "Jd. Jaqueline - Sto. Amaro",
+                  "color": "FF671F"
+                },
+                "intermediateStops": [
+                  { "gtfsId": "sptrans:550011420" },
+                  { "gtfsId": "sptrans:550011331" },
+                  { "gtfsId": "sptrans:5506955" },
+                  { "gtfsId": "sptrans:5506983" }
+                ],
+                "legGeometry": null
+              },
+              {
+                "mode": "WALK",
+                "transitLeg": false,
+                "realTime": false,
+                "duration": 114,
+                "distance": 143.43,
+                "headsign": null,
+                "start": { "scheduledTime": "2026-11-12T15:14:14-03:00", "estimated": null },
+                "end": { "scheduledTime": "2026-11-12T15:16:08-03:00", "estimated": null },
+                "from": {
+                  "name": "Av. Giovanni Gronchi, 922",
+                  "lat": -23.598921,
+                  "lon": -46.720907,
+                  "stop": { "gtfsId": "sptrans:550011328" }
+                },
+                "to": { "name": "Destino", "lat": -23.6001, "lon": -46.7202, "stop": null },
+                "route": null,
+                "intermediateStops": null,
+                "legGeometry": null
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -31,6 +31,20 @@ export const envSchema = z.object({
   GTFS_REFRESH_CRON: z.string().min(1).default('0 4 * * 1'),
   NOMINATIM_USER_AGENT: optionalString,
   NOMINATIM_URL: z.url().default('https://nominatim.openstreetmap.org'),
+  // Proxies na frente da api (Caddy, cloudflared), separados por vírgula: IPs ou faixas IPv4
+  // em CIDR. Só deles a api aceita o IP do cliente em X-Forwarded-For. Loopback já é confiável.
+  TRUSTED_PROXIES: z.preprocess(
+    (value) => (typeof value === 'string' ? value : ''),
+    z
+      .string()
+      .transform((value) =>
+        value
+          .split(',')
+          .map((item) => item.trim())
+          .filter((item) => item !== ''),
+      )
+      .pipe(z.array(z.string().regex(/^[0-9a-fA-F:.]+(\/\d{1,3})?$/, 'IP ou faixa CIDR inválida'))),
+  ),
 });
 
 export type Env = z.infer<typeof envSchema>;

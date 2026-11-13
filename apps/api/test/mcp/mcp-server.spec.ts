@@ -1,6 +1,8 @@
 import type { INestApplication } from '@nestjs/common';
 import { MCP_SERVER_NAME } from '../../src/mcp/mcp-server.factory';
-import { clientIp, MCP_THROTTLE } from '../../src/mcp/mcp-throttler.guard';
+import { THROTTLES } from '../../src/shared/presentation/throttling/throttles';
+
+const MCP_THROTTLE = THROTTLES.mcp;
 import { connectClient, rawPost, startMcpApp } from './mcp-test-app';
 
 const PING = { jsonrpc: '2.0', id: 1, method: 'ping' };
@@ -71,19 +73,5 @@ describe('Servidor MCP (Streamable HTTP, stateless)', () => {
     // Outro IP vindo pelo túnel local (CF-Connecting-IP) tem o seu próprio limite.
     const other = await rawPost(url, PING, { 'CF-Connecting-IP': '203.0.113.7' });
     expect(other.status).toBe(200);
-  });
-});
-
-describe('clientIp', () => {
-  const req = (remoteAddress: string, cf?: string) => ({
-    socket: { remoteAddress },
-    headers: cf ? { 'cf-connecting-ip': cf } : {},
-  });
-
-  it('usa CF-Connecting-IP só quando a conexão vem do loopback (túnel local)', () => {
-    expect(clientIp(req('127.0.0.1', '203.0.113.7'))).toBe('203.0.113.7');
-    expect(clientIp(req('::1', '203.0.113.7'))).toBe('203.0.113.7');
-    expect(clientIp(req('198.51.100.2', '203.0.113.7'))).toBe('198.51.100.2');
-    expect(clientIp(req('198.51.100.2'))).toBe('198.51.100.2');
   });
 });

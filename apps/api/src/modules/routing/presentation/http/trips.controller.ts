@@ -15,6 +15,7 @@ import {
 } from '@baldeacao/types';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
 import { friendlySourceMessage } from '../../../../shared/presentation/source-messages';
+import { HeavyRoute } from '../../../../shared/presentation/throttling/heavy-route.decorator';
 import { formatZodIssues } from '../../../../shared/presentation/zod-issues';
 import { PlanTripUseCase } from '../../application/use-cases/plan-trip.use-case';
 import { InvalidTripRequestError } from '../../domain/errors/invalid-trip-request.error';
@@ -25,6 +26,7 @@ export class TripsController {
 
   /** Planeja viagem de A até B (OpenTripPlanner). Corpo: TripRequest. */
   @Post(API_PATHS.planTrip)
+  @HeavyRoute()
   @HttpCode(HttpStatus.OK)
   async plan(@Body() body: unknown): Promise<PlanTripResponse> {
     const parsed = TripRequestSchema.safeParse(body);

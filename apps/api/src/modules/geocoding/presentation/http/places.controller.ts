@@ -15,6 +15,7 @@ import {
 } from '@baldeacao/types';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
 import { friendlySourceMessage } from '../../../../shared/presentation/source-messages';
+import { HeavyRoute } from '../../../../shared/presentation/throttling/heavy-route.decorator';
 import { formatZodIssues } from '../../../../shared/presentation/zod-issues';
 import { ReversePlaceUseCase } from '../../application/use-cases/reverse-place.use-case';
 import { SearchPlacesUseCase } from '../../application/use-cases/search-places.use-case';
@@ -90,6 +91,7 @@ export class PlacesController {
 
   /** Lugar mais próximo de um ponto: local a até 60 m, senão Nominatim (com cache). */
   @Get(API_PATHS.reversePlace)
+  @HeavyRoute()
   async reverse(@Query() query: unknown): Promise<ReversePlaceResponse> {
     const parsed = ReversePlaceQuerySchema.safeParse(query);
     if (!parsed.success) {

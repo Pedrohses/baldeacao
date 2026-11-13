@@ -1,10 +1,13 @@
 import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { type INestApplication, Module } from '@nestjs/common';
+import { Global, type INestApplication, Module } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import { AppConfig } from '../../src/config/app-config';
+import { envSchema } from '../../src/config/env';
 import { McpModule } from '../../src/mcp/mcp.module';
+import { ThrottlingModule } from '../../src/shared/presentation/throttling/throttling.module';
 import { SearchStopsByNameUseCase } from '../../src/modules/transit/application/use-cases/search-stops-by-name.use-case';
 import { SearchPlacesUseCase } from '../../src/modules/geocoding/application/use-cases/search-places.use-case';
 import type { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
@@ -215,7 +218,22 @@ function buildTestingModule(fakes: McpFakes) {
   })
   class FakeRoutingModule {}
 
-  return Test.createTestingModule({ imports: [McpModule] })
+  // Config mínima: o limite por IP lê os proxies confiáveis dela (só loopback, como no PC).
+  @Global()
+  @Module({
+    providers: [
+      {
+        provide: AppConfig,
+        useValue: new AppConfig(
+          envSchema.parse({ DATABASE_URL: 'postgres://teste', REDIS_URL: 'redis://teste' }),
+        ),
+      },
+    ],
+    exports: [AppConfig],
+  })
+  class TestConfigModule {}
+
+  return Test.createTestingModule({ imports: [TestConfigModule, ThrottlingModule, McpModule] })
     .overrideModule(GeocodingModule)
     .useModule(FakeGeocodingModule)
     .overrideModule(RoutingModule)

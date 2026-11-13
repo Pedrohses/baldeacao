@@ -54,4 +54,8 @@ export class AppConfig {
   get nominatimUserAgent(): string | undefined {
     return this.env.NOMINATIM_USER_AGENT;
   }
+
+  get trustedProxies(): readonly string[] {
+    return this.env.TRUSTED_PROXIES;
+  }
 }

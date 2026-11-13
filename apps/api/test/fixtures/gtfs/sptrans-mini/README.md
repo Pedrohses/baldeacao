@@ -11,7 +11,7 @@ Recorte **sintético** do GTFS da SPTrans, montado à mão para testes. Não é 
 Os códigos de linha e parada batem com `../olho-vivo/*.json` e com `packages/types/src/__examples__.ts`. Mapeamento Olho Vivo: `sl` 1 é `direction_id` 0 e `sl` 2 é `direction_id` 1.
 
 | route_id | cl sentido 1 | cl sentido 2 |
-| --- | --- | --- |
-| 8000-10 | 1273 | 33881 |
-| 875A-10 | 1090 | 34698 |
-| 477U-10 | 2517 | 35125 |
+| -------- | ------------ | ------------ |
+| 8000-10  | 1273         | 33881        |
+| 875A-10  | 1090         | 34698        |
+| 477U-10  | 2517         | 35125        |
