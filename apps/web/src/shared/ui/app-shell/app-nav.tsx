@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import type { ComponentType } from 'react';
 
 import { BusIcon, type IconProps, MapIcon, RouteIcon, StarIcon } from '../icons';
+import { ThemeToggle } from '../theme-toggle';
 
 interface NavItem {
   href: '/' | '/viagem' | '/linhas' | '/favoritos';
@@ -40,23 +41,25 @@ export function AppNav() {
               <Link
                 href={href}
                 aria-current={active ? 'page' : undefined}
-                className={`group flex min-h-12 flex-1 flex-col items-center justify-center gap-1 rounded-sm text-xs font-bold md:mx-2 md:py-2 ${
-                  active ? 'text-brand' : 'text-muted hover:text-text'
+                className={`relative flex min-h-12 flex-1 flex-col items-center justify-center gap-1 font-display text-xs font-semibold tracking-[0.06em] uppercase transition-colors md:mx-0 md:py-3 ${
+                  active ? 'text-text' : 'text-muted hover:bg-surface-2 hover:text-text'
                 }`}
               >
-                <span
-                  className={`inline-flex h-8 w-14 items-center justify-center rounded-full transition-colors ${
-                    active ? 'bg-brand/15' : 'group-hover:bg-surface-2'
-                  }`}
-                >
-                  <Icon className="size-6" />
-                </span>
+                {/* Aba ativa: filete âmbar no topo (celular) ou à esquerda (desktop), sem pílula. */}
+                {active ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute inset-x-[28%] top-0 h-[3px] bg-brand md:inset-x-auto md:inset-y-[20%] md:left-0 md:h-auto md:w-[3px]"
+                  />
+                ) : null}
+                <Icon className="size-6" />
                 {label}
               </Link>
             </li>
           );
         })}
       </ul>
+      <ThemeToggle showLabel className="absolute inset-x-0 bottom-4 hidden min-h-12 md:flex" />
     </nav>
   );
 }

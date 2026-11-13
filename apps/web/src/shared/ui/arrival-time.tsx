@@ -1,4 +1,7 @@
+'use client';
+
 import { ClockIcon } from './icons';
+import { RollingNumber } from './rolling-number';
 
 export type ArrivalTimeSize = 'sm' | 'md';
 
@@ -12,12 +15,13 @@ export interface ArrivalTimeProps {
 }
 
 const NUMBER_CLASS: Record<ArrivalTimeSize, string> = {
-  sm: 'text-xl',
-  md: 'text-2xl',
+  sm: 'text-2xl',
+  md: 'text-[2rem]',
 };
 
 /**
- * Tempo até a chegada no padrão de quadro de partidas: número grande em peso 800 e unidade menor.
+ * Tempo até a chegada no padrão de quadro de partidas: número em Barlow Condensed 700 que vira
+ * como letreiro quando muda, e unidade menor.
  * Tempo real leva o ponto verde; tabela fica em cinza com relógio. Menos de 1 min vira "agora".
  */
 export function ArrivalTime({
@@ -39,15 +43,18 @@ export function ArrivalTime({
       )}
       <span className="sr-only">{isRealtime ? 'Tempo real: ' : 'Pela tabela: '}</span>
       {now ? (
-        <span className={`font-extrabold text-live ${NUMBER_CLASS[size]}`}>agora</span>
+        <span
+          className={`font-display font-bold tracking-[0.03em] text-live uppercase ${NUMBER_CLASS[size]}`}
+        >
+          agora
+        </span>
       ) : (
         <>
-          <span
-            className={`font-extrabold ${NUMBER_CLASS[size]} ${isRealtime ? 'text-text' : 'text-muted'}`}
-          >
-            {minutes}
-          </span>
-          <span className="text-sm font-bold text-muted">min</span>
+          <RollingNumber
+            value={minutes}
+            className={`font-display font-bold ${NUMBER_CLASS[size]} ${isRealtime ? 'text-text' : 'text-muted'}`}
+          />
+          <span className="text-sm font-medium text-muted">min</span>
         </>
       )}
     </span>

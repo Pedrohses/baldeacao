@@ -446,7 +446,7 @@ function OptionRow({
       icon = <PlaceKindIcon kind={option.place.kind} />;
       title = highlightMatch(option.place.name, query).map((segment, i) =>
         segment.match ? (
-          <strong key={i} className="font-extrabold">
+          <strong key={i} className="font-bold">
             {segment.text}
           </strong>
         ) : (

@@ -21,13 +21,13 @@ export interface LineBadgeProps {
 }
 
 const SIZE_CLASS: Record<LineBadgeSize, string> = {
-  sm: 'h-6 min-w-11 text-sm',
-  md: 'h-7 min-w-11 text-[0.9375rem]',
+  sm: 'h-6 min-w-[4.25rem] text-[0.9375rem]',
+  md: 'h-7 min-w-[4.5rem] text-base',
 };
 
 /**
  * Selo de linha no padrão de transporte: retângulo de cantos pequenos na cor do GTFS, código em
- * Nunito 800 com números tabulares. Cor de linha é dado; a cor da marca nunca entra aqui.
+ * Barlow Condensed 700 com números tabulares. Cor de linha é dado; o âmbar nunca entra aqui.
  */
 export function LineBadge({
   shortName,
@@ -46,7 +46,7 @@ export function LineBadge({
   return (
     <span
       data-testid={testId}
-      className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-badge px-1.5 font-extrabold tracking-[-0.01em] tabular-nums ${SIZE_CLASS[size]} ${
+      className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-badge px-1.5 font-display leading-none font-bold tracking-[0.02em] tabular-nums ${SIZE_CLASS[size]} ${
         background ? '' : 'bg-line-fallback text-line-fallback-fg'
       } ${outlined ? 'border border-border-strong' : ''} ${className}`}
       style={

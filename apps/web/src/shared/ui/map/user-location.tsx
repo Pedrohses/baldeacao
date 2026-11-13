@@ -120,7 +120,7 @@ export function LocateButton({ className = '', style, centerOnMount = true }: Lo
         aria-label={label}
         title={label}
         aria-busy={status === 'locating'}
-        className="surface-float pointer-events-auto inline-flex size-12 items-center justify-center rounded-full text-brand"
+        className="surface-float pointer-events-auto inline-flex size-12 items-center justify-center rounded-full text-brand-ink"
       >
         <LocateIcon className={`size-6 ${status === 'locating' ? 'animate-pulse' : ''}`} />
       </button>

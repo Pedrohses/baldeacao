@@ -195,7 +195,7 @@ export function MapScreen() {
             ))}
           </ul>
         ) : null}
-        <h2 className="mt-4 mb-1 text-base font-bold">
+        <h2 className="section-label mt-4 mb-2">
           {position ? 'Paradas perto de você' : 'Paradas perto do centro do mapa'}
         </h2>
         <NearbyStopsList

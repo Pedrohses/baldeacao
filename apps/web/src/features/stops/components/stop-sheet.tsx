@@ -24,7 +24,7 @@ export function StopSheet({ stop, onClose, actions }: StopSheetProps) {
       <header className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0 pt-2">
           <p className="text-xs font-bold text-muted uppercase">Parada</p>
-          <h2 id="stop-sheet-title" className="text-xl font-bold">
+          <h2 id="stop-sheet-title" className="screen-title">
             {stop.name}
           </h2>
           {stop.description ? <p className="text-sm text-muted">{stop.description}</p> : null}

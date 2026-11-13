@@ -3,9 +3,9 @@ import type { Map as MapLibreMap } from 'maplibre-gl';
 import type { MapTheme } from './map-colors';
 
 /**
- * Paleta do mapa base: o positron e o dark do OpenFreeMap são cinza-azulados e brigam com a
- * paleta quente do app. Aquece o fundo em tempo de carga, sem trocar de provedor nem de tiles.
- * A água fica esverdeada e dessaturada para não competir com a cor das linhas.
+ * Paleta do mapa base (MASTER.md): grafite no escuro e cinza-gelo no claro, casando com o app.
+ * Aplicada em tempo de carga, sem trocar de provedor nem de tiles. Água e parque ficam
+ * dessaturados para não competir com a cor das linhas.
  */
 export interface MapTint {
   land: string;
@@ -20,24 +20,24 @@ export interface MapTint {
 
 export const MAP_TINTS: Record<MapTheme, MapTint> = {
   light: {
-    land: '#F6F0E8',
-    water: '#CFDCDC',
-    park: '#E4EAD6',
+    land: '#EEF0F3',
+    water: '#CFDDE8',
+    park: '#DDE7DC',
     road: '#FFFFFF',
-    roadCasing: '#E3D6C9',
-    building: '#EDE3D8',
-    label: '#7A6558',
-    labelHalo: '#F6F0E8',
+    roadCasing: '#D5DAE1',
+    building: '#E3E6EB',
+    label: '#6B7380',
+    labelHalo: '#EEF0F3',
   },
   dark: {
-    land: '#1E1714',
-    water: '#14201F',
-    park: '#1E261A',
-    road: '#2E2520',
-    roadCasing: '#3A2F28',
-    building: '#261E1A',
-    label: '#9C877A',
-    labelHalo: '#1E1714',
+    land: '#12161C',
+    water: '#0B1A26',
+    park: '#13201A',
+    road: '#262C36',
+    roadCasing: '#343B47',
+    building: '#181D24',
+    label: '#7D8696',
+    labelHalo: '#12161C',
   },
 };
 
@@ -97,7 +97,7 @@ export function tintTargetsFor(layer: StyleLayerLike): PaintTarget[] {
 }
 
 /**
- * Aplica a paleta quente às camadas de fundo do estilo. Idempotente e barato (não serializa o
+ * Aplica a paleta do app às camadas de fundo do estilo. Idempotente e barato (não serializa o
  * estilo): pode rodar a cada `styledata`, e repetir o mesmo valor não gera nova pintura.
  */
 export function tintStyle(map: MapLibreMap, theme: MapTheme): void {

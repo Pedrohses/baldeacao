@@ -34,7 +34,7 @@ export function LinesScreen() {
           idleContent={
             <>
               <section aria-labelledby="nearby-lines-title" className="mt-5">
-                <h2 id="nearby-lines-title" className="mb-1 text-base font-bold">
+                <h2 id="nearby-lines-title" className="section-label mb-2">
                   {position ? 'Linhas perto de você' : 'Linhas perto do centro do mapa'}
                 </h2>
                 <NearbyLinesList center={center} hrefFor={lineHref} />

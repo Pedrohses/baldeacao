@@ -17,7 +17,7 @@ export function FavoriteStopButton({ stop }: { stop: Stop }) {
       onClick={() => toggle(stop)}
       className="inline-flex h-11 items-center gap-2 rounded-sm bg-surface-2 px-4 font-bold"
     >
-      <StarIcon className={`size-5 ${saved ? 'fill-current text-brand' : ''}`} />
+      <StarIcon className={`size-5 ${saved ? 'fill-current text-brand-ink' : ''}`} />
       {saved ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
     </button>
   );

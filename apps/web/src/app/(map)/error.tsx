@@ -32,7 +32,7 @@ export default function MapError({
       role="alert"
       className="pointer-events-auto absolute inset-0 z-30 flex flex-col items-center justify-center gap-4 bg-bg p-6 text-center"
     >
-      <h2 className="text-xl font-bold">Algo deu errado por aqui.</h2>
+      <h2 className="screen-title">Algo deu errado por aqui.</h2>
       <p className="max-w-80 text-muted">
         Não foi possível mostrar esta tela. Tente de novo ou volte para onde você estava.
       </p>

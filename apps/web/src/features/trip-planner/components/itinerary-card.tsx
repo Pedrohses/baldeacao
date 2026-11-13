@@ -79,11 +79,11 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
       aria-pressed={selected}
       onClick={onSelect}
       className={`relative w-full rounded-md border-2 bg-surface p-3 text-left transition-colors ${
-        selected ? 'border-brand' : 'border-border hover:border-muted'
+        selected ? 'border-brand-ink' : 'border-border hover:border-muted'
       }`}
     >
       <span className="flex items-baseline justify-between gap-2 pr-7">
-        <span className="text-xl font-extrabold tabular-nums">
+        <span className="text-xl font-bold tabular-nums">
           <span aria-hidden="true">
             {start} → {end}
           </span>

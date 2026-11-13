@@ -1,3 +1,4 @@
+import { MAP_COLORS_DARK } from '@/shared/ui/map';
 import { vehicleSnapshotExample } from '@baldeacao/types/examples';
 import { act, render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -142,12 +143,12 @@ describe('VehiclesLayer', () => {
     const circles = layer(VEHICLES_LAYER_ID);
     expect(circles.minzoom).toBe(String(VEHICLES_MIN_ZOOM));
     // Neutro: a cor da marca não é dado.
-    expect(circles.paint['circle-color']).toBe('#5A4A40');
+    expect(circles.paint['circle-color']).toBe(MAP_COLORS_DARK.vehicleIdle);
     expect(circles.paint['circle-stroke-color']).toEqual([
       'case',
       expect.anything(),
-      '#2B1B14',
-      '#FFFFFF',
+      MAP_COLORS_DARK.text,
+      MAP_COLORS_DARK.surface,
     ]);
     expect(circles.paint['circle-opacity']).toEqual([
       'interpolate',

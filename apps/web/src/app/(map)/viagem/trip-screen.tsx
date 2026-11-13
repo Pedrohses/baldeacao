@@ -215,7 +215,7 @@ export function TripScreen({ initial }: TripScreenProps) {
         </div>
         {selected ? (
           <section aria-labelledby="trip-details-title" className="mt-5">
-            <h2 id="trip-details-title" className="mb-2 text-base font-bold">
+            <h2 id="trip-details-title" className="section-label mb-2">
               Detalhes da opção {current.index + 1}
             </h2>
             <ItineraryTimeline

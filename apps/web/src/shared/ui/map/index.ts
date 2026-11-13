@@ -3,7 +3,6 @@ export type { BaseMapProps, MapViewState } from './base-map-client';
 export { CenterPicker, type CenterPickerProps } from './center-picker';
 export { DroppedPin, type DroppedPinProps } from './dropped-pin';
 export {
-  DARK_SCHEME_QUERY,
   MAP_COLORS,
   MAP_COLORS_DARK,
   MAP_STYLE_URLS,

@@ -48,7 +48,7 @@ function Segmented<T extends string>({
         {options.map((option) => (
           <label
             key={option.value}
-            className="relative flex h-11 flex-1 cursor-pointer items-center justify-center rounded-[6px] text-sm font-bold has-checked:bg-surface has-checked:text-brand has-checked:shadow-sm has-focus-visible:outline-3 has-focus-visible:outline-focus"
+            className="relative flex h-11 flex-1 cursor-pointer items-center justify-center rounded-[6px] text-sm font-bold has-checked:bg-surface has-checked:text-brand-ink has-checked:shadow-sm has-focus-visible:outline-3 has-focus-visible:outline-focus"
           >
             <input
               type="radio"
@@ -89,7 +89,7 @@ export function TimeChip({ value, onChange, open, onOpenChange, now = new Date()
         className={`inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-bold ${
           value.kind === 'now'
             ? 'border-border bg-surface text-text'
-            : 'border-brand bg-brand/10 text-brand'
+            : 'border-brand-ink bg-brand/10 text-brand-ink'
         }`}
       >
         <ClockIcon className="size-4" />
@@ -141,7 +141,7 @@ export function TimeChip({ value, onChange, open, onOpenChange, now = new Date()
               ))}
             </select>
           </label>
-          <span aria-hidden="true" className="pb-2.5 text-xl font-extrabold">
+          <span aria-hidden="true" className="pb-2.5 text-xl font-bold">
             :
           </span>
           <label className="flex flex-1 flex-col gap-1 text-sm text-muted">

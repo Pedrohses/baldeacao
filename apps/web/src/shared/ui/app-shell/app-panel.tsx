@@ -71,7 +71,7 @@ export function AppPanel({
         aria-labelledby={titleId}
         className="surface-float absolute inset-y-0 left-0 z-30 flex w-[400px] flex-col"
       >
-        <h1 id={titleId} className={titleHidden ? 'sr-only' : 'px-4 pt-4 pb-2 text-xl font-bold'}>
+        <h1 id={titleId} className={titleHidden ? 'sr-only' : 'screen-title px-4 pt-4 pb-2'}>
           {title}
         </h1>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-3 pb-6">
@@ -150,7 +150,7 @@ export function AppPanel({
       >
         <span aria-hidden="true" className="h-1.5 w-10 rounded-full bg-border" />
       </button>
-      <h1 id={titleId} className={titleHidden ? 'sr-only' : 'px-4 pb-2 text-xl font-bold'}>
+      <h1 id={titleId} className={titleHidden ? 'sr-only' : 'screen-title px-4 pb-2'}>
         {title}
       </h1>
       <div

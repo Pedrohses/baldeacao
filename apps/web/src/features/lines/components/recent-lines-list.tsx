@@ -17,7 +17,7 @@ export function RecentLinesList({ hrefFor }: RecentLinesListProps) {
   if (recents.length === 0) return null;
   return (
     <section aria-labelledby="recent-lines-title" className="mt-6">
-      <h2 id="recent-lines-title" className="mb-1 text-base font-bold">
+      <h2 id="recent-lines-title" className="section-label mb-2">
         Vistas recentemente
       </h2>
       <ul className="-mx-1 divide-y divide-border">

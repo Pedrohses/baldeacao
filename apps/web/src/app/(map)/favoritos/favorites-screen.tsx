@@ -53,7 +53,7 @@ function NearbyToFavorite() {
   }
   return (
     <section aria-labelledby="favorites-nearby-title" className="mt-2 border-t border-border pt-4">
-      <h2 id="favorites-nearby-title" className="mb-1 text-base font-bold">
+      <h2 id="favorites-nearby-title" className="section-label mb-2">
         {position ? 'Paradas perto de você' : 'Paradas perto do centro do mapa'}
       </h2>
       <NearbyStopsList center={center} onSelectStop={setSelected} />

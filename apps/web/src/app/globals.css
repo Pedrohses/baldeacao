@@ -1,55 +1,60 @@
 @import 'tailwindcss';
 
-/* Tokens do sistema visual: paleta quente (coral, creme e neutros terrosos). Claro por padrão, escuro por prefers-color-scheme. */
+/*
+ * Tokens do design system "Painel de estação" (apps/web/MASTER.md).
+ * Escuro é o padrão: :root tem os valores escuros e [data-theme="light"] redefine.
+ * O data-theme é posto no <html> por um script inline antes da pintura (layout.tsx).
+ */
 :root {
-  --bg: #fbf6f1;
-  --surface: #ffffff;
-  --surface-2: #f5ece4;
-  --border: #eadbcd;
-  /* Contorno de campos e selos claros: 3:1 sobre surface (WCAG 1.4.11). */
-  --border-strong: #a88e7d;
-  --text: #2b1b14;
-  --muted: #6f574a;
-  /* Marca só para ação e seleção, nunca para dado. */
-  --brand: #c7361f;
-  --brand-fg: #ffffff;
-  --live: #1b7f45;
-  --live-bg: #e3f3e9;
-  /* Linha sem cor no GTFS: neutro, para não parecer botão primário. */
-  --line-fallback: #5a4a40;
+  --bg: #0e1116;
+  --surface: #161a21;
+  --surface-2: #1e232c;
+  --border: #2a303b;
+  /* Contorno de campo e selo claro: 3:1 sobre surface (WCAG 1.4.11). */
+  --border-strong: #646d7d;
+  --text: #f4f5f7;
+  --muted: #a3abb8;
+  /* Âmbar: só botão cheio, aba ativa, foco e alfinete. Nunca selo nem dado. */
+  --brand: #ffb300;
+  --brand-fg: #0e1116;
+  /* Âmbar como texto, ícone ou contorno (4,5:1 nos dois temas). */
+  --brand-ink: #ffb300;
+  --focus: #ffb300;
+  --live: #3ddc84;
+  --live-bg: #12291c;
+  --warn: #ff9f43;
+  --danger: #ff6b6b;
+  /* Linha sem cor no GTFS: neutro, para não parecer botão. */
+  --line-fallback: #4a5262;
   --line-fallback-fg: #ffffff;
-  --warn: #9a5b00;
-  --danger: #b3261e;
-  --focus: #c7361f;
-  --shadow-float-value: 0 -4px 24px rgb(120 50 20 / 0.14);
-  --float-border: transparent;
+  --shadow-float-value: 0 -2px 16px rgb(0 0 0 / 0.5);
+  --float-border: #2a303b;
   /* Barra inferior do celular: 64 px mais a área segura do aparelho. */
   --nav-h: calc(64px + env(safe-area-inset-bottom));
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1b1411;
-    --surface: #251c17;
-    --surface-2: #30251e;
-    --border: #43342a;
-    --border-strong: #8a7262;
-    --text: #f8ece3;
-    --muted: #c9b4a6;
-    --brand: #ff8a65;
-    --brand-fg: #1b1411;
-    --live: #5bd68a;
-    --live-bg: #163322;
-    --line-fallback: #8a7262;
-    --line-fallback-fg: #1b1411;
-    --warn: #ffc35c;
-    --danger: #ff8a80;
-    --focus: #ff8a65;
-    --shadow-float-value: 0 -4px 24px rgb(0 0 0 / 0.5);
-    --float-border: #43342a;
-    color-scheme: dark;
-  }
+:root[data-theme='light'] {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #edeff3;
+  --border: #dadee5;
+  --border-strong: #8a93a3;
+  --text: #0e1116;
+  --muted: #5b6472;
+  --brand: #ffb300;
+  --brand-fg: #0e1116;
+  --brand-ink: #8f5500;
+  --focus: #8f5500;
+  --live: #0f7a3d;
+  --live-bg: #e2f3e8;
+  --warn: #a04e00;
+  --danger: #c62828;
+  --line-fallback: #5b6472;
+  --line-fallback-fg: #ffffff;
+  --shadow-float-value: 0 -2px 16px rgb(14 17 22 / 0.12);
+  --float-border: transparent;
+  color-scheme: light;
 }
 
 @theme inline {
@@ -62,6 +67,7 @@
   --color-muted: var(--muted);
   --color-brand: var(--brand);
   --color-brand-fg: var(--brand-fg);
+  --color-brand-ink: var(--brand-ink);
   --color-live: var(--live);
   --color-live-bg: var(--live-bg);
   --color-line-fallback: var(--line-fallback);
@@ -70,7 +76,8 @@
   --color-danger: var(--danger);
   --color-focus: var(--focus);
 
-  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-barlow-condensed), 'Arial Narrow', ui-sans-serif, sans-serif;
 
   /* Escala 12/14/16/20/28/40. */
   --text-xs: 0.75rem;
@@ -80,17 +87,20 @@
   --text-2xl: 1.75rem;
   --text-4xl: 2.5rem;
 
-  /* Selo de linha: retângulo de cantos pequenos, não pílula. */
-  --radius-badge: 6px;
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 28px;
+  /* Selo 4, campo e botão 6, cartão raro 8, topo do painel do celular 12. */
+  --radius-badge: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 
   --shadow-float: var(--shadow-float-value);
 
-  --ease-app: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --default-transition-duration: 180ms;
-  --default-transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-app: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Virada de letreiro do número que muda: o antigo sobe e sai, o novo entra por baixo. */
+  --animate-roll-in: roll-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-roll-out: roll-out 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  --default-transition-duration: 120ms;
+  --default-transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @layer base {
@@ -120,21 +130,40 @@
 }
 
 @layer components {
-  /* Campo de busca: fundo de superfície e contorno de 1,5 px com 3:1; foco na cor da marca. */
+  /* Rótulo de seção do painel: display 600, caixa alta e espaçado, cor apagada (MASTER.md). */
+  .section-label {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Título de tela e de parada: display 700, um degrau acima do texto. */
+  .screen-title {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+  }
+
+  /* Campo de busca: fundo de superfície e contorno de 1,5 px com 3:1; foco no âmbar. */
   .search-field {
     background-color: var(--surface);
     border: 1.5px solid var(--border-strong);
-    box-shadow: 0 1px 2px rgb(60 30 15 / 0.08);
     transition:
-      border-color 180ms var(--ease-app),
-      background-color 180ms var(--ease-app);
+      border-color 120ms var(--ease-app),
+      background-color 120ms var(--ease-app);
   }
   .search-field:hover {
     background-color: var(--surface-2);
   }
   /* O anel de foco é do campo inteiro (o input interno não desenha o dele). */
   .search-field:focus-within {
-    border-color: var(--brand);
+    border-color: var(--brand-ink);
     outline: 3px solid var(--focus);
     outline-offset: 2px;
   }
@@ -155,6 +184,28 @@
   }
 }
 
+@keyframes roll-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes roll-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
 /* Aviso que entra e sai sobre o mapa: fade curto de opacidade. */
 @keyframes fade-in {
   from {
@@ -169,7 +220,7 @@
 .baldeacao-popup .maplibregl-popup-content {
   background-color: var(--surface);
   color: var(--text);
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 8px 16px 16px;
   box-shadow: var(--shadow-float-value);
 }

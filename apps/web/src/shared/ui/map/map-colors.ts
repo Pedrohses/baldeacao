@@ -1,35 +1,33 @@
 'use client';
 
 import { env } from '@/shared/config/env';
-import { useMediaQuery } from '@/shared/hooks/use-media-query';
-
-export const DARK_SCHEME_QUERY = '(prefers-color-scheme: dark)';
+import { useTheme } from '@/shared/hooks/use-theme';
 
 export type MapTheme = 'light' | 'dark';
 
-// O paint do MapLibre não lê variáveis CSS: estes são os tokens de globals.css em hex,
-// casados com o estilo do mapa de cada tema (positron no claro, dark no escuro).
+// O paint do MapLibre não lê variáveis CSS: estes são os tokens de globals.css em hex
+// (MASTER.md), casados com o estilo do mapa de cada tema (positron no claro, dark no escuro).
 export const MAP_COLORS = {
-  /** Só seleção e ação (parada escolhida, alfinete); nunca dado. */
-  brand: '#C7361F',
-  text: '#2B1B14',
-  muted: '#6F574A',
+  /** Âmbar: só seleção e ação (parada escolhida, alfinete); nunca dado. */
+  brand: '#FFB300',
+  text: '#0E1116',
+  muted: '#5B6472',
   surface: '#FFFFFF',
-  live: '#1B7F45',
+  live: '#0F7A3D',
   /** Ônibus sem linha em destaque. */
-  vehicleIdle: '#5A4A40',
+  vehicleIdle: '#5B6472',
   /** Linha sem cor no GTFS (mesmo neutro do selo). */
-  lineFallback: '#5A4A40',
+  lineFallback: '#5B6472',
 } as const;
 
 export const MAP_COLORS_DARK = {
-  brand: '#FF8A65',
-  text: '#F8ECE3',
-  muted: '#C9B4A6',
-  surface: '#251C17',
-  live: '#5BD68A',
-  vehicleIdle: '#C9B4A6',
-  lineFallback: '#8A7262',
+  brand: '#FFB300',
+  text: '#F4F5F7',
+  muted: '#A3ABB8',
+  surface: '#161A21',
+  live: '#3DDC84',
+  vehicleIdle: '#A3ABB8',
+  lineFallback: '#4A5262',
 } as const;
 
 export type MapColors = { readonly [K in keyof typeof MAP_COLORS]: string };
@@ -47,9 +45,9 @@ export const MAP_STYLE_URLS: Record<MapTheme, string> = {
   dark: darkStyleUrl(env.mapStyleUrl),
 };
 
-/** Tema do mapa segue o do sistema (`prefers-color-scheme`). */
+/** Tema do mapa segue o do app (`data-theme` do <html>; escuro por padrão). */
 export function useMapTheme(): MapTheme {
-  return useMediaQuery(DARK_SCHEME_QUERY) ? 'dark' : 'light';
+  return useTheme();
 }
 
 /** Cores para o paint do mapa no tema (tokens `--map-*`). */

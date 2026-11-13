@@ -6,10 +6,10 @@ import { StarIcon } from '@/shared/ui/icons';
 export function FavoritesEmptyState() {
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
-      <span className="inline-flex size-14 items-center justify-center rounded-full bg-surface-2 text-brand">
+      <span className="inline-flex size-14 items-center justify-center rounded-full bg-surface-2 text-brand-ink">
         <StarIcon className="size-7" />
       </span>
-      <h2 className="text-xl font-bold">Nenhum favorito ainda</h2>
+      <h2 className="screen-title">Nenhum favorito ainda</h2>
       <p className="max-w-72 text-muted">
         Escolha uma parada e toque em &ldquo;Salvar nos favoritos&rdquo;. As paradas salvas aparecem
         aqui, com as próximas chegadas.

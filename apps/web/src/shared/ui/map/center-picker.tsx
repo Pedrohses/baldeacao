@@ -26,7 +26,7 @@ export function CenterPicker({ instruction, onConfirm, onCancel }: CenterPickerP
     <>
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-1/2 text-brand"
+        className="pointer-events-none absolute top-1/2 left-1/2 z-10 -translate-1/2 text-brand-ink"
       >
         <CrosshairIcon className="size-10 drop-shadow" />
       </div>

@@ -134,7 +134,7 @@ export function ItineraryTimeline({
               onClick={() => onFocusLeg(focused ? null : index)}
               className={`flex w-full gap-0 rounded-sm py-2 text-left transition-colors ${focused ? 'bg-brand/10' : 'hover:bg-surface-2'}`}
             >
-              <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-extrabold tabular-nums">
+              <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-bold tabular-nums">
                 {formatTime(leg.startAt)}
               </span>
               <Rail leg={leg} transfer={previous !== null} />
@@ -147,7 +147,7 @@ export function ItineraryTimeline({
       })}
       {last ? (
         <li className="flex py-2">
-          <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-extrabold tabular-nums">
+          <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-bold tabular-nums">
             {formatTime(itinerary.endAt)}
           </span>
           <span aria-hidden="true" className="flex w-6 shrink-0 justify-center">
