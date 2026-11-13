@@ -307,7 +307,7 @@ describe('PlaceAutocomplete: aceita o que foi digitado', () => {
     await advance(0);
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.getByRole('status')).toHaveTextContent('2 endereços encontrados');
+    expect(screen.getByRole('status')).toHaveTextContent('2 resultados encontrados');
     const options = screen.getAllByRole('option');
     expect(options).toHaveLength(2);
     fireEvent.click(options[1]!);

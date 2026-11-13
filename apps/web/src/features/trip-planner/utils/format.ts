@@ -112,3 +112,23 @@ export function readableTextColor(background: string): '#000000' | '#FFFFFF' {
   // Contraste com branco (1.05 / (L + 0.05)) contra preto ((L + 0.05) / 0.05).
   return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.05 ? '#FFFFFF' : '#000000';
 }
+
+/** Velocidade a pé usada para estimar a caminhada (m/s). */
+export const WALK_SPEED_MS = 1.2;
+
+/** Caminhadas menores que isto (m) não aparecem na linha do tempo. */
+export const MIN_WALK_LEG_M = 20;
+
+export function isTinyWalk(leg: Pick<Leg, 'mode' | 'distanceM'>): boolean {
+  return leg.mode === 'walk' && leg.distanceM < MIN_WALK_LEG_M;
+}
+
+/**
+ * Segundos de espera embutidos num trecho a pé: o tempo do trecho menos a caminhada estimada.
+ * Só conta se sobrar pelo menos 2 min (e o dobro da caminhada), senão é folga normal.
+ */
+export function walkWaitSeconds(leg: Pick<Leg, 'distanceM' | 'durationS'>): number {
+  const walking = Math.round(leg.distanceM / WALK_SPEED_MS / 60) * 60;
+  const wait = leg.durationS - leg.distanceM / WALK_SPEED_MS;
+  return wait >= 120 && leg.durationS >= 2 * walking ? Math.round(wait / 60) * 60 : 0;
+}
