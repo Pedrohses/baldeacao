@@ -23,7 +23,9 @@ export const envSchema = z.object({
   OTP_URL: optionalUrl,
   GTFS_SPTRANS_URL: z
     .url()
-    .default('https://www.sptrans.com.br/umbraco/Surface/PerfilDesenvolvedor/BaixarGTFS?memberName=sptrans'),
+    .default(
+      'https://www.sptrans.com.br/umbraco/Surface/PerfilDesenvolvedor/BaixarGTFS?memberName=sptrans',
+    ),
   GTFS_SPTRANS_FALLBACK_URL: z.url().default('https://files.mobilitydatabase.org/mdb-8/latest.zip'),
   // Toda segunda às 4h (horário de São Paulo, ver o job).
   GTFS_REFRESH_CRON: z.string().min(1).default('0 4 * * 1'),

@@ -51,12 +51,15 @@ export class ResolvePlaceAccessUseCase {
       };
     }
 
-    const rule = known ? placeAccessRule({ category: known.category, name: known.place.name }) : null;
+    const rule = known
+      ? placeAccessRule({ category: known.category, name: known.place.name })
+      : null;
     const access = known && rule ? await this.accessFor(rule, known.place.location) : null;
     if (!access) return { location, airportShuttle: false };
     return {
       location: access.location,
-      airportShuttle: rule === 'airport' && access.isStation && access.distanceM > AIRPORT_WALKABLE_STOP_M,
+      airportShuttle:
+        rule === 'airport' && access.isStation && access.distanceM > AIRPORT_WALKABLE_STOP_M,
     };
   }
 

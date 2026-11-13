@@ -94,9 +94,7 @@ describe('ReversePlaceUseCase', () => {
     const { place } = await build(new ReverseGeocoder(), [osm], undefined, stops).execute({
       location: { lat: -23.5162359, lon: -46.6259 },
     });
-    expect(place).toEqual(
-      new Place({ ...osm, id: 'stop:18877', location: STATION_STOP.location }),
-    );
+    expect(place).toEqual(new Place({ ...osm, id: 'stop:18877', location: STATION_STOP.location }));
   });
 
   it('parada a até 60 m responde sem Nominatim', async () => {

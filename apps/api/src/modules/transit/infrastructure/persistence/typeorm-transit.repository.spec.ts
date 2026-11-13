@@ -198,7 +198,8 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
 
   describe('TypeormRouteRepository.search por palavra curta', () => {
     beforeAll(async () => {
-      await db.dataSource.query(`INSERT INTO routes (source_id, route_id, short_name, long_name, route_type) VALUES
+      await db.dataSource
+        .query(`INSERT INTO routes (source_id, route_id, short_name, long_name, route_type) VALUES
         ('sptrans', '1', '9001-10', 'José Bonifácio - Pedro José', 3),
         ('sptrans', '2', '9002-10', 'Praça da Sé - Vila Sônia', 3),
         ('sptrans', '3', '9003-10', 'Sé - Lapa', 3)`);

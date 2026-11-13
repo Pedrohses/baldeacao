@@ -1,3 +1,4 @@
+import { fixDisplayCase } from '../../../../shared/domain/value-objects/display-name';
 import type {
   Coordinates,
   Itinerary,
@@ -49,7 +50,7 @@ function seconds(value: number | null, startAt: string, endAt: string): number {
 
 function legPlace(place: OtpPlace): LegPlace {
   return {
-    name: place.name?.trim() || 'Ponto sem nome',
+    name: fixDisplayCase(place.name?.trim() || 'Ponto sem nome'),
     location: { lat: place.lat, lon: place.lon },
     stopId: place.stop?.gtfsId ? stripFeedPrefix(place.stop.gtfsId) : null,
   };
@@ -95,7 +96,11 @@ export const OtpItineraryMapper = {
       routeShortName: route ? route.shortName?.trim() || route.longName?.trim() || null : null,
       routeColor: route ? routeColor(route.color) : null,
       headsign: isTransit
-        ? legHeadsign(leg.headsign?.trim() || null, from.name, route?.longName?.trim() || null)
+        ? legHeadsign(
+            leg.headsign?.trim() ? fixDisplayCase(leg.headsign.trim()) : null,
+            from.name,
+            route?.longName?.trim() ? fixDisplayCase(route.longName.trim()) : null,
+          )
         : null,
       intermediateStops: isTransit ? (leg.intermediateStops ?? []).filter(Boolean).length : 0,
       isRealtime: isTransit && leg.realTime === true,

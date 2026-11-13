@@ -188,6 +188,16 @@ describe('Tool MCP planejar_viagem', () => {
     expect(textOf(result)).toContain('Caminhe 300 m até Terminal Rodoviário Tietê (3 min).');
   });
 
+  it('omite caminhada de menos de 20 m', async () => {
+    const [first, ...rest] = itineraryExample.legs;
+    fakes.planner.result = [
+      { ...itineraryExample, legs: [{ ...first!, distanceM: 0, durationS: 30 }, ...rest] },
+    ];
+    const result = await plan({ origem: 'Morumbis', destino: 'Terminal Tietê' });
+    expect(textOf(result)).not.toContain('Caminhe 0 m');
+    expect(textOf(result)).toMatch(/\n1\. Pegue /);
+  });
+
   it('pede endereço mais específico quando não acha a origem', async () => {
     const result = await plan({ origem: 'Lugar Nenhum', destino: 'Tietê' });
     expect(result.isError).toBe(true);

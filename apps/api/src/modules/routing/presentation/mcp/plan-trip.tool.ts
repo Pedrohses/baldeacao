@@ -102,6 +102,14 @@ const outputSchema = {
 
 type PlaceOutput = z.infer<typeof placeOutput>;
 
+/** Trecho a pé mais curto que isto (ex.: "Caminhe 0 m até Sé") não aparece na resposta. */
+const MIN_WALK_LEG_M = 20;
+
+/** Trechos mostrados: sem as caminhadas de menos de 20 m entre plataformas. */
+function visibleLegs(it: Itinerary): Leg[] {
+  return it.legs.filter((leg) => leg.mode !== 'walk' || leg.distanceM >= MIN_WALK_LEG_M);
+}
+
 /** Velocidade a pé conservadora para saber se o tempo do trecho inclui espera. */
 const WALK_SPEED_M_S = 0.8;
 
@@ -313,7 +321,7 @@ function describeItinerary(it: Itinerary, index: number, timeZone: string): stri
     `Opção ${index}: ${formatDuration(it.durationS)}, saída ${formatClock(it.startAt, timeZone)}, ` +
     `chegada ${formatClock(it.endAt, timeZone)}, ${transfers}, ${formatDistance(it.walkDistanceM)} a pé.` +
     also;
-  const steps = it.legs.map((leg, i) => `${i + 1}. ${describeLeg(leg, timeZone)}`);
+  const steps = visibleLegs(it).map((leg, i) => `${i + 1}. ${describeLeg(leg, timeZone)}`);
   return [header, ...steps].join('\n');
 }
 
@@ -351,7 +359,7 @@ function toItineraryOutput(it: Itinerary) {
     duracao_min: minutes(it.durationS),
     baldeacoes: it.transfers,
     caminhada_metros: Math.round(it.walkDistanceM),
-    trechos: it.legs.map((leg) => ({
+    trechos: visibleLegs(it).map((leg) => ({
       modo: leg.mode,
       linha: leg.routeShortName,
       sentido: leg.headsign,
