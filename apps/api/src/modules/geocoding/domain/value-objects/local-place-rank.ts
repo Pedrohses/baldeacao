@@ -101,13 +101,34 @@ export function analyzePlaceQuery(query: string): AnalyzedPlaceQuery {
   return { terms: tokens, houseNumber: tokens.length > 0 ? houseNumber : null };
 }
 
+/** Palavra sem a vogal de gênero e o plural ("rodoviária" e "rodoviário" viram "rodoviari"). */
+function stem(word: string): string {
+  return word.length >= 5 ? word.replace(/[ao]s?$/, '') : word;
+}
+
+/**
+ * Termo começa a palavra, tolerando gênero e número ("Rodoviária" casa "Rodoviário") e uma
+ * letra a mais no fim ("Morumbis" casa "Morumbi").
+ */
+function termMatches(term: string, word: string): boolean {
+  if (/^\d+$/.test(term)) return word === term;
+  if (word.startsWith(term)) return true;
+  if (term.length >= 5 && stem(word).startsWith(stem(term))) return true;
+  return word.length >= 5 && term.length === word.length + 1 && term.startsWith(word);
+}
+
 /** Fração dos termos que começam alguma palavra do nome (1 = todos). */
 function matchedFraction(terms: string[], nameTokens: string[]): number {
   if (terms.length === 0) return 0;
-  const matched = terms.filter((term) =>
-    nameTokens.some((word) => (/^\d+$/.test(term) ? word === term : word.startsWith(term))),
-  );
+  const matched = terms.filter((term) => nameTokens.some((word) => termMatches(term, word)));
   return matched.length / terms.length;
+}
+
+/** Todos os termos casam o nome ou um nome alternativo (match forte). */
+export function isStrongMatch(candidate: PlaceCandidate, query: AnalyzedPlaceQuery): boolean {
+  return [candidate.place.name, ...candidate.aliases].some(
+    (name) => matchedFraction(query.terms, placeTokens(name)) === 1,
+  );
 }
 
 /** Números que aparecem como palavra no nome (ou no começo do endereço, para endereço). */
@@ -134,6 +155,11 @@ export const RANK_WEIGHTS = {
   perKmFromCenter: -0.6,
   busStop: -15,
   remoteIndex: -2,
+  /**
+   * POI do Nominatim que não é lugar conhecido local (ponto de táxi, POI sem tipo): as
+   * categorias fortes (parque, terminal, estação, shopping) já vêm do banco local.
+   */
+  weakRemotePoi: -40,
   sameHouseNumber: 60,
   addressWithSameNumber: 10,
   otherHouseNumber: -80,
@@ -150,7 +176,7 @@ const MAX_DISTANCE_KM = 40;
  * 3. Consulta com número de casa: mesmo número sobe, número diferente (parada "R. X, 356")
  *    cai, endereço do Nominatim sem número fica no meio.
  * 4. Importância da categoria, estação antes de parada de ônibus e a ordem do Nominatim
- *    desempatam.
+ *    desempatam; POI do Nominatim sem categoria local (táxi, POI sem tipo) perde.
  */
 export function scorePlaceCandidate(candidate: PlaceCandidate, query: AnalyzedPlaceQuery): number {
   const { place } = candidate;
@@ -178,7 +204,10 @@ export function scorePlaceCandidate(candidate: PlaceCandidate, query: AnalyzedPl
   if (candidate.inCity === false) score += w.outsideCity;
   const km = distanceM(place.location, SERVICE_CITY_CENTER) / 1000;
   score += w.perKmFromCenter * Math.min(km, MAX_DISTANCE_KM);
-  if (candidate.remoteIndex !== null) score += w.remoteIndex * candidate.remoteIndex;
+  if (candidate.remoteIndex !== null) {
+    score += w.remoteIndex * candidate.remoteIndex;
+    if (place.kind === 'poi' && !candidate.category) score += w.weakRemotePoi;
+  }
 
   if (query.houseNumber) {
     const numbers = placeNumbers(place);
@@ -193,13 +222,30 @@ export function scorePlaceCandidate(candidate: PlaceCandidate, query: AnalyzedPl
   return score;
 }
 
+/** Com tantos resultados fortes na cidade, os de fora do município saem da lista. */
+export const IN_CITY_ENOUGH = 3;
+
+/**
+ * Fora do município só entra se faltar resultado bom na cidade: some quando há 3 matches
+ * fortes dentro dela, ou quando ele mesmo é match fraco e há algum forte dentro.
+ */
+function withoutFarAway(candidates: PlaceCandidate[], query: AnalyzedPlaceQuery): PlaceCandidate[] {
+  const strongInCity = candidates.filter(
+    (c) => c.inCity !== false && isStrongMatch(c, query),
+  ).length;
+  if (strongInCity === 0) return candidates;
+  return candidates.filter(
+    (c) => c.inCity !== false || (strongInCity < IN_CITY_ENOUGH && isStrongMatch(c, query)),
+  );
+}
+
 /**
  * Ordena os candidatos (locais e do Nominatim juntos) pela nota e junta sem repetir o mesmo
  * lugar, até `limit`. Empate: nome mais curto, depois ordem alfabética.
  */
 export function rankPlaces(query: string, candidates: PlaceCandidate[], limit: number): Place[] {
   const analyzed = analyzePlaceQuery(query);
-  const sorted = candidates
+  const sorted = withoutFarAway(candidates, analyzed)
     .map((candidate) => ({ candidate, score: scorePlaceCandidate(candidate, analyzed) }))
     .sort(
       (a, b) =>

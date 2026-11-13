@@ -293,4 +293,95 @@ describe('rankPlaces (casos do QA)', () => {
     );
     expect(ranked.map((p) => p.id)).toEqual(['stop:11', 'osm:way:12']);
   });
+
+  it('lugar local forte vence POI do Nominatim sem categoria (táxi, POI sem tipo)', () => {
+    const tiete = candidate({
+      id: 'osm:relation:8546826',
+      name: 'Terminal Rodoviário Tietê',
+      lat: -23.5163,
+      lon: -46.6237,
+      importance: 10,
+    });
+    const taxi = candidate({
+      id: 'osm:node:5151527015',
+      name: 'Ponto de Táxi Rodoviaria do Tiete',
+      lat: -23.5161,
+      lon: -46.6231,
+      importance: 4,
+      remoteIndex: 0,
+    });
+    expect(rankPlaces('Rodoviária do Tietê', [taxi, tiete], 8)[0]?.id).toBe(tiete.place.id);
+
+    const park = {
+      ...candidate({
+        id: 'osm:way:125450993',
+        name: 'Parque Ibirapuera',
+        lat: -23.588,
+        lon: -46.6593,
+        importance: 9,
+      }),
+      category: 'leisure=park',
+    };
+    const bare = candidate({
+      id: 'osm:node:2540462440',
+      name: 'Ibirapuera',
+      lat: -23.5817,
+      lon: -46.66,
+      importance: 4,
+      remoteIndex: 0,
+    });
+    expect(rankPlaces('Ibirapuera', [bare, park], 8)[0]?.id).toBe(park.place.id);
+  });
+
+  it('fora do município sai quando há match forte na cidade e ele é fraco', () => {
+    const ranked = rankPlaces(
+      'Estádio do Morumbis',
+      [
+        candidate({
+          id: 'a',
+          name: 'MorumBIS',
+          lat: -23.6,
+          lon: -46.72,
+          importance: 9,
+          aliases: ['Estádio do Morumbi'],
+        }),
+        candidate({
+          id: 'b',
+          name: 'Estádio Ulrico Mursa',
+          lat: -23.947,
+          lon: -46.337,
+          importance: 9,
+          inCity: false,
+        }),
+      ],
+      8,
+    );
+    expect(ranked.map((p) => p.id)).toEqual(['a']);
+  });
+
+  it('junta a mesma estação escrita com e sem espaço no hífen', () => {
+    const ranked = rankPlaces(
+      'Palmeiras Barra Funda',
+      [
+        candidate({
+          id: 'stop:18986',
+          name: 'Palmeiras - Barra Funda',
+          lat: -23.5257,
+          lon: -46.6668,
+          kind: 'station',
+          importance: 8,
+        }),
+        candidate({
+          id: 'stop:614606',
+          name: 'Palmeiras-Barra Funda',
+          lat: -23.5253,
+          lon: -46.6672,
+          kind: 'station',
+          importance: 8,
+        }),
+      ],
+      8,
+    );
+    expect(ranked).toHaveLength(1);
+  });
 });
