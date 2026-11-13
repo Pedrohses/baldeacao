@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { StarIcon } from '@/shared/ui/icons';
 
-/** Estado vazio da aba Favoritos (guardar favoritos chega numa fase seguinte). */
+/** Estado vazio da aba Favoritos (só paradas por enquanto). */
 export function FavoritesEmptyState() {
   return (
     <div className="flex flex-col items-center gap-3 py-8 text-center">
@@ -11,8 +11,8 @@ export function FavoritesEmptyState() {
       </span>
       <h2 className="text-xl font-bold">Nenhum favorito ainda</h2>
       <p className="max-w-72 text-muted">
-        Paradas, linhas e lugares que você guardar vão aparecer aqui, para chegar a eles com um
-        toque.
+        Abra uma parada no mapa e toque em &ldquo;Salvar nos favoritos&rdquo;. As paradas salvas
+        aparecem aqui, com as próximas chegadas.
       </p>
       <Link
         href="/viagem"
