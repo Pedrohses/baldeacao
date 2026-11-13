@@ -28,13 +28,24 @@ export default function GlobalError({ retry, reset }: { retry?: () => void; rese
           >
             Tentar de novo
           </button>
-          <button
-            type="button"
-            onClick={() => window.location.assign('/')}
-            style={{ height: 44, padding: '0 20px', fontWeight: 700 }}
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- global-error roda fora do roteador */}
+          <a
+            href="/"
+            style={{
+              height: 44,
+              padding: '0 20px',
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              border: '1px solid currentColor',
+              borderRadius: 4,
+              color: 'inherit',
+              textDecoration: 'none',
+              boxSizing: 'border-box',
+            }}
           >
             Voltar
-          </button>
+          </a>
         </div>
       </body>
     </html>
