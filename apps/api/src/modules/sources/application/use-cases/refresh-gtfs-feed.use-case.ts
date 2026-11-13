@@ -42,6 +42,9 @@ export class RefreshGtfsFeedUseCase {
       const dir = await mkdtemp(join(tmpdir(), 'gtfs-'));
       try {
         await extract(archive, dir);
+        // A importação já aplica o reparo de traçados (RepairGtfsShapesUseCase). O zip
+        // reparado para o OTP ainda não é gravado aqui: falta uma variável de config com o
+        // caminho (ex.: infra/otp/data/sptrans.gtfs.zip); até lá, usar `gtfs:prepare`.
         const result = await this.importer.execute({ sourceId, location: dir });
         // O hash só vale depois que a troca do feed foi confirmada.
         await this.state.save(sourceId, { sha256, importedAt: new Date().toISOString() });
