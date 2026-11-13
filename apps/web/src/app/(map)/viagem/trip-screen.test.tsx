@@ -30,7 +30,16 @@ vi.mock('@/shared/ui/map', () => ({
 vi.mock('react-map-gl/maplibre', () => ({
   Source: ({ children }: { children?: ReactNode }) => <>{children}</>,
   Layer: () => null,
-  useMap: () => ({ current: { fitBounds: vi.fn(), on: vi.fn(), off: vi.fn() } }),
+  useMap: () => ({
+    current: {
+      fitBounds: vi.fn(),
+      on: vi.fn(),
+      off: vi.fn(),
+      hasImage: vi.fn(() => false),
+      isStyleLoaded: vi.fn(() => false),
+      getCanvas: () => ({ style: {} }),
+    },
+  }),
 }));
 
 function paramsOf(href: string): Record<string, string> {

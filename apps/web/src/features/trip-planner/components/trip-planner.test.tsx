@@ -39,7 +39,16 @@ vi.mock('react-map-gl/maplibre', () => ({
     mapMock.layers.push({ id, filter, paint });
     return null;
   },
-  useMap: () => ({ current: { fitBounds: mapMock.fitBounds } }),
+  useMap: () => ({
+    current: {
+      fitBounds: mapMock.fitBounds,
+      on: vi.fn(),
+      off: vi.fn(),
+      hasImage: vi.fn(() => false),
+      isStyleLoaded: vi.fn(() => false),
+      getCanvas: () => ({ style: {} }),
+    },
+  }),
 }));
 
 interface LegsCollection {
@@ -116,7 +125,8 @@ function renderHarness(request: TripRequest | null) {
 }
 
 function lastLegs(): LegsCollection {
-  return mapMock.sources.at(-1)?.data as LegsCollection;
+  const data = mapMock.sources.at(-1)?.data as LegsCollection;
+  return { features: data.features.filter((f) => f.geometry.type === 'LineString') };
 }
 
 beforeEach(() => {
@@ -124,6 +134,30 @@ beforeEach(() => {
   mapMock.layers.length = 0;
   mapMock.fitBounds.mockReset();
   vi.restoreAllMocks();
+});
+
+describe('marcadores do itinerário', () => {
+  it('põe origem, destino e pontos de embarque e desembarque', () => {
+    render(<ItineraryLayer itinerary={directBus} fitPadding={PADDING} />);
+    const data = mapMock.sources.at(-1)?.data as {
+      features: { properties: { kind?: string }; geometry: { type: string } }[];
+    };
+    const kinds = data.features
+      .filter((f) => f.geometry.type === 'Point')
+      .map((f) => f.properties.kind);
+    expect(kinds.filter((k) => k === 'origin')).toHaveLength(1);
+    expect(kinds.filter((k) => k === 'destination')).toHaveLength(1);
+    expect(kinds.filter((k) => k === 'stop').length).toBeGreaterThanOrEqual(2);
+    const ids = mapMock.layers.map((l) => l.id);
+    expect(ids.indexOf('itinerary-walk')).toBeLessThan(ids.indexOf('itinerary-stops'));
+    expect(ids.indexOf('itinerary-stops')).toBeLessThan(ids.indexOf('itinerary-origin'));
+  });
+
+  it('caminhada fica mais larga quando focada', () => {
+    render(<ItineraryLayer itinerary={directBus} focusedLeg={0} fitPadding={PADDING} />);
+    const walk = mapMock.layers.findLast((l) => l.id === 'itinerary-walk');
+    expect(walk?.paint['line-width']).not.toBe(4);
+  });
 });
 
 describe('cartão de itinerário', () => {
@@ -279,7 +313,7 @@ describe('linha do tempo e camadas do itinerário', () => {
       '#FFD700',
       '#6F574A',
     ]);
-    const layers = mapMock.layers.slice(-3);
+    const layers = mapMock.layers.filter((l) => /^itinerary-(transit|walk)/.test(l.id)).slice(-3);
     expect(layers.map((l) => l.id)).toEqual([
       'itinerary-transit-casing',
       'itinerary-transit',
@@ -298,7 +332,7 @@ describe('linha do tempo e camadas do itinerário', () => {
     const busLeg = screen.getByRole('button', { name: /sentido Rio Pequeno/ });
     fireEvent.click(busLeg);
     expect(busLeg).toHaveAttribute('aria-pressed', 'true');
-    const focused = mapMock.layers.slice(-3);
+    const focused = mapMock.layers.filter((l) => /^itinerary-(transit|walk)/.test(l.id)).slice(-3);
     expect(focused[1]?.paint['line-opacity']).toEqual([
       'case',
       ['==', ['get', 'legIndex'], 1],
@@ -314,6 +348,8 @@ describe('linha do tempo e camadas do itinerário', () => {
     );
 
     fireEvent.click(busLeg);
-    expect(mapMock.layers.at(-2)?.paint['line-opacity']).toBe(1);
+    expect(
+      mapMock.layers.findLast((l) => l.id === 'itinerary-transit')?.paint['line-opacity'],
+    ).toBe(1);
   });
 });
