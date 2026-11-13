@@ -149,7 +149,7 @@ describe('PositionsGateway (Socket.IO)', () => {
     const client = await connect();
 
     const ack = (await client.emitWithAck(REALTIME_EVENTS.subscribe, {
-      channel: 'positions:line:875A 10',
+      channel: 'positions:line:875A:10',
     })) as SubscriptionAck;
 
     expect(ack).toMatchObject({ ok: false, error: { code: 'INVALID_CHANNEL' } });

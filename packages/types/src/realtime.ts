@@ -52,8 +52,14 @@ export type PositionsAllChannel = typeof POSITIONS_ALL_CHANNEL;
 export type PositionsLineChannel = `${typeof POSITIONS_LINE_CHANNEL_PREFIX}${string}`;
 export type PositionsChannel = PositionsAllChannel | PositionsLineChannel;
 
-// Código da linha no canal: route_id, sem ":" nem espaço.
-const LineCodeSchema = z.string().regex(/^[^:\s]+$/, 'código de linha sem ":" nem espaço');
+// O route_id do GTFS pode ter espaço ("METRÔ L4", "CPTM L09"); só ":" é proibido, pois separa o prefixo do canal.
+const LineCodeSchema = z
+  .string()
+  .regex(/^[^:]+$/, 'código de linha sem ":"')
+  .refine(
+    (code) => code.trim() === code && code.length > 0,
+    'código de linha vazio ou com espaço nas pontas',
+  );
 
 export const PositionsChannelSchema = z.union([
   z.literal(POSITIONS_ALL_CHANNEL),
