@@ -132,7 +132,12 @@ export function TripScreen({ initial }: TripScreenProps) {
     <main className={SCREEN_CLASS}>
       <MapLayers>
         <UserLocationLayer />
-        <ItineraryLayer itinerary={selected} focusedLeg={current.leg} fitPadding={padding} />
+        <ItineraryLayer
+          itinerary={selected}
+          focusedLeg={current.leg}
+          fitPadding={padding}
+          onFocusLeg={(leg) => setSelection({ key: requestKey, index: current.index, leg })}
+        />
         {picking ? (
           <CenterPicker
             instruction={
