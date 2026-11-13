@@ -6,10 +6,10 @@ import { initialMapState, useMapStore } from '../hooks/use-map-store';
 import { useVehiclePositions } from '../hooks/use-vehicle-positions';
 import { createFakeMap, type FakeMap } from './fake-map.test-utils';
 import {
-  VEHICLES_HEATMAP_LAYER_ID,
   VEHICLES_HIGHLIGHT_LAYER_ID,
   VEHICLES_LAYER_ID,
   VEHICLES_SOURCE_ID,
+  VEHICLES_MIN_ZOOM,
   VehiclesLayer,
 } from './vehicles-layer';
 
@@ -132,37 +132,17 @@ describe('VehiclesLayer', () => {
     expect(map.listenerCount(`click:${VEHICLES_LAYER_ID}`)).toBe(0);
   });
 
-  it('abaixo do zoom 13 vira heatmap e acima círculos da marca, com fade cruzado', () => {
+  it('sem heatmap: pontinhos neutros no panorama e pontos cheios a partir do zoom 13', () => {
     mockData(vehicleSnapshotExample);
     render(<VehiclesLayer />);
 
-    const heat = layer(VEHICLES_HEATMAP_LAYER_ID);
-    expect(heat.type).toBe('heatmap');
-    expect(heat.maxzoom).toBe('13.5');
-    expect(heat.layout).toEqual({ visibility: 'visible' });
-    expect(heat.paint['heatmap-opacity']).toEqual([
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      12.5,
-      0.35,
-      13.5,
-      0,
-    ]);
-    expect(heat.paint['heatmap-radius']).toEqual([
-      'interpolate',
-      ['linear'],
-      ['zoom'],
-      10,
-      8,
-      13,
-      14,
-    ]);
-    expect(JSON.stringify(heat.paint['heatmap-color'])).toContain('rgba(199, 54, 31, 1)');
-
+    expect(screen.getAllByTestId('layer').map((l) => l.getAttribute('data-type'))).not.toContain(
+      'heatmap',
+    );
     const circles = layer(VEHICLES_LAYER_ID);
-    expect(circles.minzoom).toBe('12.5');
-    expect(circles.paint['circle-color']).toBe('#C7361F');
+    expect(circles.minzoom).toBe(String(VEHICLES_MIN_ZOOM));
+    // Neutro: a cor da marca não é dado.
+    expect(circles.paint['circle-color']).toBe('#5A4A40');
     expect(circles.paint['circle-stroke-color']).toEqual([
       'case',
       expect.anything(),
@@ -173,22 +153,21 @@ describe('VehiclesLayer', () => {
       'interpolate',
       ['linear'],
       ['zoom'],
-      12.5,
-      0,
-      13.5,
+      12,
+      0.35,
+      13,
       1,
     ]);
-    expect(JSON.stringify(circles.paint['circle-radius'])).toContain('2.5');
+    expect(JSON.stringify(circles.paint['circle-radius'])).toContain('1.5');
     expect(screen.queryAllByTestId('layer').map((l) => l.getAttribute('data-id'))).not.toContain(
       VEHICLES_HIGHLIGHT_LAYER_ID,
     );
   });
 
-  it('com linha em destaque esconde o heatmap, esmaece os demais e pinta a linha', () => {
+  it('com linha em destaque esmaece os demais e pinta a linha', () => {
     mockData(vehicleSnapshotExample);
     render(<VehiclesLayer highlight={{ routeId: '875A-10', color: '#E3001B' }} />);
 
-    expect(layer(VEHICLES_HEATMAP_LAYER_ID).layout).toEqual({ visibility: 'none' });
     const others = layer(VEHICLES_LAYER_ID);
     expect(others.paint['circle-opacity']).toBe(0.12);
     expect(others.minzoom).toBe('0');

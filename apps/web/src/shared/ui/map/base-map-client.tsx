@@ -8,9 +8,10 @@ import Map, {
   type MapRef,
   type ViewState,
 } from 'react-map-gl/maplibre';
-import type { ReactNode } from 'react';
+import { type ReactNode, useCallback, useEffect, useRef } from 'react';
 
-import { MAP_STYLE_URLS, useMapTheme } from './map-colors';
+import { MAP_STYLE_URLS, type MapTheme, useMapTheme } from './map-colors';
+import { tintStyle } from './map-tint';
 
 // O MapLibre 6 deduz a URL do worker a partir do próprio arquivo, o que quebra depois do bundle.
 // `new URL(..., import.meta.url)` faz o bundler emitir o worker como asset e nos dá a URL final.
@@ -35,6 +36,42 @@ function ignoreMissingImages(ref: MapRef | null) {
   map.on('styleimagemissing', ({ id }: { id: string }) => addEmpty(id));
 }
 
+const tinted = new WeakSet<MapLibreMap>();
+
+/**
+ * Aquece o estilo sempre que ele muda. Na troca de tema o react-map-gl aplica o novo estilo por
+ * diff (sem `style.load`), por isso o ouvinte é `styledata`. O tema vem por ref porque o ouvinte
+ * é registrado uma vez só por mapa.
+ */
+function tintOnStyleData(map: MapLibreMap, theme: { current: MapTheme }) {
+  if (tinted.has(map)) return;
+  tinted.add(map);
+  const apply = () => {
+    try {
+      tintStyle(map, theme.current);
+    } catch {
+      // Estilo ainda sem camadas: o próximo `styledata` tenta de novo.
+    }
+  };
+  map.on('styledata', apply);
+  apply();
+}
+
+/**
+ * No celular a atribuição compacta abre expandida no topo e cobre os rótulos. Recolhe ao carregar;
+ * o botão "i" continua abrindo os créditos.
+ */
+function collapseAttribution(map: MapLibreMap) {
+  const collapse = () => {
+    map
+      .getContainer()
+      .querySelectorAll('.maplibregl-ctrl-attrib.maplibregl-compact-show')
+      .forEach((element) => element.classList.remove('maplibregl-compact-show'));
+  };
+  map.once('load', collapse);
+  map.once('idle', collapse);
+}
+
 export type MapViewState = Pick<ViewState, 'longitude' | 'latitude' | 'zoom'>;
 
 export interface BaseMapProps {
@@ -51,9 +88,23 @@ export default function BaseMapClient({
   children,
 }: BaseMapProps) {
   const theme = useMapTheme();
+  const themeRef = useRef(theme);
+  useEffect(() => {
+    themeRef.current = theme;
+  }, [theme]);
+  const onRef = useCallback(
+    (ref: MapRef | null) => {
+      ignoreMissingImages(ref);
+      const map = ref?.getMap();
+      if (!map) return;
+      tintOnStyleData(map, themeRef);
+      if (!showNavigation) collapseAttribution(map);
+    },
+    [showNavigation],
+  );
   return (
     <Map
-      ref={ignoreMissingImages}
+      ref={onRef}
       initialViewState={initialViewState}
       mapStyle={MAP_STYLE_URLS[theme]}
       style={{ width: '100%', height: '100%' }}

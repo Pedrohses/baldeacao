@@ -10,22 +10,26 @@ export type MapTheme = 'light' | 'dark';
 // O paint do MapLibre não lê variáveis CSS: estes são os tokens de globals.css em hex,
 // casados com o estilo do mapa de cada tema (positron no claro, dark no escuro).
 export const MAP_COLORS = {
+  /** Só seleção e ação (parada escolhida, alfinete); nunca dado. */
   brand: '#C7361F',
-  /** `brand` em "r, g, b", para montar rgba no heatmap. */
-  brandRgb: '199, 54, 31',
   text: '#2B1B14',
   muted: '#6F574A',
   surface: '#FFFFFF',
   live: '#1B7F45',
+  /** Ônibus sem linha em destaque. */
+  vehicleIdle: '#5A4A40',
+  /** Linha sem cor no GTFS (mesmo neutro do selo). */
+  lineFallback: '#5A4A40',
 } as const;
 
 export const MAP_COLORS_DARK = {
   brand: '#FF8A65',
-  brandRgb: '255, 138, 101',
   text: '#F8ECE3',
   muted: '#C9B4A6',
   surface: '#251C17',
   live: '#5BD68A',
+  vehicleIdle: '#C9B4A6',
+  lineFallback: '#8A7262',
 } as const;
 
 export type MapColors = { readonly [K in keyof typeof MAP_COLORS]: string };
@@ -46,6 +50,11 @@ export const MAP_STYLE_URLS: Record<MapTheme, string> = {
 /** Tema do mapa segue o do sistema (`prefers-color-scheme`). */
 export function useMapTheme(): MapTheme {
   return useMediaQuery(DARK_SCHEME_QUERY) ? 'dark' : 'light';
+}
+
+/** Cores para o paint do mapa no tema (tokens `--map-*`). */
+export function mapColorsFor(theme: MapTheme): MapColors {
+  return theme === 'dark' ? MAP_COLORS_DARK : MAP_COLORS;
 }
 
 /** Cores para o paint das camadas no tema atual. */

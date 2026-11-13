@@ -12,15 +12,17 @@ import { useVehiclePositions } from '../hooks/use-vehicle-positions';
 import { toVehiclesFeatureCollection } from './vehicles-geojson';
 
 export const VEHICLES_SOURCE_ID = 'live-map-vehicles';
-export const VEHICLES_HEATMAP_LAYER_ID = 'live-map-vehicles-heat';
 export const VEHICLES_LAYER_ID = 'live-map-vehicles-circle';
 export const VEHICLES_HIGHLIGHT_LAYER_ID = 'live-map-vehicles-highlight';
 
-/** Abaixo deste zoom os ônibus viram mancha de calor; acima, pontos. */
+/**
+ * A partir deste zoom os ônibus aparecem como pontos de verdade. Abaixo dele viram pontinhos
+ * neutros e translúcidos: dão sinal de cidade viva sem cobrir ruas, nomes e paradas.
+ */
 export const VEHICLES_POINTS_ZOOM = 13;
-// Fade cruzado de 1 nível: heatmap some até 13,5 e os círculos surgem a partir de 12,5.
-const FADE_START = VEHICLES_POINTS_ZOOM - 0.5;
-const FADE_END = VEHICLES_POINTS_ZOOM + 0.5;
+/** Abaixo disso nenhum ônibus é desenhado: no panorama da cidade eles só cobrem os rótulos. */
+export const VEHICLES_MIN_ZOOM = 12;
+const OVERVIEW_OPACITY = 0.35;
 export const DIMMED_VEHICLE_OPACITY = 0.12;
 
 const EMPTY_VEHICLES = toVehiclesFeatureCollection([]);
@@ -57,49 +59,51 @@ export function VehiclesLayer({ routeId, highlight = null }: VehiclesLayerProps)
 
   const circleOpacity: DataDrivenPropertyValueSpecification<number> = highlight
     ? DIMMED_VEHICLE_OPACITY
-    : ['interpolate', ['linear'], ['zoom'], FADE_START, 0, FADE_END, 1];
+    : [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        VEHICLES_POINTS_ZOOM - 1,
+        OVERVIEW_OPACITY,
+        VEHICLES_POINTS_ZOOM,
+        1,
+      ];
+  // Contorno só quando o ponto já tem tamanho para isso; no panorama ele vira borrão.
+  const strokeWidth: DataDrivenPropertyValueSpecification<number> = [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    VEHICLES_POINTS_ZOOM - 1,
+    ['case', isSelected, 3, 0],
+    VEHICLES_POINTS_ZOOM,
+    ['case', isSelected, 3, 1],
+  ];
 
   return (
     <Source id={VEHICLES_SOURCE_ID} type="geojson" data={vehicles}>
       <Layer
-        id={VEHICLES_HEATMAP_LAYER_ID}
-        type="heatmap"
-        maxzoom={FADE_END}
-        layout={{ visibility: highlight ? 'none' : 'visible' }}
-        paint={{
-          'heatmap-color': [
-            'interpolate',
-            ['linear'],
-            ['heatmap-density'],
-            0,
-            // Cor da marca transparente na densidade zero.
-            `rgba(${colors.brandRgb}, 0)`,
-            1,
-            `rgba(${colors.brandRgb}, 1)`,
-          ],
-          'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 10, 8, VEHICLES_POINTS_ZOOM, 14],
-          'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], FADE_START, 0.35, FADE_END, 0],
-        }}
-      />
-      <Layer
         id={VEHICLES_LAYER_ID}
         type="circle"
         // Com linha em destaque os demais aparecem (esmaecidos) em qualquer zoom.
-        minzoom={highlight ? 0 : FADE_START}
+        minzoom={highlight ? 0 : VEHICLES_MIN_ZOOM}
         paint={{
           'circle-radius': [
             'interpolate',
             ['linear'],
             ['zoom'],
+            VEHICLES_MIN_ZOOM,
+            ['case', isSelected, 5, 1.5],
             VEHICLES_POINTS_ZOOM,
-            ['case', isSelected, 5, 2.5],
+            ['case', isSelected, 5, 3],
             17,
             ['case', isSelected, 9, 6],
           ],
-          'circle-color': colors.brand,
+          // A posição em tempo real não traz a cor da linha: ônibus ficam num neutro, e a linha
+          // selecionada ganha a cor dela na camada de destaque.
+          'circle-color': colors.vehicleIdle,
           'circle-opacity': circleOpacity,
           'circle-stroke-color': ['case', isSelected, colors.text, colors.surface],
-          'circle-stroke-width': ['case', isSelected, 3, 1],
+          'circle-stroke-width': strokeWidth,
           'circle-stroke-opacity': circleOpacity,
         }}
       />

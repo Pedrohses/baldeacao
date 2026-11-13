@@ -27,7 +27,7 @@ export function StaleDataNotice() {
       className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-3 md:left-[400px]"
     >
       {isStale && (
-        <p className="surface-float pointer-events-auto max-w-md rounded-md border-l-4 border-l-warn px-3 py-2 text-sm">
+        <p className="surface-float pointer-events-auto max-w-md animate-[fade-in_150ms_var(--ease-app)] rounded-md border-l-4 border-l-warn px-3 py-2 text-sm">
           <strong className="font-semibold">Dados atrasados.</strong> {staleMessage(dataUpdatedAt)}
         </p>
       )}
