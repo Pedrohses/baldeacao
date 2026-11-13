@@ -3,51 +3,48 @@
 import type { Arrival } from '@baldeacao/types';
 
 import { useNow } from '@/shared/hooks/use-now';
+import { ArrivalTime } from '@/shared/ui/arrival-time';
+import { LineBadge } from '@/shared/ui/line-badge';
 
 import { useStopArrivals } from '../hooks';
-import { formatMinutes, minutesUntil } from '../utils/arrival-time';
+import { minutesUntil } from '../utils/arrival-time';
 
 export interface ArrivalsListViewProps {
   arrivals: readonly Arrival[];
   now: Date;
 }
 
-/** Apresentação pura: lista de previsões com minutos e origem (tempo real ou tabela). */
+/**
+ * Apresentação pura no padrão de quadro de partidas: selo da linha na cor do GTFS, destino em uma
+ * linha e o tempo grande à direita (ponto verde para tempo real, relógio para tabela).
+ */
 export function ArrivalsListView({ arrivals, now }: ArrivalsListViewProps) {
   if (arrivals.length === 0) {
     return <p className="text-muted">Nenhuma chegada prevista no momento.</p>;
   }
   return (
     <ul className="divide-y divide-border" aria-label="Próximas chegadas">
-      {arrivals.map((arrival, index) => {
-        const minutes = minutesUntil(arrival.expectedAt, now);
-        return (
-          <li
-            key={`${arrival.routeId}-${arrival.directionId}-${index}`}
-            className="flex min-h-14 items-center justify-between gap-3 py-2"
-          >
-            <div className="min-w-0">
-              <p className="inline-flex rounded-[6px] bg-surface-2 px-1.5 font-mono font-bold">
-                {arrival.routeShortName}
-              </p>
-              {arrival.headsign ? (
-                <p className="truncate text-sm text-muted">{arrival.headsign}</p>
-              ) : null}
-            </div>
-            <div className="shrink-0 text-right">
-              <p className="font-mono text-xl font-bold">{formatMinutes(minutes)}</p>
-              <p
-                className={`inline-flex items-center gap-1 text-xs ${arrival.isRealtime ? 'font-bold text-live' : 'text-muted'}`}
-              >
-                {arrival.isRealtime ? (
-                  <span aria-hidden="true" className="size-1.5 rounded-full bg-live" />
-                ) : null}
-                {arrival.isRealtime ? 'Tempo real' : 'Tabela'}
-              </p>
-            </div>
-          </li>
-        );
-      })}
+      {arrivals.map((arrival, index) => (
+        <li
+          key={`${arrival.routeId}-${arrival.directionId}-${index}`}
+          className="flex min-h-14 items-center gap-3 py-2"
+        >
+          <LineBadge
+            shortName={arrival.routeShortName}
+            color={arrival.routeColor}
+            textColor={arrival.routeTextColor}
+          />
+          <p className="min-w-0 flex-1 truncate font-bold">
+            {arrival.headsign ?? (
+              <span className="font-normal text-muted">Destino não informado</span>
+            )}
+          </p>
+          <ArrivalTime
+            minutes={minutesUntil(arrival.expectedAt, now)}
+            isRealtime={arrival.isRealtime}
+          />
+        </li>
+      ))}
     </ul>
   );
 }

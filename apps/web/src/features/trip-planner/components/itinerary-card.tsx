@@ -2,6 +2,7 @@ import type { Itinerary, Leg } from '@baldeacao/types';
 import type { CSSProperties } from 'react';
 
 import { CheckIcon } from '@/shared/ui/icons';
+import { LineBadge } from '@/shared/ui/line-badge';
 
 import {
   MODE_LABELS,
@@ -12,7 +13,6 @@ import {
   formatTime,
   formatTransfers,
   legColor,
-  readableTextColor,
   shortRouteName,
 } from '../utils/format';
 import { ModeIcon } from './mode-icon';
@@ -50,20 +50,17 @@ function LegBar({ legs }: { legs: readonly Leg[] }) {
   );
 }
 
-/** Selo da linha: ícone do modo + nome curto ("L4", "746H-10") na cor da linha. */
+/** Selo da linha: ícone do modo + nome curto ("L4", "746H-10") no selo comum de linha. */
 export function LineChip({ leg }: { leg: Leg }) {
-  const background = legColor(leg);
-  const name = shortRouteName(leg.routeShortName) ?? MODE_LABELS[leg.mode];
   return (
-    <span
-      data-testid="leg-badge"
-      className="inline-flex h-6 items-center gap-1 rounded-[6px] px-1.5 text-sm font-bold"
-      style={{ backgroundColor: background, color: readableTextColor(background) }}
-    >
-      <ModeIcon mode={leg.mode} />
-      <span className="sr-only">{MODE_LABELS[leg.mode]} </span>
-      {name}
-    </span>
+    <LineBadge
+      testId="leg-badge"
+      size="sm"
+      shortName={shortRouteName(leg.routeShortName) ?? MODE_LABELS[leg.mode]}
+      color={leg.routeColor}
+      icon={<ModeIcon mode={leg.mode} />}
+      srLabel={MODE_LABELS[leg.mode]}
+    />
   );
 }
 
@@ -86,7 +83,7 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
       }`}
     >
       <span className="flex items-baseline justify-between gap-2 pr-7">
-        <span className="font-mono text-xl font-bold">
+        <span className="text-xl font-extrabold tabular-nums">
           <span aria-hidden="true">
             {start} → {end}
           </span>

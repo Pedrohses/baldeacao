@@ -354,7 +354,7 @@ export function PlaceAutocomplete({
           setActiveIndex(-1);
           acceptTyped();
         }}
-        className={`w-full rounded-sm bg-transparent px-2 text-base placeholder:text-muted hover:bg-surface-2 focus-visible:outline-offset-[-3px] ${
+        className={`w-full rounded-sm bg-transparent px-2 text-base transition-colors placeholder:text-muted hover:bg-surface-2 focus-visible:outline-offset-[-3px] ${
           subtitle ? 'h-11 pt-1 font-semibold' : 'h-12'
         }`}
       />

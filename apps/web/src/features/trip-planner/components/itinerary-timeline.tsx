@@ -79,7 +79,7 @@ function LegText({ leg }: { leg: Leg }) {
       </p>
       <p>
         Desça em {placeLabel(leg.to.name)}{' '}
-        <span className="font-mono text-sm text-muted">às {formatTime(leg.endAt)}</span>
+        <span className="text-sm text-muted tabular-nums">às {formatTime(leg.endAt)}</span>
       </p>
       <p className="mt-1">
         {leg.isRealtime ? (
@@ -132,9 +132,9 @@ export function ItineraryTimeline({
               type="button"
               aria-pressed={focused}
               onClick={() => onFocusLeg(focused ? null : index)}
-              className={`flex w-full gap-0 rounded-sm py-2 text-left ${focused ? 'bg-brand/10' : 'hover:bg-surface-2'}`}
+              className={`flex w-full gap-0 rounded-sm py-2 text-left transition-colors ${focused ? 'bg-brand/10' : 'hover:bg-surface-2'}`}
             >
-              <span className="w-14 shrink-0 pt-0.5 text-right font-mono text-sm font-bold">
+              <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-extrabold tabular-nums">
                 {formatTime(leg.startAt)}
               </span>
               <Rail leg={leg} transfer={previous !== null} />
@@ -147,7 +147,7 @@ export function ItineraryTimeline({
       })}
       {last ? (
         <li className="flex py-2">
-          <span className="w-14 shrink-0 pt-0.5 text-right font-mono text-sm font-bold">
+          <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-extrabold tabular-nums">
             {formatTime(itinerary.endAt)}
           </span>
           <span aria-hidden="true" className="flex w-6 shrink-0 justify-center">

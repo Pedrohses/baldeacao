@@ -8,7 +8,6 @@ import {
   formatTransfers,
   legColor,
   placeLabel,
-  readableTextColor,
   shortRouteName,
 } from './format';
 
@@ -33,12 +32,11 @@ describe('formatação do itinerário', () => {
     expect(formatTransfers(2)).toBe('2 baldeações');
   });
 
-  it('resolve a cor do trecho e um texto legível sobre ela', () => {
+  it('resolve a cor do trecho', () => {
     expect(legColor({ mode: 'walk', routeColor: null })).toBe('#6F574A');
     expect(legColor({ mode: 'bus', routeColor: '509e2f' })).toBe('#509E2F');
-    expect(legColor({ mode: 'bus', routeColor: null })).toBe('#C7361F');
-    expect(readableTextColor('#FFD700')).toBe('#000000');
-    expect(readableTextColor('#C7361F')).toBe('#FFFFFF');
+    // Sem cor no GTFS: neutro, nunca a cor da marca.
+    expect(legColor({ mode: 'bus', routeColor: null })).toBe('#8A7262');
   });
 
   it('encurta nomes de metrô e trem e troca os nomes genéricos do OTP', () => {

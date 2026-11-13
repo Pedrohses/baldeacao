@@ -53,17 +53,30 @@ beforeEach(() => {
 describe('ArrivalsListView', () => {
   const now = new Date('2026-11-12T15:31:00Z');
 
-  it('mostra minutos e indica tempo real', () => {
+  it('mostra o selo na cor da linha, o destino, os minutos e indica tempo real', () => {
     render(<ArrivalsListView arrivals={[arrivalExample]} now={now} />);
-    expect(screen.getByText('875A-10')).toBeInTheDocument();
+    expect(screen.getByTestId('line-badge')).toHaveTextContent('875A-10');
+    expect(screen.getByTestId('line-badge')).toHaveStyle({
+      backgroundColor: '#509E2F',
+      color: '#FFFFFF',
+    });
     expect(screen.getByText('Aeroporto')).toBeInTheDocument();
-    expect(screen.getByText('5 min')).toBeInTheDocument();
-    expect(screen.getByText('Tempo real')).toBeInTheDocument();
+    expect(screen.getByTestId('arrival-time')).toHaveTextContent('Tempo real: 5min');
   });
 
   it('indica tabela quando não é tempo real', () => {
     render(<ArrivalsListView arrivals={[{ ...arrivalExample, isRealtime: false }]} now={now} />);
-    expect(screen.getByText('Tabela')).toBeInTheDocument();
+    expect(screen.getByTestId('arrival-time')).toHaveTextContent('Pela tabela: 5min');
+  });
+
+  it('menos de 1 min vira "agora"', () => {
+    render(
+      <ArrivalsListView
+        arrivals={[arrivalExample]}
+        now={new Date(Date.parse(arrivalExample.expectedAt) - 30_000)}
+      />,
+    );
+    expect(screen.getByTestId('arrival-time')).toHaveTextContent('agora');
   });
 
   it('mostra mensagem quando não há chegadas', () => {
@@ -142,15 +155,15 @@ describe('StopSheet', () => {
 });
 
 describe('NearbyStopsList', () => {
-  it('lista as paradas mais próximas com as 2 próximas chegadas e devolve a tocada', async () => {
+  it('lista as paradas mais próximas com 2 linhas por parada e devolve a tocada', async () => {
     const far: NearbyStop = { ...nearby, id: 'far', name: 'Parada longe', distanceM: 480 };
     vi.spyOn(stopsService, 'getNearby').mockResolvedValue({ stops: [far, nearby] });
     vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
       stopId: stopExample.id,
       arrivals: [
         arrivalExample,
-        { ...arrivalExample, routeShortName: '702U-10' },
-        { ...arrivalExample, routeShortName: '9999-10' },
+        { ...arrivalExample, routeId: '702U-10-0', routeShortName: '702U-10' },
+        { ...arrivalExample, routeId: '9999-10-0', routeShortName: '9999-10' },
       ],
     });
     const onSelectStop = vi.fn();
@@ -167,6 +180,29 @@ describe('NearbyStopsList', () => {
 
     fireEvent.click(buttons[0]!);
     expect(onSelectStop).toHaveBeenCalledWith(nearby);
+  });
+
+  it('mostra a linha uma vez só, com as chegadas seguintes ao lado', async () => {
+    vi.spyOn(stopsService, 'getNearby').mockResolvedValue({ stops: [nearby] });
+    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
+      stopId: stopExample.id,
+      arrivals: [arrivalExample, arrivalExample, arrivalExample],
+    });
+    wrap(<NearbyStopsList center={{ lat: -23.56, lon: -46.65 }} onSelectStop={vi.fn()} />);
+
+    expect(await screen.findAllByText(arrivalExample.routeShortName)).toHaveLength(1);
+    expect(screen.getByText(/depois em/)).toBeInTheDocument();
+  });
+
+  it('avisa quando a parada não tem previsão', async () => {
+    vi.spyOn(stopsService, 'getNearby').mockResolvedValue({ stops: [nearby] });
+    vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
+      stopId: stopExample.id,
+      arrivals: [],
+    });
+    wrap(<NearbyStopsList center={{ lat: -23.56, lon: -46.65 }} onSelectStop={vi.fn()} />);
+
+    expect(await screen.findByText('Sem previsão agora')).toBeInTheDocument();
   });
 
   it('não consulta sem centro', () => {

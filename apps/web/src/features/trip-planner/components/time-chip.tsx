@@ -132,7 +132,7 @@ export function TimeChip({ value, onChange, open, onOpenChange, now = new Date()
             <select
               value={current.hour}
               onChange={(event) => update({ hour: Number(event.target.value) })}
-              className="h-11 rounded-sm border border-border bg-surface px-2 font-mono text-base text-text"
+              className="h-11 rounded-sm border-[1.5px] border-border-strong bg-surface px-2 text-base font-bold text-text tabular-nums"
             >
               {HOURS.map((h) => (
                 <option key={h} value={h}>
@@ -141,7 +141,7 @@ export function TimeChip({ value, onChange, open, onOpenChange, now = new Date()
               ))}
             </select>
           </label>
-          <span aria-hidden="true" className="pb-2.5 font-mono text-xl font-bold">
+          <span aria-hidden="true" className="pb-2.5 text-xl font-extrabold">
             :
           </span>
           <label className="flex flex-1 flex-col gap-1 text-sm text-muted">
@@ -149,7 +149,7 @@ export function TimeChip({ value, onChange, open, onOpenChange, now = new Date()
             <select
               value={current.minute - (current.minute % MINUTE_STEP)}
               onChange={(event) => update({ minute: Number(event.target.value) })}
-              className="h-11 rounded-sm border border-border bg-surface px-2 font-mono text-base text-text"
+              className="h-11 rounded-sm border-[1.5px] border-border-strong bg-surface px-2 text-base font-bold text-text tabular-nums"
             >
               {MINUTES.map((m) => (
                 <option key={m} value={m}>

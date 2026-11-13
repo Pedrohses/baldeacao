@@ -9,9 +9,10 @@ const timeFormatter = new Intl.DateTimeFormat('pt-BR', {
   timeZone: CITY_TIME_ZONE,
 });
 
-// Cinza "muted" do tema e petróleo da marca (o paint do mapa não lê variáveis CSS).
+// Cinza "muted" do tema e neutro de linha sem cor (o paint do mapa não lê variáveis CSS). O
+// neutro serve nos dois temas; a cor da marca fica para ação e seleção, nunca para linha.
 export const WALK_COLOR = '#6F574A';
-export const FALLBACK_TRANSIT_COLOR = '#C7361F';
+export const FALLBACK_TRANSIT_COLOR = '#8A7262';
 
 export const MODE_LABELS: Record<TripMode, string> = {
   walk: 'A pé',
@@ -95,22 +96,10 @@ export function minutesBetween(fromIso: string, toIso: string): number {
   return Math.max(0, Math.round((Date.parse(toIso) - Date.parse(fromIso)) / 60_000));
 }
 
-/** Cor do trecho em "#RRGGBB": cinza na caminhada, cor da linha (GTFS) ou a cor da marca. */
+/** Cor do trecho em "#RRGGBB": cinza na caminhada, cor da linha (GTFS) ou o neutro de linha. */
 export function legColor(leg: Pick<Leg, 'mode' | 'routeColor'>): string {
   if (leg.mode === 'walk') return WALK_COLOR;
   return leg.routeColor ? `#${leg.routeColor.toUpperCase()}` : FALLBACK_TRANSIT_COLOR;
-}
-
-/** Preto ou branco, o que tiver mais contraste com o fundo "#RRGGBB" (luminância relativa WCAG). */
-export function readableTextColor(background: string): '#000000' | '#FFFFFF' {
-  const hex = background.replace('#', '');
-  const channel = (offset: number) => {
-    const value = parseInt(hex.slice(offset, offset + 2), 16) / 255;
-    return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-  };
-  const luminance = 0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
-  // Contraste com branco (1.05 / (L + 0.05)) contra preto ((L + 0.05) / 0.05).
-  return 1.05 / (luminance + 0.05) >= (luminance + 0.05) / 0.05 ? '#FFFFFF' : '#000000';
 }
 
 /** Velocidade a pé usada para estimar a caminhada (m/s). */
