@@ -31,7 +31,7 @@ export function FavoriteStopsList({ renderStop }: FavoriteStopsListProps) {
               type="button"
               onClick={() => toggle(stop)}
               aria-label={`Remover ${stop.name} dos favoritos`}
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface-2"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm transition-colors hover:bg-surface-2"
             >
               <CloseIcon />
             </button>

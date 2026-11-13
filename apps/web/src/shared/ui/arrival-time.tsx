@@ -14,6 +14,12 @@ export interface ArrivalTimeProps {
   className?: string;
 }
 
+// "Agora" um degrau abaixo do número: em caixa alta ele já pesa mais que um dígito.
+const NOW_CLASS: Record<ArrivalTimeSize, string> = {
+  sm: 'text-xl',
+  md: 'text-2xl',
+};
+
 const NUMBER_CLASS: Record<ArrivalTimeSize, string> = {
   sm: 'text-2xl',
   md: 'text-[2rem]',
@@ -44,7 +50,7 @@ export function ArrivalTime({
       <span className="sr-only">{isRealtime ? 'Tempo real: ' : 'Pela tabela: '}</span>
       {now ? (
         <span
-          className={`font-display font-bold tracking-[0.03em] text-live uppercase ${NUMBER_CLASS[size]}`}
+          className={`font-display font-bold tracking-[0.04em] text-live uppercase ${NOW_CLASS[size]}`}
         >
           agora
         </span>

@@ -23,7 +23,7 @@ export function StopSheet({ stop, onClose, actions }: StopSheetProps) {
     <section aria-labelledby="stop-sheet-title">
       <header className="mb-3 flex items-start justify-between gap-3">
         <div className="min-w-0 pt-2">
-          <p className="text-xs font-bold text-muted uppercase">Parada</p>
+          <p className="section-label">Parada</p>
           <h2 id="stop-sheet-title" className="screen-title">
             {stop.name}
           </h2>
@@ -33,7 +33,7 @@ export function StopSheet({ stop, onClose, actions }: StopSheetProps) {
           type="button"
           onClick={onClose}
           aria-label="Fechar painel da parada"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface-2"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm transition-colors hover:bg-surface-2"
         >
           <CloseIcon />
         </button>

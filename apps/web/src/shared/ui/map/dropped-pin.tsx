@@ -52,7 +52,7 @@ export function DroppedPin({ location, title, subtitle, onClose, children }: Dro
               type="button"
               onClick={onClose}
               aria-label="Fechar"
-              className="-mr-2 inline-flex size-11 items-center justify-center rounded-full hover:bg-surface-2"
+              className="-mr-2 inline-flex size-11 items-center justify-center rounded-sm transition-colors hover:bg-surface-2"
             >
               <CloseIcon />
             </button>

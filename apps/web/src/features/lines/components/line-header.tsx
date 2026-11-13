@@ -11,7 +11,7 @@ export function LineHeader({ line }: LineHeaderProps) {
   return (
     <div className="flex items-center gap-3">
       <LineBadge shortName={line.shortName} color={line.color} textColor={line.textColor} />
-      <h2 className="screen-title min-w-0 truncate">{line.longName}</h2>
+      <h2 className="screen-title line-clamp-2 min-w-0">{line.longName}</h2>
     </div>
   );
 }

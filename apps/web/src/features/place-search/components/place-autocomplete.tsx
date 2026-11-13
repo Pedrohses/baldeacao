@@ -472,7 +472,7 @@ function OptionRow({
         onMouseEnter={onHover}
         className={`flex min-h-14 items-center gap-3 px-3 py-2 ${selected ? 'bg-surface-2' : ''}`}
       >
-        <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-2 text-muted">
+        <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-sm bg-surface-2 text-muted">
           {icon}
         </span>
         <span className="min-w-0">

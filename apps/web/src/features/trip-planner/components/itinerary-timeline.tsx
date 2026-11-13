@@ -83,12 +83,12 @@ function LegText({ leg }: { leg: Leg }) {
       </p>
       <p className="mt-1">
         {leg.isRealtime ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-live/15 px-2 py-0.5 text-xs font-bold text-live">
+          <span className="inline-flex items-center gap-1 rounded-badge bg-live-bg px-1.5 py-0.5 font-display text-xs font-semibold tracking-[0.06em] text-live uppercase">
             <span aria-hidden="true" className="size-1.5 rounded-full bg-live" />
             ao vivo
           </span>
         ) : (
-          <span className="inline-flex rounded-full bg-surface-2 px-2 py-0.5 text-xs font-bold text-muted">
+          <span className="inline-flex rounded-badge bg-surface-2 px-1.5 py-0.5 font-display text-xs font-semibold tracking-[0.06em] text-muted uppercase">
             horário previsto
           </span>
         )}
@@ -134,7 +134,7 @@ export function ItineraryTimeline({
               onClick={() => onFocusLeg(focused ? null : index)}
               className={`flex w-full gap-0 rounded-sm py-2 text-left transition-colors ${focused ? 'bg-brand/10' : 'hover:bg-surface-2'}`}
             >
-              <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-bold tabular-nums">
+              <span className="w-14 shrink-0 pt-0.5 text-right font-display text-base leading-tight font-bold tabular-nums">
                 {formatTime(leg.startAt)}
               </span>
               <Rail leg={leg} transfer={previous !== null} />
@@ -147,7 +147,7 @@ export function ItineraryTimeline({
       })}
       {last ? (
         <li className="flex py-2">
-          <span className="w-14 shrink-0 pt-0.5 text-right text-sm font-bold tabular-nums">
+          <span className="w-14 shrink-0 pt-0.5 text-right font-display text-base leading-tight font-bold tabular-nums">
             {formatTime(itinerary.endAt)}
           </span>
           <span aria-hidden="true" className="flex w-6 shrink-0 justify-center">

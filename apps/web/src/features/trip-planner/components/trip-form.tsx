@@ -54,7 +54,7 @@ export function TripForm({
       onSubmit={(event) => event.preventDefault()}
       noValidate
     >
-      <div className="flex items-center gap-1 rounded-md border-[1.5px] border-border-strong bg-surface p-1 pl-3 shadow-sm">
+      <div className="flex items-center gap-1 rounded-sm border-[1.5px] border-border-strong bg-surface p-1 pl-3">
         <div
           aria-hidden="true"
           className="flex w-4 shrink-0 flex-col items-center self-stretch py-5"
@@ -91,7 +91,7 @@ export function TripForm({
           type="button"
           onClick={onSwap}
           aria-label="Inverter origem e destino"
-          className="inline-flex size-11 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-text"
+          className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-muted transition-colors hover:bg-surface-2 hover:text-text"
         >
           <SwapIcon />
         </button>

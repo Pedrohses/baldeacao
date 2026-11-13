@@ -71,7 +71,7 @@ export function LineScreen({ routeId }: LineScreenProps) {
       <AppPanel title={`Linha ${routeId}`} titleHidden snap={snap} onSnapChange={setSnap}>
         <Link
           href="/linhas"
-          className="-ml-2 inline-flex h-11 items-center gap-1.5 rounded-sm px-2 text-sm font-bold text-muted hover:text-text"
+          className="-ml-2 inline-flex h-11 items-center gap-1.5 rounded-sm px-2 text-sm font-semibold text-muted transition-colors hover:text-text"
         >
           <ArrowLeftIcon className="size-4" />
           Todas as linhas

@@ -38,7 +38,7 @@ function LegBar({ legs }: { legs: readonly Leg[] }) {
         <span
           key={index}
           data-testid="leg-bar-segment"
-          className="h-full min-w-1.5 rounded-full"
+          className="h-full min-w-1.5 rounded-[1px]"
           style={{
             flexGrow: Math.max(leg.durationS, 1),
             flexBasis: 0,
@@ -78,12 +78,12 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
       type="button"
       aria-pressed={selected}
       onClick={onSelect}
-      className={`relative w-full rounded-md border-2 bg-surface p-3 text-left transition-colors ${
+      className={`relative w-full rounded-sm border-2 bg-surface p-3 text-left transition-colors ${
         selected ? 'border-brand-ink' : 'border-border hover:border-muted'
       }`}
     >
       <span className="flex items-baseline justify-between gap-2 pr-7">
-        <span className="text-xl font-bold tabular-nums">
+        <span className="font-display text-2xl leading-none font-bold tabular-nums">
           <span aria-hidden="true">
             {start} → {end}
           </span>
@@ -91,10 +91,12 @@ export function ItineraryCard({ itinerary, selected, onSelect, now }: ItineraryC
             Das {start} às {end},
           </span>
         </span>
-        <span className="font-bold">{formatDuration(itinerary.durationS)}</span>
+        <span className="font-display text-xl leading-none font-bold tabular-nums">
+          {formatDuration(itinerary.durationS)}
+        </span>
       </span>
       {selected ? (
-        <span className="absolute top-3 right-3 inline-flex size-5 items-center justify-center rounded-full bg-brand text-brand-fg">
+        <span className="absolute top-3 right-3 inline-flex size-5 items-center justify-center rounded-badge bg-brand text-brand-fg">
           <CheckIcon className="size-3.5" />
         </span>
       ) : null}

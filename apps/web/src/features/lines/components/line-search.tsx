@@ -84,7 +84,7 @@ export function LineSearch({ hrefFor, autoFocus = false, idleContent = null }: L
       <label htmlFor={inputId} className="sr-only">
         Buscar linha
       </label>
-      <div className="search-field flex h-14 items-center gap-3 rounded-md px-4">
+      <div className="search-field flex h-14 items-center gap-3 rounded-sm px-4">
         <SearchIcon className="size-6 shrink-0 text-text" />
         <input
           id={inputId}
