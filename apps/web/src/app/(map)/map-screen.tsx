@@ -4,6 +4,7 @@ import type { Coordinates, Place, Stop } from '@baldeacao/types';
 import Link from 'next/link';
 import { useState } from 'react';
 
+import { FavoriteStopButton } from '@/features/favorites';
 import { LineHeader, RouteShapeLayer, useLineDetails } from '@/features/lines';
 import { StaleDataNotice, VehiclesLayer, useMapStore } from '@/features/live-map';
 import { PlaceKindIcon, useMapPointPlace, useRecentPlaces } from '@/features/place-search';
@@ -125,7 +126,12 @@ export function MapScreen() {
       <StopSheet
         stop={activeStop}
         onClose={handleClose}
-        actions={<PlaceActions place={stopPlace(activeStop)} />}
+        actions={
+          <>
+            <FavoriteStopButton stop={activeStop} />
+            <PlaceActions place={stopPlace(activeStop)} />
+          </>
+        }
       />
     );
   } else if (routeId) {

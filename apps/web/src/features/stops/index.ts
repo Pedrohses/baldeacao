@@ -1,4 +1,11 @@
-export { ArrivalsList, NearbyStopsList, STOPS_MIN_ZOOM, StopSheet, StopsLayer } from './components';
+export {
+  ArrivalsList,
+  ArrivalsListView,
+  NearbyStopsList,
+  STOPS_MIN_ZOOM,
+  StopSheet,
+  StopsLayer,
+} from './components';
 export type {
   ArrivalsListProps,
   NearbyStopsListProps,

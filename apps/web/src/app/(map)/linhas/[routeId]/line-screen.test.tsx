@@ -91,4 +91,18 @@ describe('LineScreen', () => {
     expect(useMapStore.getState().selection).toEqual({ kind: 'line', routeId: routeExample.id });
     expect(push).toHaveBeenCalledWith('/');
   });
+
+  it('metrô e trem não têm posição ao vivo nem contagem de ônibus', async () => {
+    vi.spyOn(linesService, 'getDetails').mockResolvedValue({
+      line: { ...routeExample, type: 'subway' },
+      shapes: [lineShapeExample],
+    });
+    vi.spyOn(vehiclePositionsService, 'getSnapshot').mockResolvedValue({
+      ...vehicleSnapshotExample,
+      vehicles: [],
+    });
+    renderScreen();
+    expect(await screen.findByText('Metrô e trem não têm posição ao vivo.')).toBeInTheDocument();
+    expect(screen.queryByText(/ônibus ao vivo|Nenhum ônibus/)).not.toBeInTheDocument();
+  });
 });
