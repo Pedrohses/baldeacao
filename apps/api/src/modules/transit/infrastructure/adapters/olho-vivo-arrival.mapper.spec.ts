@@ -20,6 +20,9 @@ describe('toArrivals (Previsao/Parada)', () => {
       ...arrivalExample,
       // O letreiro vem da Olho Vivo como está, em maiúsculas.
       headsign: 'AEROPORTO',
+      // A Olho Vivo não traz a cor: quem acrescenta é o caso de uso, a partir do GTFS.
+      routeColor: null,
+      routeTextColor: null,
     });
     expect({ ...arrivals[1] }).toMatchObject({
       vehicleId: '11502',

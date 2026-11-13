@@ -51,6 +51,10 @@ export const ArrivalSchema = z.object({
   stopId: EntityIdSchema,
   routeId: EntityIdSchema,
   routeShortName: z.string().min(1),
+  // route_color e route_text_color do GTFS; null quando a linha não tem cor. O default aceita
+  // respostas de uma api anterior às cores (o cliente pode ser publicado antes do servidor).
+  routeColor: HexColorSchema.nullable().default(null),
+  routeTextColor: HexColorSchema.nullable().default(null),
   directionId: DirectionIdSchema,
   headsign: z.string().nullable(), // destino mostrado no letreiro
   vehicleId: EntityIdSchema.nullable(), // null quando a previsão vem só da tabela

@@ -177,6 +177,8 @@ describe('HTTP do transit (contrato v1)', () => {
       expect(body.arrivals.map((a) => a.vehicleId)).toEqual(['11433', '11502']);
       expect(body.arrivals[0]).toMatchObject({
         routeId: '875A-10',
+        routeColor: '509E2F',
+        routeTextColor: 'FFFFFF',
         directionId: 0,
         isRealtime: true,
       });

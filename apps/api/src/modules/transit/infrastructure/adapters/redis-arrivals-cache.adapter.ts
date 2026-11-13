@@ -15,6 +15,9 @@ const CachedArrivalsSchema = z.array(
     stopId: z.string(),
     routeId: z.string(),
     routeShortName: z.string(),
+    // Entradas gravadas antes das cores existirem continuam válidas, sem cor.
+    routeColor: z.string().nullable().default(null),
+    routeTextColor: z.string().nullable().default(null),
     directionId: z.union([z.literal(0), z.literal(1)]),
     headsign: z.string().nullable(),
     vehicleId: z.string().nullable(),

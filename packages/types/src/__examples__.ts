@@ -48,6 +48,8 @@ export const arrivalExample = {
   stopId: '4301848',
   routeId: '875A-10',
   routeShortName: '875A-10',
+  routeColor: '509E2F',
+  routeTextColor: 'FFFFFF',
   directionId: 0,
   headsign: 'Aeroporto',
   vehicleId: '11433',

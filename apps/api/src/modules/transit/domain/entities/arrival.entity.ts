@@ -5,6 +5,9 @@ export interface ArrivalProps {
   stopId: string;
   routeId: string;
   routeShortName: string;
+  /** Cor da linha (route_color do GTFS, hex sem #); a fonte de tempo real não traz. */
+  routeColor?: string | null;
+  routeTextColor?: string | null;
   directionId: DirectionId;
   headsign: string | null;
   vehicleId: string | null;
@@ -20,6 +23,8 @@ export class Arrival {
   readonly stopId: string;
   readonly routeId: string;
   readonly routeShortName: string;
+  readonly routeColor: string | null;
+  readonly routeTextColor: string | null;
   readonly directionId: DirectionId;
   readonly headsign: string | null;
   readonly vehicleId: string | null;
@@ -32,6 +37,8 @@ export class Arrival {
     this.stopId = props.stopId;
     this.routeId = props.routeId;
     this.routeShortName = props.routeShortName;
+    this.routeColor = props.routeColor ?? null;
+    this.routeTextColor = props.routeTextColor ?? null;
     this.directionId = props.directionId;
     this.headsign = props.headsign;
     this.vehicleId = props.vehicleId;
@@ -39,6 +46,11 @@ export class Arrival {
     this.isRealtime = props.isRealtime;
     this.accessible = props.accessible;
     this.vehicleLocation = props.vehicleLocation;
+  }
+
+  /** Cópia com as cores da linha (vindas da rede planejada). */
+  withRouteColors(color: string | null, textColor: string | null): Arrival {
+    return new Arrival({ ...this, routeColor: color, routeTextColor: textColor });
   }
 
   get expectedAtMs(): number {

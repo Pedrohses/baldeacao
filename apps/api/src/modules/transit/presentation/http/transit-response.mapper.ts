@@ -55,6 +55,8 @@ export const TransitResponseMapper = {
       stopId: arrival.stopId,
       routeId: arrival.routeId,
       routeShortName: arrival.routeShortName,
+      routeColor: arrival.routeColor,
+      routeTextColor: arrival.routeTextColor,
       directionId: arrival.directionId,
       headsign: arrival.headsign,
       vehicleId: arrival.vehicleId,

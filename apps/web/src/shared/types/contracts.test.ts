@@ -38,6 +38,16 @@ describe('contratos v1 de @baldeacao/types', () => {
     expect(schema.parse(example)).toEqual(example);
   });
 
+  it('previsão sem cor de linha (api anterior às cores) vira cor nula', () => {
+    const withoutColors: Record<string, unknown> = { ...arrivalExample };
+    delete withoutColors.routeColor;
+    delete withoutColors.routeTextColor;
+    expect(ArrivalSchema.parse(withoutColors)).toMatchObject({
+      routeColor: null,
+      routeTextColor: null,
+    });
+  });
+
   it('rejeita data fora de ISO 8601 e coordenada inválida', () => {
     expect(
       VehiclePositionSchema.safeParse({ ...vehiclePositionExample, recordedAt: '12/11/2026' })

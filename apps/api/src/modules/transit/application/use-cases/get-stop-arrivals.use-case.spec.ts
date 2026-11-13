@@ -3,7 +3,11 @@ import { Arrival } from '../../domain/entities/arrival.entity';
 import { InvalidTransitQueryError } from '../../domain/errors/invalid-transit-query.error';
 import { ArrivalsCache } from '../../domain/ports/arrivals-cache.port';
 import { ArrivalsProvider } from '../../domain/ports/arrivals-provider.port';
-import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
+import {
+  InMemoryRouteRepository,
+  InMemoryStopRepository,
+} from '../../../../../test/support/transit-in-memory';
+import { RouteRepository } from '../../domain/ports/route-repository.port';
 import { StopNotFoundError } from '../../domain/errors/stop-not-found.error';
 import { ARRIVALS_CACHE_TTL_SECONDS, GetStopArrivalsUseCase } from './get-stop-arrivals.use-case';
 
@@ -23,6 +27,14 @@ const arrival = (vehicleId: string, expectedAt: string) =>
 
 const late = arrival('2', '2026-11-12T12:44:00-03:00');
 const soon = arrival('1', '2026-11-12T12:36:00-03:00');
+// 875A-10 no recorte sptrans-mini: verde com texto branco.
+const colored = (a: Arrival) => a.withRouteColors('509E2F', 'FFFFFF');
+
+class BrokenRouteRepository extends InMemoryRouteRepository {
+  override findById(): ReturnType<RouteRepository['findById']> {
+    return Promise.reject(new Error('postgres fora'));
+  }
+}
 
 class InMemoryArrivalsProvider extends ArrivalsProvider {
   calls = 0;
@@ -57,13 +69,18 @@ describe('GetStopArrivalsUseCase', () => {
   it('busca na fonte, ordena por expectedAt e guarda no cache curto', async () => {
     const provider = new InMemoryArrivalsProvider([late, soon]);
     const cache = new InMemoryArrivalsCache();
-    const useCase = new GetStopArrivalsUseCase(provider, cache, new InMemoryStopRepository());
+    const useCase = new GetStopArrivalsUseCase(
+      provider,
+      cache,
+      new InMemoryStopRepository(),
+      new InMemoryRouteRepository(),
+    );
 
     const result = await useCase.execute({ stopId: '4301848' });
 
-    expect(result).toEqual({ stopId: '4301848', arrivals: [soon, late] });
+    expect(result).toEqual({ stopId: '4301848', arrivals: [colored(soon), colored(late)] });
     expect(cache.entries.get('4301848')).toEqual({
-      arrivals: [soon, late],
+      arrivals: [colored(soon), colored(late)],
       ttl: ARRIVALS_CACHE_TTL_SECONDS,
     });
   });
@@ -71,7 +88,12 @@ describe('GetStopArrivalsUseCase', () => {
   it('serve do cache sem chamar a fonte', async () => {
     const provider = new InMemoryArrivalsProvider([late]);
     const cache = new InMemoryArrivalsCache();
-    const useCase = new GetStopArrivalsUseCase(provider, cache, new InMemoryStopRepository());
+    const useCase = new GetStopArrivalsUseCase(
+      provider,
+      cache,
+      new InMemoryStopRepository(),
+      new InMemoryRouteRepository(),
+    );
 
     await useCase.execute({ stopId: '4301848' });
     await useCase.execute({ stopId: '4301848' });
@@ -85,6 +107,48 @@ describe('GetStopArrivalsUseCase', () => {
       provider,
       new InMemoryArrivalsCache(true),
       new InMemoryStopRepository(),
+      new InMemoryRouteRepository(),
+    );
+
+    await expect(useCase.execute({ stopId: '4301848' })).resolves.toEqual({
+      stopId: '4301848',
+      arrivals: [colored(soon)],
+    });
+  });
+
+  it('acrescenta a cor da linha (GTFS) à previsão', async () => {
+    const useCase = new GetStopArrivalsUseCase(
+      new InMemoryArrivalsProvider([soon]),
+      new InMemoryArrivalsCache(),
+      new InMemoryStopRepository(),
+      new InMemoryRouteRepository(),
+    );
+
+    const [first] = (await useCase.execute({ stopId: '4301848' })).arrivals;
+
+    expect(first).toMatchObject({ routeColor: '509E2F', routeTextColor: 'FFFFFF' });
+    expect(soon.routeColor).toBeNull();
+  });
+
+  it('linha fora da rede planejada fica sem cor', async () => {
+    const useCase = new GetStopArrivalsUseCase(
+      new InMemoryArrivalsProvider([soon]),
+      new InMemoryArrivalsCache(),
+      new InMemoryStopRepository(),
+      new InMemoryRouteRepository([]),
+    );
+
+    const [first] = (await useCase.execute({ stopId: '4301848' })).arrivals;
+
+    expect(first).toMatchObject({ routeColor: null, routeTextColor: null });
+  });
+
+  it('segue sem cor quando a rede planejada falha', async () => {
+    const useCase = new GetStopArrivalsUseCase(
+      new InMemoryArrivalsProvider([soon]),
+      new InMemoryArrivalsCache(),
+      new InMemoryStopRepository(),
+      new BrokenRouteRepository(),
     );
 
     await expect(useCase.execute({ stopId: '4301848' })).resolves.toEqual({
@@ -99,6 +163,7 @@ describe('GetStopArrivalsUseCase', () => {
       new InMemoryArrivalsProvider(new SourceUnavailableError('olho-vivo')),
       cache,
       new InMemoryStopRepository(),
+      new InMemoryRouteRepository(),
     );
 
     await expect(useCase.execute({ stopId: '4301848' })).rejects.toBeInstanceOf(
@@ -112,6 +177,7 @@ describe('GetStopArrivalsUseCase', () => {
       new InMemoryArrivalsProvider([]),
       new InMemoryArrivalsCache(),
       new InMemoryStopRepository(),
+      new InMemoryRouteRepository(),
     );
     await expect(useCase.execute({ stopId: '  ' })).rejects.toBeInstanceOf(
       InvalidTransitQueryError,
@@ -124,6 +190,7 @@ describe('GetStopArrivalsUseCase', () => {
       provider,
       new InMemoryArrivalsCache(),
       new InMemoryStopRepository(),
+      new InMemoryRouteRepository(),
     );
     await expect(useCase.execute({ stopId: 'nope123' })).rejects.toBeInstanceOf(StopNotFoundError);
   });
