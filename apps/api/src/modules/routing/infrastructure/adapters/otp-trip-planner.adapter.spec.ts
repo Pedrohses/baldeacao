@@ -59,6 +59,15 @@ describe('OtpTripPlannerAdapter', () => {
     expect(now).not.toHaveProperty('dateTime');
   });
 
+  it('janela de madrugada vira searchWindow em ISO 8601', async () => {
+    const fetchFn = fakeOtpFetch(readOtpFixture('plan-connection-no-route.json'));
+    await plannerWith(fetchFn).plan({ ...QUERY, searchWindowMin: 180 });
+    const [variables] = fetchFn.calls.map(
+      (c) => (c.body as { variables: Record<string, unknown> }).variables,
+    );
+    expect(variables?.searchWindow).toBe('PT180M');
+  });
+
   it('itinerário com baldeação ônibus + metrô da fixture vira Itinerary do contrato', async () => {
     const fetchFn = fakeOtpFetch(readOtpFixture('plan-connection-bus-subway.json'));
     const itineraries = await plannerWith(fetchFn).plan(QUERY);

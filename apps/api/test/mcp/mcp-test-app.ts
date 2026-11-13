@@ -21,6 +21,8 @@ import { RoutingModule } from '../../src/modules/routing/routing.module';
 import { GetVehicleSnapshotUseCase } from '../../src/modules/realtime/application/use-cases/get-vehicle-snapshot.use-case';
 import { VehiclePositionsStorePort } from '../../src/modules/realtime/domain/ports/vehicle-positions-store.port';
 import { RealtimeModule } from '../../src/modules/realtime/realtime.module';
+import { FindAccessStopsUseCase } from '../../src/modules/transit/application/use-cases/find-access-stops.use-case';
+import { ResolvePlaceAccessUseCase } from '../../src/modules/geocoding/application/use-cases/resolve-place-access.use-case';
 import { FindNearbyStopsUseCase } from '../../src/modules/transit/application/use-cases/find-nearby-stops.use-case';
 import { GetLineDetailsUseCase } from '../../src/modules/transit/application/use-cases/get-line-details.use-case';
 import { GetStopArrivalsUseCase } from '../../src/modules/transit/application/use-cases/get-stop-arrivals.use-case';
@@ -42,7 +44,20 @@ import {
   InMemoryRouteRepository,
   InMemoryServiceCalendar,
   InMemoryStopRepository,
+  stopLiberdade,
+  stopPaulista,
 } from '../support/transit-in-memory';
+import { Stop } from '../../src/modules/transit/domain/entities/stop.entity';
+
+/** Estação da CPTM que atende o aeroporto de Guarulhos (aviso airport_shuttle). */
+export const stopAirportStation = new Stop({
+  id: '1814713',
+  sourceId: 'sptrans',
+  code: null,
+  name: 'Aeroporto Guarulhos',
+  description: null,
+  location: { lat: -23.433667, lon: -46.493732 },
+});
 
 /** Previsões por parada; uma parada mapeada para Error faz a fonte falhar. */
 export class InMemoryArrivalsProvider extends ArrivalsProvider {
@@ -111,6 +126,11 @@ export class ServiceAreaStopRepository extends InMemoryStopRepository {
   /** Coordenadas ("lat,lon") tratadas como sem parada perto. */
   readonly outside = new Set<string>();
 
+  constructor() {
+    super([stopPaulista, stopLiberdade, stopAirportStation]);
+    this.stationIds.add(stopAirportStation.id);
+  }
+
   override existsWithin(center: { lat: number; lon: number }): Promise<boolean> {
     return Promise.resolve(!this.outside.has(`${center.lat},${center.lon}`));
   }
@@ -123,6 +143,7 @@ export interface McpFakes {
   geocodeCache: InMemoryGeocodeCache;
   planner: ControllableTripPlanner;
   stops: ServiceAreaStopRepository;
+  knownPlaces: InMemoryKnownPlaceRepository;
 }
 
 /** Monta o McpModule real com os módulos de contexto trocados por versões em memória. */
@@ -166,7 +187,7 @@ function buildTestingModule(fakes: McpFakes) {
     providers: [
       SearchPlacesUseCase,
       SearchStopsByNameUseCase,
-      FindNearbyStopsUseCase,
+      FindAccessStopsUseCase,
       { provide: StopRepository, useValue: new InMemoryStopRepository() },
       { provide: Geocoder, useValue: fakes.geocoder },
       { provide: GeocodeCache, useValue: fakes.geocodeCache },
@@ -181,6 +202,9 @@ function buildTestingModule(fakes: McpFakes) {
       PlanTripUseCase,
       HasNearbyStopUseCase,
       GetServicePeriodUseCase,
+      ResolvePlaceAccessUseCase,
+      FindAccessStopsUseCase,
+      { provide: KnownPlaceRepository, useValue: fakes.knownPlaces },
       { provide: StopRepository, useValue: fakes.stops },
       { provide: TripPlanner, useValue: fakes.planner },
       { provide: ServiceCalendarRepository, useValue: new InMemoryServiceCalendar() },
@@ -215,6 +239,7 @@ export async function startMcpApp(): Promise<{
     geocodeCache: new InMemoryGeocodeCache(),
     planner: new ControllableTripPlanner(),
     stops: new ServiceAreaStopRepository(),
+    knownPlaces: new InMemoryKnownPlaceRepository(),
   };
   const moduleRef = await buildTestingModule(fakes).compile();
   const app = moduleRef.createNestApplication({ logger: false });

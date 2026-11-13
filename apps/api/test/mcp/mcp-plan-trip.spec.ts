@@ -9,7 +9,7 @@ import {
 import { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
 import { toTripDateTime } from '../../src/modules/routing/presentation/mcp/trip-time';
 import { SourceUnavailableError } from '../../src/shared/domain/errors/source-unavailable.error';
-import { connectClient, type McpFakes, startMcpApp } from './mcp-test-app';
+import { connectClient, type McpFakes, startMcpApp, stopAirportStation } from './mcp-test-app';
 
 function textOf(result: CallToolResult): string {
   return result.content.map((c) => (c.type === 'text' ? c.text : '')).join('\n');
@@ -135,6 +135,28 @@ describe('Tool MCP planejar_viagem', () => {
     expect(textOf(empty)).toContain('Escolha um ponto mais perto de uma linha.');
   });
 
+  it('explica o ônibus gratuito quando o destino é a estação do aeroporto', async () => {
+    const { lat, lon } = stopAirportStation.location;
+    const result = await plan({ origem: 'Morumbis', destino: `${lat},${lon}` });
+    expect(result.isError).toBeFalsy();
+    expect(textOf(result)).toMatch(
+      /^Atenção: o trajeto vai até a estação Aeroporto-Guarulhos \(CPTM Linha 13\)\. Entre a estação e os terminais, use o ônibus gratuito do aeroporto/,
+    );
+    expect(result.structuredContent).toMatchObject({ avisos: ['airport_shuttle'] });
+  });
+
+  it('data que já passou há dias diz que a data pedida já passou', async () => {
+    const result = await plan({
+      origem: 'Morumbis',
+      destino: 'Tietê',
+      saida: '2025-01-01T08:00:00-03:00',
+    });
+    expect(textOf(result)).toMatch(
+      /^Atenção: a data pedida já passou; mostrei as opções para o mesmo horário hoje/,
+    );
+    expect(result.structuredContent).toMatchObject({ avisos: ['time_in_past_moved'] });
+  });
+
   it('aceita hora de chegada no formato HH:MM e coordenada como origem', async () => {
     const result = await plan({
       origem: '-23.6, -46.7202',
@@ -164,6 +186,16 @@ describe('Tool MCP planejar_viagem', () => {
     );
     // Tempo coerente com a distância não ganha a explicação.
     expect(textOf(result)).toContain('Caminhe 300 m até Terminal Rodoviário Tietê (3 min).');
+  });
+
+  it('omite caminhada de menos de 20 m', async () => {
+    const [first, ...rest] = itineraryExample.legs;
+    fakes.planner.result = [
+      { ...itineraryExample, legs: [{ ...first!, distanceM: 0, durationS: 30 }, ...rest] },
+    ];
+    const result = await plan({ origem: 'Morumbis', destino: 'Terminal Tietê' });
+    expect(textOf(result)).not.toContain('Caminhe 0 m');
+    expect(textOf(result)).toMatch(/\n1\. Pegue /);
   });
 
   it('pede endereço mais específico quando não acha a origem', async () => {

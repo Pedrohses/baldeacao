@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppConfig } from '../../config/app-config';
 import { TransitModule } from '../transit/transit.module';
+import { ResolvePlaceAccessUseCase } from './application/use-cases/resolve-place-access.use-case';
 import { ReversePlaceUseCase } from './application/use-cases/reverse-place.use-case';
 import { SearchPlacesUseCase } from './application/use-cases/search-places.use-case';
 import { GeocodeCache } from './domain/ports/geocode-cache.port';
@@ -18,6 +19,7 @@ import { PlacesController } from './presentation/http/places.controller';
   providers: [
     SearchPlacesUseCase,
     ReversePlaceUseCase,
+    ResolvePlaceAccessUseCase,
     {
       // Uma instância por processo: a fila de 1 req/s do Nominatim mora nela.
       provide: NominatimClient,
@@ -33,6 +35,6 @@ import { PlacesController } from './presentation/http/places.controller';
     { provide: KnownPlaceRepository, useClass: TypeormKnownPlaceRepository },
   ],
   // Caso de uso exportado para o MCP (A4) e o contexto routing.
-  exports: [SearchPlacesUseCase, ReversePlaceUseCase],
+  exports: [SearchPlacesUseCase, ReversePlaceUseCase, ResolvePlaceAccessUseCase],
 })
 export class GeocodingModule {}

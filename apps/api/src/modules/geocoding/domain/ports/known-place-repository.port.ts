@@ -12,6 +12,14 @@ export interface KnownPlaceMatch {
   inCity: boolean | null;
 }
 
+/** Lugar conhecido mais próximo de um ponto. */
+export interface NearestKnownPlace {
+  place: Place;
+  /** Tag que classificou, ex.: "amenity=bus_station". */
+  category: string;
+  distanceM: number;
+}
+
 /** Lugar conhecido a ser gravado pela importação (geometria em GeoJSON; área vira centroide). */
 export interface KnownPlaceRecord {
   /** "osm:way:123", mesmo formato do id do Nominatim. */
@@ -37,11 +45,8 @@ export abstract class KnownPlaceRepository {
    */
   abstract searchByName(text: string, limit: number): Promise<KnownPlaceMatch[]>;
 
-  /** Lugar mais próximo de `center` a até `radiusM` metros, ou null. */
-  abstract findNearest(
-    center: Coordinates,
-    radiusM: number,
-  ): Promise<{ place: Place; distanceM: number } | null>;
+  /** Lugar mais próximo de `center` a até `radiusM` metros (com a categoria OSM), ou null. */
+  abstract findNearest(center: Coordinates, radiusM: number): Promise<NearestKnownPlace | null>;
 
   /**
    * Para cada ponto, se fica dentro do município atendido; null quando o limite do município

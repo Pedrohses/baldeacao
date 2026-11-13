@@ -1,3 +1,4 @@
+import { fixDisplayCase } from '../../../../shared/domain/value-objects/display-name';
 import { LineShape } from '../../domain/entities/line-shape.entity';
 import { Route } from '../../domain/entities/route.entity';
 import { Stop } from '../../domain/entities/stop.entity';
@@ -31,7 +32,7 @@ export const RouteMapper = {
       id: entity.routeId,
       sourceId: entity.sourceId,
       shortName: entity.shortName,
-      longName: entity.longName,
+      longName: fixDisplayCase(entity.longName),
       type: routeTypeFromGtfs(entity.routeType),
       color: entity.color?.trim() || null,
       textColor: entity.textColor?.trim() || null,
@@ -45,7 +46,7 @@ export const StopMapper = {
       id: row.stop_id,
       sourceId: row.source_id,
       code: row.code,
-      name: row.name,
+      name: fixDisplayCase(row.name),
       description: row.description,
       location: { lat: Number(row.lat), lon: Number(row.lon) },
     });

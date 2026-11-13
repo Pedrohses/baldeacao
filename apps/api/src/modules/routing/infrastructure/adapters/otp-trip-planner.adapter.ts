@@ -51,6 +51,7 @@ export function toOtpVariables(query: TripPlanQuery): OtpPlanVariables {
     },
     first: query.candidates,
   };
+  if (query.searchWindowMin) variables.searchWindow = `PT${query.searchWindowMin}M`;
   const allowed = allowedOtpModes(query.excludeModes);
   if (allowed) variables.modes = { transit: { transit: allowed.map((mode) => ({ mode })) } };
   if (query.time && 'departAt' in query.time) {

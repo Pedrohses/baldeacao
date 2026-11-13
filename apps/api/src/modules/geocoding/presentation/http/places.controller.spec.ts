@@ -15,7 +15,7 @@ import {
   readNominatimFixture,
 } from '../../../../../test/support/geocoding-in-memory';
 import { InMemoryStopRepository } from '../../../../../test/support/transit-in-memory';
-import { FindNearbyStopsUseCase } from '../../../transit/application/use-cases/find-nearby-stops.use-case';
+import { FindAccessStopsUseCase } from '../../../transit/application/use-cases/find-access-stops.use-case';
 import { SearchStopsByNameUseCase } from '../../../transit/application/use-cases/search-stops-by-name.use-case';
 import { StopRepository } from '../../../transit/domain/ports/stop-repository.port';
 import { ReversePlaceUseCase } from '../../application/use-cases/reverse-place.use-case';
@@ -55,7 +55,7 @@ describe('HTTP do geocoding (contrato v2)', () => {
       providers: [
         SearchPlacesUseCase,
         ReversePlaceUseCase,
-        FindNearbyStopsUseCase,
+        FindAccessStopsUseCase,
         SearchStopsByNameUseCase,
         { provide: StopRepository, useValue: new InMemoryStopRepository() },
         {

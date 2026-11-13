@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { OlhoVivoModule } from '../../shared/infrastructure/olho-vivo/olho-vivo.module';
+import { FindAccessStopsUseCase } from './application/use-cases/find-access-stops.use-case';
 import { FindNearbyStopsUseCase } from './application/use-cases/find-nearby-stops.use-case';
 import { GetLineDetailsUseCase } from './application/use-cases/get-line-details.use-case';
 import { GetServicePeriodUseCase } from './application/use-cases/get-service-period.use-case';
@@ -30,6 +31,7 @@ const USE_CASES = [
   HasNearbyStopUseCase,
   GetServicePeriodUseCase,
   LineExistsUseCase,
+  FindAccessStopsUseCase,
 ];
 
 @Module({

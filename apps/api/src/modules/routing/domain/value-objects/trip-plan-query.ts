@@ -14,4 +14,6 @@ export interface TripPlanQuery {
   candidates: number;
   /** Modos de transporte proibidos nesta consulta (alternativa sem o modo dominante). */
   excludeModes?: TripMode[];
+  /** Janela de saídas em minutos (madrugada); ausente usa a padrão do planejador. */
+  searchWindowMin?: number;
 }

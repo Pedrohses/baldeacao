@@ -11,7 +11,7 @@ import {
   stopPaulista,
 } from '../../../../../test/support/transit-in-memory';
 import { Stop } from '../../../transit/domain/entities/stop.entity';
-import { FindNearbyStopsUseCase } from '../../../transit/application/use-cases/find-nearby-stops.use-case';
+import { FindAccessStopsUseCase } from '../../../transit/application/use-cases/find-access-stops.use-case';
 import { SearchStopsByNameUseCase } from '../../../transit/application/use-cases/search-stops-by-name.use-case';
 import { Place } from '../../domain/entities/place.entity';
 import { InvalidPlaceQueryError } from '../../domain/errors/invalid-place-query.error';
@@ -33,8 +33,8 @@ const SE = new Place({
   location: { lat: -23.5503, lon: -46.6339 },
 });
 
-function nearby(stops?: Stop[]): FindNearbyStopsUseCase {
-  return new FindNearbyStopsUseCase(new InMemoryStopRepository(stops));
+function nearby(stops?: Stop[]): FindAccessStopsUseCase {
+  return new FindAccessStopsUseCase(new InMemoryStopRepository(stops));
 }
 
 function noStops(): SearchStopsByNameUseCase {
@@ -403,7 +403,7 @@ describe('SearchPlacesUseCase', () => {
     });
   });
 
-  it('lugar grande (aeroporto) usa a parada mais próxima do centroide como coordenada', async () => {
+  it('lugar grande mantém o centroide (o acesso fica para o planejamento)', async () => {
     const congonhas = new Place({
       id: 'osm:way:7',
       name: 'Aeroporto de Congonhas',
@@ -411,29 +411,114 @@ describe('SearchPlacesUseCase', () => {
       kind: 'poi',
       location: { lat: -23.6273, lon: -46.6566 },
     });
-    // Parada no terminal, a ~600 m do centroide (meio da pista).
     const terminal = new Stop({
       ...stopPaulista,
       id: '2000',
       name: 'Aeroporto de Congonhas',
       location: { lat: -23.6265, lon: -46.6614 },
     });
-    const museum = new Place({ ...congonhas, id: 'osm:way:8', name: 'Aeroporto Museu' });
     const useCase = new SearchPlacesUseCase(
       new InMemoryGeocodeCache(),
       new FakeGeocoder(),
       noStops(),
       new InMemoryKnownPlaceRepository([
         { place: congonhas, importance: 11, category: 'aeroway=aerodrome' },
-        { place: museum, importance: 6, category: 'tourism=museum' },
       ]),
       nearby([terminal]),
     );
     const { places } = await useCase.execute({ query: 'aeroporto', mode: 'quick' });
-    expect(places.find((p) => p.id === congonhas.id)).toEqual(
-      new Place({ ...congonhas, location: terminal.location }),
+    expect(places).toEqual([congonhas]);
+  });
+
+  it('estação do OSM vira a parada GTFS da estação (id e coordenada) sem repetir', async () => {
+    const osmStation = new Place({
+      id: 'osm:relation:18483436',
+      name: 'Aeroporto Guarulhos',
+      address: null,
+      kind: 'station',
+      location: { lat: -23.43291, lon: -46.49376 },
+    });
+    const gtfsStation = new Stop({
+      ...stopPaulista,
+      id: '1814713',
+      name: 'Aeroporto Guarulhos',
+      description: null,
+      location: { lat: -23.433667, lon: -46.493732 },
+    });
+    const stops = new InMemoryStopRepository([gtfsStation]);
+    stops.stationIds.add('1814713');
+    const useCase = new SearchPlacesUseCase(
+      new InMemoryGeocodeCache(),
+      new FakeGeocoder(),
+      new SearchStopsByNameUseCase(stops),
+      new InMemoryKnownPlaceRepository([
+        { place: osmStation, importance: 10, category: 'railway=station' },
+      ]),
+      new FindAccessStopsUseCase(stops),
     );
-    // Museu não é lugar grande: fica no centroide.
-    expect(places.find((p) => p.id === museum.id)?.location).toEqual(congonhas.location);
+    const { places } = await useCase.execute({ query: 'aeroporto guarulhos', mode: 'quick' });
+    expect(places.filter((p) => p.kind === 'station')).toHaveLength(1);
+    expect(places[0]).toMatchObject({
+      id: 'stop:1814713',
+      kind: 'station',
+      location: gtfsStation.location,
+    });
+  });
+
+  describe('esquina', () => {
+    class StreetGeocoder extends Geocoder {
+      constructor(private readonly streets: Record<string, Place[]>) {
+        super();
+      }
+      search(): Promise<Place[]> {
+        return Promise.resolve([]);
+      }
+      override searchStreet(street: string): Promise<Place[]> {
+        return Promise.resolve(this.streets[street] ?? []);
+      }
+      reverse(): Promise<Place | null> {
+        return Promise.resolve(null);
+      }
+    }
+    const road = (id: string, name: string, lat: number, lon: number) =>
+      new Place({ id, name, address: null, kind: 'address', location: { lat, lon } });
+    const paulista = [
+      road('osm:way:1', 'Avenida Paulista', -23.5617, -46.6559),
+      road('osm:way:2', 'Avenida Paulista', -23.5562, -46.6621),
+    ];
+    const consolacao = [
+      road('osm:way:3', 'Rua da Consolação', -23.5559, -46.6627),
+      road('osm:way:4', 'Rua da Consolação', -23.546, -46.648),
+    ];
+
+    function corner(streets: Record<string, Place[]>) {
+      return new SearchPlacesUseCase(
+        new InMemoryGeocodeCache(),
+        new StreetGeocoder(streets),
+        noStops(),
+        new InMemoryKnownPlaceRepository(),
+        nearby(),
+      );
+    }
+
+    it('"esquina da X com a Y" devolve o ponto entre os trechos mais próximos', async () => {
+      const { places } = await corner({ paulista, consolação: consolacao }).execute({
+        query: 'esquina da Paulista com a Consolação',
+        mode: 'full',
+      });
+      expect(places[0]).toMatchObject({
+        name: 'Avenida Paulista com Rua da Consolação',
+        kind: 'address',
+      });
+      expect(places[0]?.location.lat).toBeCloseTo(-23.55605, 4);
+    });
+
+    it('vias longe uma da outra: ao menos a primeira via', async () => {
+      const { places } = await corner({ paulista, consolação: [consolacao[1]!] }).execute({
+        query: 'Paulista x Consolação',
+        mode: 'full',
+      });
+      expect(places.map((p) => p.id)).toEqual(['osm:way:1', 'osm:way:2']);
+    });
   });
 });

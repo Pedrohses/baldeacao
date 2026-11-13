@@ -18,6 +18,10 @@ import { ServiceCalendarRepository } from '../../../transit/domain/ports/service
 import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
 import { Stop } from '../../../transit/domain/entities/stop.entity';
 import { StopRepository } from '../../../transit/domain/ports/stop-repository.port';
+import { InMemoryKnownPlaceRepository } from '../../../../../test/support/geocoding-in-memory';
+import { ResolvePlaceAccessUseCase } from '../../../geocoding/application/use-cases/resolve-place-access.use-case';
+import { KnownPlaceRepository } from '../../../geocoding/domain/ports/known-place-repository.port';
+import { FindAccessStopsUseCase } from '../../../transit/application/use-cases/find-access-stops.use-case';
 import { PlanTripUseCase } from '../../application/use-cases/plan-trip.use-case';
 import { Clock } from '../../domain/ports/clock.port';
 import { TripPlanner } from '../../domain/ports/trip-planner.port';
@@ -42,6 +46,9 @@ async function appWith(client: OtpClient): Promise<INestApplication<App>> {
       PlanTripUseCase,
       HasNearbyStopUseCase,
       GetServicePeriodUseCase,
+      ResolvePlaceAccessUseCase,
+      FindAccessStopsUseCase,
+      { provide: KnownPlaceRepository, useValue: new InMemoryKnownPlaceRepository() },
       { provide: StopRepository, useValue: new InMemoryStopRepository([ORIGIN_STOP]) },
       { provide: ServiceCalendarRepository, useValue: new InMemoryServiceCalendar() },
       { provide: Clock, useValue: new FixedClock() },

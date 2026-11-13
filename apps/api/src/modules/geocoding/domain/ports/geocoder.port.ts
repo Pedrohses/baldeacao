@@ -8,6 +8,14 @@ export abstract class Geocoder {
    */
   abstract search(query: string, limit: number): Promise<Place[]>;
 
+  /**
+   * Trechos de rua com o nome dado na cidade atendida (para achar esquinas). Padrão: a busca
+   * por texto livre; o Nominatim usa a busca estruturada por `street`.
+   */
+  searchStreet(street: string, limit: number): Promise<Place[]> {
+    return this.search(street, limit);
+  }
+
   /** Lugar (endereço ou ponto de interesse) mais próximo do ponto; null quando não há. */
   abstract reverse(location: Coordinates): Promise<Place | null>;
 }

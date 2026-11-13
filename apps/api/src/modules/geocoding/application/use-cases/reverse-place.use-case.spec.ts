@@ -6,8 +6,9 @@ import {
   InMemoryStopRepository,
   stopPaulista,
 } from '../../../../../test/support/transit-in-memory';
+import { Stop } from '../../../transit/domain/entities/stop.entity';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
-import { FindNearbyStopsUseCase } from '../../../transit/application/use-cases/find-nearby-stops.use-case';
+import { FindAccessStopsUseCase } from '../../../transit/application/use-cases/find-access-stops.use-case';
 import { type Coordinates, Place } from '../../domain/entities/place.entity';
 import { InvalidPlaceQueryError } from '../../domain/errors/invalid-place-query.error';
 import { Geocoder } from '../../domain/ports/geocoder.port';
@@ -46,16 +47,56 @@ class ReverseGeocoder extends Geocoder {
   }
 }
 
-function build(geocoder: Geocoder, known: Place[] = [], cache = new InMemoryGeocodeCache()) {
+function build(
+  geocoder: Geocoder,
+  known: Place[] = [],
+  cache = new InMemoryGeocodeCache(),
+  stops = new InMemoryStopRepository(),
+) {
   return new ReversePlaceUseCase(
     cache,
     geocoder,
     new InMemoryKnownPlaceRepository(known.map((place) => ({ place, importance: 5 }))),
-    new FindNearbyStopsUseCase(new InMemoryStopRepository()),
+    new FindAccessStopsUseCase(stops),
   );
 }
 
+const STATION_STOP = new Stop({
+  id: '18877',
+  sourceId: 'sptrans',
+  code: null,
+  name: 'Portuguesa-Tietê',
+  description: null,
+  location: { lat: -23.516067, lon: -46.625162 },
+});
+
 describe('ReversePlaceUseCase', () => {
+  it('parada que é estação volta como station', async () => {
+    const stops = new InMemoryStopRepository([STATION_STOP]);
+    stops.stationIds.add('18877');
+    const { place } = await build(new ReverseGeocoder(), [], undefined, stops).execute({
+      location: { lat: -23.51607, lon: -46.62517 },
+    });
+    expect(place).toMatchObject({ id: 'stop:18877', kind: 'station' });
+  });
+
+  it('estação do OSM volta com o id e a coordenada da parada GTFS', async () => {
+    const stops = new InMemoryStopRepository([STATION_STOP]);
+    stops.stationIds.add('18877');
+    // Ponto do OSM a ~25 m da plataforma; o clique fica a 70 m da parada e 50 m do ponto do OSM.
+    const osm = new Place({
+      id: 'osm:node:13645331212',
+      name: 'Portuguesa-Tietê',
+      address: null,
+      kind: 'station',
+      location: { lat: -23.5162359, lon: -46.6254001 },
+    });
+    const { place } = await build(new ReverseGeocoder(), [osm], undefined, stops).execute({
+      location: { lat: -23.5162359, lon: -46.6259 },
+    });
+    expect(place).toEqual(new Place({ ...osm, id: 'stop:18877', location: STATION_STOP.location }));
+  });
+
   it('parada a até 60 m responde sem Nominatim', async () => {
     const geocoder = new ReverseGeocoder();
     const { place } = await build(geocoder).execute({
