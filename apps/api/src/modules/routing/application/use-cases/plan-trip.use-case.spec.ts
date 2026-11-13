@@ -195,6 +195,22 @@ describe('PlanTripUseCase', () => {
       expect(mainQueries(planner)[1]?.time).toEqual({ arriveBy: '2026-11-13T09:30:00-03:00' });
     });
 
+    it('data de mais de 1 dia atrás vai para o mesmo horário hoje, ou amanhã se já passou', async () => {
+      const planner = new InMemoryTripPlanner([ITINERARY]);
+      const useCase = planTrip(planner);
+      const out = await useCase.execute({
+        from: FROM,
+        to: TO,
+        departAt: '2025-01-01T08:00:00-03:00',
+      });
+      await useCase.execute({ from: FROM, to: TO, departAt: '2025-01-01T06:00:00-03:00' });
+      expect(out.notices).toEqual(['time_in_past_moved']);
+      expect(mainQueries(planner).map((q) => q.time)).toEqual([
+        { departAt: '2026-11-12T08:00:00-03:00' },
+        { departAt: '2026-11-13T06:00:00-03:00' },
+      ]);
+    });
+
     it('até 5 minutos no passado não move', async () => {
       const planner = new InMemoryTripPlanner([ITINERARY]);
       const useCase = planTrip(planner, undefined, new FixedClock('2026-11-12T08:04:00-03:00'));

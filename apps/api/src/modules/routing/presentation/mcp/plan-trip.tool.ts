@@ -158,11 +158,13 @@ export class PlanTripTool extends McpTool {
           const to = await this.locate(destino);
           if (!to) return toolError(notFound('o destino', destino));
 
+          const departAt = saida ? toTripDateTime(saida, city.timeZone) : undefined;
+          const arriveBy = chegada ? toTripDateTime(chegada, city.timeZone) : undefined;
           const { itineraries, notices } = await this.planTrip.execute({
             from: { lat: from.latitude, lon: from.longitude },
             to: { lat: to.latitude, lon: to.longitude },
-            departAt: saida ? toTripDateTime(saida, city.timeZone) : undefined,
-            arriveBy: chegada ? toTripDateTime(chegada, city.timeZone) : undefined,
+            departAt,
+            arriveBy,
             maxItineraries: opcoes,
           });
           const structured = {
@@ -174,7 +176,8 @@ export class PlanTripTool extends McpTool {
           };
 
           const route = `de ${from.nome} para ${to.nome}`;
-          const warnings = describeNotices(notices, from, to, city.name);
+          const pastDate = isPastDate(departAt ?? arriveBy, city.timeZone);
+          const warnings = describeNotices(notices, from, to, city.name, pastDate);
           if (itineraries.length === 0) {
             const empty =
               `Não encontrei itinerário de transporte público ${route} nesse horário. ` +
@@ -247,17 +250,34 @@ function joinClocks(isos: string[], timeZone: string): string {
   return `${clocks.slice(0, -1).join(', ')} e ${clocks[clocks.length - 1]}`;
 }
 
+/** Data do pedido (no fuso da cidade) antes de hoje: o aviso fala da data, não da hora. */
+function isPastDate(iso: string | undefined, timeZone: string): boolean {
+  if (!iso) return false;
+  const day = (at: Date) =>
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(at);
+  return day(new Date(Date.parse(iso))) < day(new Date());
+}
+
 /** Explica em português cada aviso. */
 function describeNotices(
   notices: PlanTripNotice[],
   from: PlaceOutput,
   to: PlaceOutput,
   cityName: string,
+  pastDate: boolean,
 ): string[] {
   const radius = `${SERVICE_AREA_RADIUS_M / 1000} km`;
   return notices.map((notice) => {
     if (notice === 'time_in_past_moved') {
-      return 'Atenção: o horário pedido já passou; mostrei as opções para o mesmo horário amanhã.';
+      return pastDate
+        ? 'Atenção: a data pedida já passou; mostrei as opções para o mesmo horário hoje ' +
+            '(ou amanhã, se esse horário de hoje também já passou).'
+        : 'Atenção: o horário pedido já passou; mostrei as opções para o mesmo horário amanhã.';
     }
     if (notice === 'airport_shuttle') {
       return (

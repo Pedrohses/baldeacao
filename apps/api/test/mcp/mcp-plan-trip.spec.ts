@@ -145,6 +145,18 @@ describe('Tool MCP planejar_viagem', () => {
     expect(result.structuredContent).toMatchObject({ avisos: ['airport_shuttle'] });
   });
 
+  it('data que já passou há dias diz que a data pedida já passou', async () => {
+    const result = await plan({
+      origem: 'Morumbis',
+      destino: 'Tietê',
+      saida: '2025-01-01T08:00:00-03:00',
+    });
+    expect(textOf(result)).toMatch(
+      /^Atenção: a data pedida já passou; mostrei as opções para o mesmo horário hoje/,
+    );
+    expect(result.structuredContent).toMatchObject({ avisos: ['time_in_past_moved'] });
+  });
+
   it('aceita hora de chegada no formato HH:MM e coordenada como origem', async () => {
     const result = await plan({
       origem: '-23.6, -46.7202',
