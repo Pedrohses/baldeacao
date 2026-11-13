@@ -16,7 +16,11 @@ import {
   type PlanTripNotice,
   SERVICE_AREA_RADIUS_M,
 } from '../../domain/value-objects/plan-trip-notice';
-import { movePastTimeForward, serviceDateOf } from '../../domain/value-objects/trip-date';
+import {
+  movePastTimeForward,
+  searchWindowFor,
+  serviceDateOf,
+} from '../../domain/value-objects/trip-date';
 import type { TripPlanQuery, TripTime } from '../../domain/value-objects/trip-plan-query';
 import type { PlanTripInput, PlanTripOutput } from '../dto/plan-trip.dto';
 
@@ -107,12 +111,15 @@ export class PlanTripUseCase {
     const accessNotices: PlanTripNotice[] =
       from.airportShuttle || to.airportShuttle ? ['airport_shuttle'] : [];
     const notices = [...timeNotices, ...dateNotices, ...areaNotices, ...accessNotices];
-    const query = {
+    // Madrugada: janela de 3 h. Se ainda vier vazio, a lista volta vazia (sem aviso próprio).
+    const searchWindowMin = searchWindowFor(requestedIso, now);
+    const query: TripPlanQuery = {
       from: from.location,
       to: to.location,
       time,
       maxItineraries,
       candidates: planTripCandidates(maxItineraries),
+      ...(searchWindowMin ? { searchWindowMin } : {}),
     };
     const arriveBy = time !== null && 'arriveBy' in time;
     const grouped = groupItineraries(await this.planner.plan(query), maxItineraries, {

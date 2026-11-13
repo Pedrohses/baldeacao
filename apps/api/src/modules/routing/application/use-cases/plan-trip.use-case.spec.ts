@@ -278,6 +278,18 @@ describe('PlanTripUseCase', () => {
     });
   });
 
+  it('madrugada pede janela de 3 h; de dia, a janela padrão', async () => {
+    const planner = new InMemoryTripPlanner([]);
+    const out = await planTrip(planner).execute({
+      from: FROM,
+      to: TO,
+      departAt: '2026-11-13T01:30:00-03:00',
+    });
+    await planTrip(planner).execute({ from: FROM, to: TO, departAt: '2026-11-13T10:00:00-03:00' });
+    expect(mainQueries(planner).map((q) => q.searchWindowMin)).toEqual([180, undefined]);
+    expect(out).toEqual({ itineraries: [], notices: [] });
+  });
+
   describe('ponto de acesso de terminais e aeroporto', () => {
     const tiete = new Place({
       id: 'osm:relation:8546826',
@@ -306,14 +318,10 @@ describe('PlanTripUseCase', () => {
 
     it('terminal sai pela estação ao lado e aeroporto chega pela estação, com aviso', async () => {
       const planner = new InMemoryTripPlanner([ITINERARY]);
-      const out = await planTrip(
-        planner,
-        [metro, busStop, cptm],
-        undefined,
-        undefined,
-        known,
-        ['18877', '1814713'],
-      ).execute({ from: tiete.location, to: airport.location, maxItineraries: 1 });
+      const out = await planTrip(planner, [metro, busStop, cptm], undefined, undefined, known, [
+        '18877',
+        '1814713',
+      ]).execute({ from: tiete.location, to: airport.location, maxItineraries: 1 });
       expect(mainQueries(planner)[0]).toMatchObject({
         from: metro.location,
         to: cptm.location,
@@ -323,10 +331,14 @@ describe('PlanTripUseCase', () => {
 
     it('a estação do aeroporto escolhida direto também avisa do ônibus gratuito', async () => {
       const planner = new InMemoryTripPlanner([ITINERARY]);
-      const out = await planTrip(planner, [metro, cptm], undefined, undefined, [], [
-        '18877',
-        '1814713',
-      ]).execute({ from: metro.location, to: cptm.location, maxItineraries: 1 });
+      const out = await planTrip(
+        planner,
+        [metro, cptm],
+        undefined,
+        undefined,
+        [],
+        ['18877', '1814713'],
+      ).execute({ from: metro.location, to: cptm.location, maxItineraries: 1 });
       expect(mainQueries(planner)[0]).toMatchObject({ from: metro.location, to: cptm.location });
       expect(out.notices).toEqual(['airport_shuttle']);
     });

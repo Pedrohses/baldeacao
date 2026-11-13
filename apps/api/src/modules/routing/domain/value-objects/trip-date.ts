@@ -31,6 +31,27 @@ export function movePastTimeForward(iso: string, now: Date): string | null {
   return `${addDays(Number(y), Number(m), Number(d), days)}${time}${zone}`;
 }
 
+/** Madrugada (00:00 a 04:59 na cidade): poucas viagens, a janela de busca do OTP aumenta. */
+export const NIGHT_END_HOUR = 5;
+/** Janela de saídas na madrugada: 3 h, para achar a primeira viagem do dia ou o noturno. */
+export const NIGHT_SEARCH_WINDOW_MIN = 180;
+
+/** Hora local (0 a 23) do pedido, ou de agora sem hora. */
+export function serviceHourOf(iso: string | null, now: Date): number {
+  const at = iso ? new Date(Date.parse(iso)) : now;
+  const hour = new Intl.DateTimeFormat('en-GB', {
+    timeZone: SERVICE_TIME_ZONE,
+    hour: '2-digit',
+    hourCycle: 'h23',
+  }).format(at);
+  return Number(hour);
+}
+
+/** Janela de busca em minutos para a hora pedida: 3 h na madrugada, senão a padrão (null). */
+export function searchWindowFor(iso: string | null, now: Date): number | null {
+  return serviceHourOf(iso, now) < NIGHT_END_HOUR ? NIGHT_SEARCH_WINDOW_MIN : null;
+}
+
 /** Data local (AAAA-MM-DD) do pedido: a escrita no ISO (já no fuso dele) ou hoje na cidade. */
 export function serviceDateOf(iso: string | null, now: Date): string {
   if (iso) return iso.slice(0, 10);
