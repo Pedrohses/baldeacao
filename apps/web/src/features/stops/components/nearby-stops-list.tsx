@@ -24,6 +24,24 @@ export interface NearbyStopsListProps {
   limit?: number;
   /** Quantas linhas mostrar por parada. */
   linesPerStop?: number;
+  /**
+   * `inline`: nome e partidas lado a lado (celular). `stacked`: nome na linha inteira e partidas
+   * embaixo, como num quadro de estação; o nome não é cortado (painel do desktop).
+   */
+  layout?: 'inline' | 'stacked';
+}
+
+/** Minutos das chegadas seguintes, sem repetir o da primeira nem entre si ("17, 17" vira "17"). */
+export function laterMinutes(first: number, rest: readonly number[], max: number): number[] {
+  const seen = new Set([first]);
+  const out: number[] = [];
+  for (const minutes of rest) {
+    if (seen.has(minutes)) continue;
+    seen.add(minutes);
+    out.push(minutes);
+    if (out.length === max) break;
+  }
+  return out;
 }
 
 /** Agrupa as chegadas por linha, na ordem da primeira chegada de cada uma. */
@@ -46,12 +64,15 @@ function NextArrivals({ stopId, now, lines }: { stopId: string; now: Date; lines
   }
   return (
     // Grade de 3 colunas (selo, primeira chegada, seguintes): tempos alinham entre as linhas.
-    <span className="grid shrink-0 grid-cols-[auto_auto_minmax(2.75rem,auto)] items-center gap-x-2 gap-y-1">
+    <span className="grid shrink-0 grid-cols-[auto_auto_minmax(2.75rem,auto)] items-center justify-start gap-x-2 gap-y-1">
       {groups.map((group) => {
         const [first, ...rest] = group as [Arrival, ...Arrival[]];
-        const later = rest
-          .slice(0, LATER_ARRIVALS)
-          .map((arrival) => minutesUntil(arrival.expectedAt, now));
+        const firstMinutes = minutesUntil(first.expectedAt, now);
+        const later = laterMinutes(
+          firstMinutes,
+          rest.map((arrival) => minutesUntil(arrival.expectedAt, now)),
+          LATER_ARRIVALS,
+        );
         return (
           <Fragment key={first.routeId}>
             <LineBadge
@@ -63,7 +84,7 @@ function NextArrivals({ stopId, now, lines }: { stopId: string; now: Date; lines
             <ArrivalTime
               size="sm"
               className="justify-end"
-              minutes={minutesUntil(first.expectedAt, now)}
+              minutes={firstMinutes}
               isRealtime={first.isRealtime}
             />
             <span className="text-sm text-muted tabular-nums">
@@ -90,6 +111,7 @@ export function NearbyStopsList({
   onSelectStop,
   limit = NEARBY_LIST_LIMIT,
   linesPerStop = NEARBY_LINES_PER_STOP,
+  layout = 'inline',
 }: NearbyStopsListProps) {
   const { data, isPending, isError } = useNearbyStops(center);
   const now = useNow();
@@ -121,16 +143,28 @@ export function NearbyStopsList({
           <button
             type="button"
             onClick={() => onSelectStop(stop)}
-            className="flex min-h-14 w-full items-center gap-3 rounded-sm px-2 py-2 text-left transition-colors hover:bg-surface-2"
+            className={`w-full rounded-sm px-2 py-2 text-left transition-colors hover:bg-surface-2 ${
+              layout === 'stacked'
+                ? 'grid grid-cols-[auto_minmax(0,1fr)] items-start gap-x-3 gap-y-2'
+                : 'flex min-h-14 items-center gap-3'
+            }`}
           >
-            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-2 text-muted">
+            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-sm bg-surface-2 text-muted">
               <StopSignIcon />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="line-clamp-2 font-bold">{stop.name}</span>
+              <span className={`font-semibold ${layout === 'stacked' ? 'block' : 'line-clamp-2'}`}>
+                {stop.name}
+              </span>
               <span className="block text-sm text-muted">{Math.round(stop.distanceM)} m</span>
             </span>
-            <NextArrivals stopId={stop.id} now={now} lines={linesPerStop} />
+            {layout === 'stacked' ? (
+              <span className="col-start-2">
+                <NextArrivals stopId={stop.id} now={now} lines={linesPerStop} />
+              </span>
+            ) : (
+              <NextArrivals stopId={stop.id} now={now} lines={linesPerStop} />
+            )}
           </button>
         </li>
       ))}

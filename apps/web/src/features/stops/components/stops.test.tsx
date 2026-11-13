@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { stopsService } from '../services';
 import { ArrivalsList, ArrivalsListView } from './arrivals-list';
-import { NearbyStopsList } from './nearby-stops-list';
+import { laterMinutes, NearbyStopsList } from './nearby-stops-list';
 import { StopSheet } from './stop-sheet';
 import { StopsLayer } from './stops-layer';
 
@@ -186,7 +186,10 @@ describe('NearbyStopsList', () => {
     vi.spyOn(stopsService, 'getNearby').mockResolvedValue({ stops: [nearby] });
     vi.spyOn(stopsService, 'getArrivals').mockResolvedValue({
       stopId: stopExample.id,
-      arrivals: [arrivalExample, arrivalExample, arrivalExample],
+      arrivals: [0, 6, 12].map((offsetMin) => ({
+        ...arrivalExample,
+        expectedAt: new Date(Date.now() + (offsetMin + 3) * 60_000).toISOString(),
+      })),
     });
     wrap(<NearbyStopsList center={{ lat: -23.56, lon: -46.65 }} onSelectStop={vi.fn()} />);
 
@@ -237,5 +240,13 @@ describe('StopsLayer', () => {
     const spy = vi.spyOn(stopsService, 'getNearby');
     wrap(<StopsLayer center={null} onSelectStop={vi.fn()} />);
     expect(spy).not.toHaveBeenCalled();
+  });
+});
+
+describe('laterMinutes', () => {
+  it('não repete o minuto da primeira chegada nem entre as seguintes', () => {
+    expect(laterMinutes(5, [17, 17, 20], 2)).toEqual([17, 20]);
+    expect(laterMinutes(5, [5, 9], 2)).toEqual([9]);
+    expect(laterMinutes(1, [2, 3, 4], 2)).toEqual([2, 3]);
   });
 });

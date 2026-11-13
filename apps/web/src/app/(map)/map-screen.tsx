@@ -162,7 +162,7 @@ export function MapScreen() {
             type="button"
             onClick={handleClose}
             aria-label="Fechar linha"
-            className="inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface-2"
+            className="inline-flex size-11 shrink-0 items-center justify-center rounded-sm transition-colors hover:bg-surface-2"
           >
             <CloseIcon />
           </button>
@@ -175,7 +175,7 @@ export function MapScreen() {
       <>
         <Link
           href={buildTripHref({ from: 'current-location', focus: 'destination' })}
-          className="search-field flex h-14 items-center gap-3 rounded-md px-4 text-xl font-bold"
+          className="search-field flex h-14 items-center gap-3 rounded-sm px-4 text-xl font-semibold"
         >
           <SearchIcon className="size-6 text-text" />
           Para onde?
@@ -186,7 +186,7 @@ export function MapScreen() {
               <li key={place.id} className="shrink-0">
                 <Link
                   href={buildTripHref({ from: 'current-location', to: place })}
-                  className="inline-flex h-11 max-w-56 items-center gap-1.5 rounded-full border border-border px-3 text-sm font-bold"
+                  className="inline-flex h-11 max-w-56 items-center gap-1.5 rounded-sm border border-border-strong px-3 text-sm font-semibold transition-colors hover:bg-surface-2"
                 >
                   <PlaceKindIcon kind={place.kind} className="size-4 shrink-0 text-muted" />
                   <span className="truncate">{place.name}</span>
@@ -203,6 +203,7 @@ export function MapScreen() {
           onSelectStop={(stop) => handleSelectStop(stop, true)}
           limit={isDesktop ? DESKTOP_NEARBY_LIMIT : NEARBY_LIST_LIMIT}
           linesPerStop={isDesktop ? DESKTOP_LINES_PER_STOP : NEARBY_LINES_PER_STOP}
+          layout={isDesktop ? 'stacked' : 'inline'}
         />
         {pointHint.visible ? (
           <div className="mt-4 flex items-center gap-3 rounded-sm bg-surface-2 py-2 pr-2 pl-3 text-sm">
