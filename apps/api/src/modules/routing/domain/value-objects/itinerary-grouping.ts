@@ -15,14 +15,61 @@ export function itinerarySignature(itinerary: Itinerary): string {
 
 const time = (iso: string): number => Date.parse(iso);
 
+/** Em "chegar até", opção que chega mais que isto antes da mais tardia sai da lista. */
+export const ARRIVE_BY_MAX_EARLY_MS = 30 * 60_000;
+
+export interface GroupOptions {
+  /** Pedido "chegar até": ordena pela chegada mais tardia (perto do limite). */
+  arriveBy?: boolean;
+}
+
+/**
+ * Desce e sobe na mesma linha em sequência (ex.: 3721-41 num sentido e depois no outro): conta
+ * baldeação à toa e costuma ser volta no terminal.
+ */
+export function hasSameLineTransfer(itinerary: Itinerary): boolean {
+  const transit = itinerary.legs.filter((leg) => leg.mode !== 'walk');
+  return transit.some((leg, i) => {
+    const next = transit[i + 1];
+    return next !== undefined && leg.routeId !== null && leg.routeId === next.routeId;
+  });
+}
+
+/**
+ * `a` é dominado por `b`: sai mais cedo ou junto, chega mais tarde ou junto, com baldeações e
+ * caminhada iguais ou maiores, e pior em pelo menos um desses quatro pontos.
+ */
+export function isDominated(a: Itinerary, b: Itinerary): boolean {
+  const notBetter =
+    time(a.startAt) <= time(b.startAt) &&
+    time(a.endAt) >= time(b.endAt) &&
+    a.transfers >= b.transfers &&
+    a.walkDistanceM >= b.walkDistanceM;
+  const worse =
+    time(a.startAt) < time(b.startAt) ||
+    time(a.endAt) > time(b.endAt) ||
+    a.transfers > b.transfers ||
+    a.walkDistanceM > b.walkDistanceM;
+  return notBetter && worse;
+}
+
 /**
  * Agrupa itinerários com a mesma assinatura: cada grupo vira o de saída mais cedo, com as
- * saídas seguintes (até 3, sem repetir horário) em `alsoDepartsAt`. Devolve até `max`
- * grupos, ordenados pela chegada.
+ * saídas seguintes (até 3, sem repetir horário) em `alsoDepartsAt`. Antes, descarta quem troca
+ * para a mesma linha (se houver outra opção); depois, os dominados por outro grupo. Saída
+ * (ou agora): ordem pela chegada e depois baldeações. Chegar até: chegada mais tardia primeiro,
+ * sem as que chegam mais de 30 min antes dela. Devolve até `max` grupos.
  */
-export function groupItineraries(itineraries: Itinerary[], max: number): Itinerary[] {
+export function groupItineraries(
+  itineraries: Itinerary[],
+  max: number,
+  options: GroupOptions = {},
+): Itinerary[] {
+  const clean = itineraries.filter((it) => !hasSameLineTransfer(it));
+  const usable = clean.length > 0 ? clean : itineraries;
+
   const groups = new Map<string, Itinerary[]>();
-  for (const itinerary of itineraries) {
+  for (const itinerary of usable) {
     const key = itinerarySignature(itinerary);
     const group = groups.get(key);
     if (group) group.push(itinerary);
@@ -34,11 +81,13 @@ export function groupItineraries(itineraries: Itinerary[], max: number): Itinera
     const sorted = [...group].sort(
       (a, b) => time(a.startAt) - time(b.startAt) || time(a.endAt) - time(b.endAt),
     );
-    const first = sorted[0];
+    // Chegar até: o representante é a última saída que ainda chega no limite.
+    const ordered = options.arriveBy ? [...sorted].reverse() : sorted;
+    const first = ordered[0];
     if (!first) continue;
     const seen = new Set<number>([time(first.startAt)]);
     const also: string[] = [];
-    for (const next of sorted.slice(1)) {
+    for (const next of ordered.slice(1)) {
       if (also.length >= ALSO_DEPARTS_MAX) break;
       if (seen.has(time(next.startAt))) continue;
       seen.add(time(next.startAt));
@@ -46,13 +95,34 @@ export function groupItineraries(itineraries: Itinerary[], max: number): Itinera
     }
     const representative: Itinerary = { ...first };
     delete representative.alsoDepartsAt;
-    if (also.length > 0) representative.alsoDepartsAt = also;
+    if (also.length > 0) {
+      representative.alsoDepartsAt = also.sort((a, b) => time(a) - time(b));
+    }
     grouped.push(representative);
   }
 
-  return grouped
-    .sort((a, b) => time(a.endAt) - time(b.endAt) || time(a.startAt) - time(b.startAt))
-    .slice(0, Math.max(0, max));
+  let kept = grouped.filter(
+    (it) => !grouped.some((other) => other !== it && isDominated(it, other)),
+  );
+  if (options.arriveBy) {
+    const latest = Math.max(...kept.map((it) => time(it.endAt)));
+    kept = kept
+      .filter((it) => latest - time(it.endAt) <= ARRIVE_BY_MAX_EARLY_MS)
+      .sort(
+        (a, b) =>
+          time(b.endAt) - time(a.endAt) ||
+          a.transfers - b.transfers ||
+          time(b.startAt) - time(a.startAt),
+      );
+  } else {
+    kept.sort(
+      (a, b) =>
+        time(a.endAt) - time(b.endAt) ||
+        a.transfers - b.transfers ||
+        time(b.startAt) - time(a.startAt),
+    );
+  }
+  return kept.slice(0, Math.max(0, max));
 }
 
 /** Alternativa sem o modo dominante só entra se durar até isto vezes a melhor opção. */

@@ -114,7 +114,10 @@ export class PlanTripUseCase {
       maxItineraries,
       candidates: planTripCandidates(maxItineraries),
     };
-    const grouped = groupItineraries(await this.planner.plan(query), maxItineraries);
+    const arriveBy = time !== null && 'arriveBy' in time;
+    const grouped = groupItineraries(await this.planner.plan(query), maxItineraries, {
+      arriveBy,
+    });
     return { itineraries: await this.withAlternative(grouped, query), notices };
   }
 
