@@ -97,17 +97,29 @@ export function ItineraryLayer({
   // O alfinete entra no mapa ao montar e de novo se o estilo for trocado (tema claro/escuro).
   useEffect(() => {
     if (!map) return;
+    // Não depende de isStyleLoaded(): ele fica falso enquanto há tiles carregando e o alfinete
+    // podia nunca entrar. Se a camada pedir a imagem antes, o styleimagemissing a fornece.
     const ensurePin = () => {
-      if (map.hasImage(pinId) || !map.isStyleLoaded()) return;
+      if (map.hasImage(pinId)) return;
       const image = drawPin(colors.brand);
-      if (image) map.addImage(pinId, image, { pixelRatio: 2 });
+      if (!image) return;
+      try {
+        map.addImage(pinId, image, { pixelRatio: 2 });
+      } catch {
+        // Estilo ainda não existe; o próximo styledata ou styleimagemissing tenta de novo.
+      }
+    };
+    const onMissing = (event: { id: string }) => {
+      if (event.id === pinId) ensurePin();
     };
     ensurePin();
     map.on('styledata', ensurePin);
     map.on('load', ensurePin);
+    map.on('styleimagemissing', onMissing);
     return () => {
       map.off('styledata', ensurePin);
       map.off('load', ensurePin);
+      map.off('styleimagemissing', onMissing);
     };
   }, [map, pinId, colors.brand]);
 
