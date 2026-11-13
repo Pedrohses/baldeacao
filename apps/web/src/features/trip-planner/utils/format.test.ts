@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  FALLBACK_TRANSIT_COLOR,
+  WALK_COLOR,
   formatDeparture,
   formatDistance,
   formatDuration,
@@ -33,10 +35,10 @@ describe('formatação do itinerário', () => {
   });
 
   it('resolve a cor do trecho', () => {
-    expect(legColor({ mode: 'walk', routeColor: null })).toBe('#6F574A');
+    expect(legColor({ mode: 'walk', routeColor: null })).toBe(WALK_COLOR);
     expect(legColor({ mode: 'bus', routeColor: '509e2f' })).toBe('#509E2F');
     // Sem cor no GTFS: neutro, nunca a cor da marca.
-    expect(legColor({ mode: 'bus', routeColor: null })).toBe('#8A7262');
+    expect(legColor({ mode: 'bus', routeColor: null })).toBe(FALLBACK_TRANSIT_COLOR);
   });
 
   it('encurta nomes de metrô e trem e troca os nomes genéricos do OTP', () => {

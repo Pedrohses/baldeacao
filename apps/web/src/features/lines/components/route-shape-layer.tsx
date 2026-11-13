@@ -4,6 +4,7 @@ import type { LngLatBoundsLike } from 'maplibre-gl';
 import { useEffect, useMemo } from 'react';
 import { Layer, Source, useMap } from 'react-map-gl/maplibre';
 
+import { useMapColors } from '@/shared/ui/map';
 import { fitPaddingFor } from '@/shared/ui/map/fit-padding';
 
 import { useLineDetails } from '../hooks';
@@ -12,8 +13,6 @@ import { shapesToGeoJson } from '../utils/shapes-geojson';
 export const ROUTE_SHAPE_SOURCE_ID = 'route-shape';
 export const ROUTE_SHAPE_OUTBOUND_LAYER_ID = 'route-shape-0';
 export const ROUTE_SHAPE_INBOUND_LAYER_ID = 'route-shape-1';
-
-const FALLBACK_COLOR = '#C7361F';
 
 export interface RouteShapeLayerProps {
   /** route_id da linha cujo traçado será desenhado; null não desenha nada. */
@@ -44,6 +43,7 @@ function shapeBounds(points: readonly { lat: number; lon: number }[]): LngLatBou
 export function RouteShapeLayer({ routeId, fitPadding }: RouteShapeLayerProps) {
   const { current: map } = useMap();
   const { data } = useLineDetails(routeId);
+  const colors = useMapColors();
   const geojson = useMemo(() => shapesToGeoJson(data?.shapes ?? []), [data]);
 
   useEffect(() => {
@@ -58,7 +58,8 @@ export function RouteShapeLayer({ routeId, fitPadding }: RouteShapeLayerProps) {
   }, [map, data, fitPadding]);
 
   if (!data) return null;
-  const color = data.line.color ? `#${data.line.color}` : FALLBACK_COLOR;
+  // Linha sem cor no GTFS: neutro do tema, nunca o âmbar (MASTER.md).
+  const color = data.line.color ? `#${data.line.color}` : colors.lineFallback;
 
   return (
     <Source id={ROUTE_SHAPE_SOURCE_ID} type="geojson" data={geojson}>

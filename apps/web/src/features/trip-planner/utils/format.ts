@@ -9,10 +9,10 @@ const timeFormatter = new Intl.DateTimeFormat('pt-BR', {
   timeZone: CITY_TIME_ZONE,
 });
 
-// Cinza "muted" do tema e neutro de linha sem cor (o paint do mapa não lê variáveis CSS). O
-// neutro serve nos dois temas; a cor da marca fica para ação e seleção, nunca para linha.
-export const WALK_COLOR = '#6F574A';
-export const FALLBACK_TRANSIT_COLOR = '#8A7262';
+// Cinzas médios que funcionam nos dois temas (o paint do mapa não lê variáveis CSS): trecho a pé
+// e linha sem cor. O âmbar fica para ação e seleção, nunca para linha (MASTER.md).
+export const WALK_COLOR = '#7D8696';
+export const FALLBACK_TRANSIT_COLOR = '#5B6472';
 
 export const MODE_LABELS: Record<TripMode, string> = {
   walk: 'A pé',

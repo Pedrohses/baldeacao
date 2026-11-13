@@ -10,6 +10,7 @@ import { tripPlannerService } from '../services';
 import { ItineraryLayer } from './itinerary-layer';
 import { ItineraryList, type ItineraryListStatus } from './itinerary-list';
 import { ItineraryTimeline } from './itinerary-timeline';
+import { WALK_COLOR } from '../utils/format';
 
 const planned = (itineraries: Itinerary[], notices: PlanTripNotice[] = []) => ({
   itineraries,
@@ -308,10 +309,10 @@ describe('linha do tempo e camadas do itinerário', () => {
     expect(mapMock.sources.at(-1)?.id).toBe('itinerary');
     expect(data.features.map((f) => f.properties.mode)).toEqual(['walk', 'bus', 'subway', 'walk']);
     expect(data.features.map((f) => f.properties.color)).toEqual([
-      '#6F574A',
+      WALK_COLOR,
       '#509E2F',
       '#FFD700',
-      '#6F574A',
+      WALK_COLOR,
     ]);
     const layers = mapMock.layers.filter((l) => /^itinerary-(transit|walk)/.test(l.id)).slice(-3);
     expect(layers.map((l) => l.id)).toEqual([

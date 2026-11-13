@@ -129,7 +129,7 @@ export function AppPanel({
       style={{
         height: maxHeight,
         transform: `translateY(${maxHeight - height}px)`,
-        transition: drag ? 'none' : 'transform 180ms var(--ease-app)',
+        transition: drag ? 'none' : 'transform 240ms var(--ease-app)',
       }}
       data-snap={snap}
     >
