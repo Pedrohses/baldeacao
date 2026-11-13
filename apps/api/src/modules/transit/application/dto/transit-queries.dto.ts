@@ -55,3 +55,16 @@ export interface HasNearbyStopInput {
 export interface HasNearbyStopOutput {
   hasStop: boolean;
 }
+
+export interface FindAccessStopsInput {
+  center: Coordinates;
+  /** Em metros, maior que zero e no máximo 5000. */
+  radiusM: number;
+}
+
+export interface FindAccessStopsOutput {
+  /** Parada mais próxima (de qualquer modo) no raio, ou null. */
+  stop: NearbyStop | null;
+  /** Estação de metrô ou trem mais próxima no raio, ou null. */
+  station: NearbyStop | null;
+}

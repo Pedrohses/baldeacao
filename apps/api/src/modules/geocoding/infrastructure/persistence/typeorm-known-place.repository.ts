@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import type { Coordinates, Place } from '../../domain/entities/place.entity';
+import type { Coordinates } from '../../domain/entities/place.entity';
 import { SERVICE_CITY_CENTER, SERVICE_CITY_NAME } from '../../domain/value-objects/service-city';
 import {
   type KnownPlaceMatch,
   type KnownPlaceRecord,
   KnownPlaceRepository,
+  type NearestKnownPlace,
 } from '../../domain/ports/known-place-repository.port';
 import { ALIASES_SEPARATOR, KnownPlaceMapper, type KnownPlaceRow } from './known-place.mapper';
 
@@ -62,7 +63,7 @@ const INSERT_BOUNDARY_SQL = `
 
 const NEAREST_SQL = `
   WITH center AS (SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography AS g)
-  SELECT p.osm_id, p.name, p.address, p.importance,
+  SELECT p.osm_id, p.name, p.kind, p.category, p.address, p.importance,
          ST_Y(p.location::geometry) AS lat, ST_X(p.location::geometry) AS lon,
          ST_Distance(p.location, center.g) AS distance_m
   FROM places p, center
@@ -125,17 +126,18 @@ export class TypeormKnownPlaceRepository extends KnownPlaceRepository {
     return rows.map((row) => row.inside);
   }
 
-  async findNearest(
-    center: Coordinates,
-    radiusM: number,
-  ): Promise<{ place: Place; distanceM: number } | null> {
+  async findNearest(center: Coordinates, radiusM: number): Promise<NearestKnownPlace | null> {
     const rows = await this.dataSource.query<Array<KnownPlaceRow & { distance_m: number }>>(
       NEAREST_SQL,
       [center.lon, center.lat, radiusM],
     );
     const row = rows[0];
     if (!row) return null;
-    return { place: KnownPlaceMapper.toDomain(row), distanceM: Number(row.distance_m) };
+    return {
+      place: KnownPlaceMapper.toDomain(row),
+      category: row.category ?? '',
+      distanceM: Number(row.distance_m),
+    };
   }
 
   async replaceAll(

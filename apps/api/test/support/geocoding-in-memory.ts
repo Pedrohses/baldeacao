@@ -7,6 +7,7 @@ import {
   type KnownPlaceMatch,
   type KnownPlaceRecord,
   KnownPlaceRepository,
+  type NearestKnownPlace,
 } from '../../src/modules/geocoding/domain/ports/known-place-repository.port';
 import { haversineM } from './transit-in-memory';
 
@@ -95,12 +96,13 @@ export class InMemoryKnownPlaceRepository extends KnownPlaceRepository {
     );
   }
 
-  findNearest(
-    center: Coordinates,
-    radiusM: number,
-  ): Promise<{ place: Place; distanceM: number } | null> {
+  findNearest(center: Coordinates, radiusM: number): Promise<NearestKnownPlace | null> {
     const nearest = this.places
-      .map((match) => ({ place: match.place, distanceM: haversineM(center, match.place.location) }))
+      .map((match) => ({
+        place: match.place,
+        category: match.category,
+        distanceM: haversineM(center, match.place.location),
+      }))
       .filter((found) => found.distanceM <= radiusM)
       .sort((a, b) => a.distanceM - b.distanceM)[0];
     return Promise.resolve(nearest ?? null);

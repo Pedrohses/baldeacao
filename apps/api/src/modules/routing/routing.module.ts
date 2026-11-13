@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppConfig } from '../../config/app-config';
+import { GeocodingModule } from '../geocoding/geocoding.module';
 import { TransitModule } from '../transit/transit.module';
 import { PlanTripUseCase } from './application/use-cases/plan-trip.use-case';
 import { Clock } from './domain/ports/clock.port';
@@ -10,7 +11,7 @@ import { SystemClock } from './infrastructure/adapters/system-clock.adapter';
 import { TripsController } from './presentation/http/trips.controller';
 
 @Module({
-  imports: [TransitModule],
+  imports: [TransitModule, GeocodingModule],
   controllers: [TripsController],
   providers: [
     PlanTripUseCase,

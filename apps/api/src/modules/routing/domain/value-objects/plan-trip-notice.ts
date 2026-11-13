@@ -5,7 +5,9 @@ export type PlanTripNotice =
   /** Data pedida fora da validade do calendário do GTFS carregado. */
   | 'date_outside_service'
   /** Hora pedida já tinha passado: a busca foi para o mesmo horário no dia seguinte. */
-  | 'time_in_past_moved';
+  | 'time_in_past_moved'
+  /** Origem ou destino no aeroporto de Guarulhos: o trecho estação-terminais é o ônibus gratuito. */
+  | 'airport_shuttle';
 
 /** Sem parada a até isto da origem ou do destino, o ponto está fora da área atendida. */
 export const SERVICE_AREA_RADIUS_M = 1000;

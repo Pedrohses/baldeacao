@@ -109,6 +109,15 @@ export class InMemoryStopRepository extends StopRepository {
     return Promise.resolve(found);
   }
 
+  findNearestStation(center: Coordinates, radiusM: number): Promise<NearbyStop | null> {
+    const found = this.stops
+      .filter((stop) => this.stationIds.has(stop.id))
+      .map((stop) => ({ stop, distanceM: Math.round(haversineM(center, stop.location)) }))
+      .filter((s) => s.distanceM <= radiusM)
+      .sort((a, b) => a.distanceM - b.distanceM);
+    return Promise.resolve(found[0] ?? null);
+  }
+
   exists(stopId: string): Promise<boolean> {
     return Promise.resolve(this.stops.some((stop) => stop.id === stopId));
   }

@@ -69,6 +69,7 @@ const outputSchema = {
       'destination_outside_service_area',
       'date_outside_service',
       'time_in_past_moved',
+      'airport_shuttle',
     ]),
   ),
   itinerarios: z.array(
@@ -138,7 +139,8 @@ export class PlanTripTool extends McpTool {
           'informados em texto, saindo agora, a partir de uma hora ou para chegar até uma hora ' +
           '(ex.: "Como chego do Tatuapé à Paulista saindo às 8h?"). Devolve as opções com duração, ' +
           'horários, baldeações e cada trecho, as saídas seguintes com as mesmas linhas ("também às") ' +
-          'e avisos quando a origem ou o destino ficam longe de qualquer parada.',
+          'e avisos quando a origem ou o destino ficam longe de qualquer parada ou quando o trecho ' +
+          'até os terminais do aeroporto de Guarulhos é pelo ônibus gratuito do aeroporto.',
         inputSchema: relaxShape(inputSchema),
         outputSchema,
         annotations: { readOnlyHint: true, idempotentHint: false, openWorldHint: true },
@@ -256,6 +258,13 @@ function describeNotices(
   return notices.map((notice) => {
     if (notice === 'time_in_past_moved') {
       return 'Atenção: o horário pedido já passou; mostrei as opções para o mesmo horário amanhã.';
+    }
+    if (notice === 'airport_shuttle') {
+      return (
+        'Atenção: o trajeto vai até a estação Aeroporto-Guarulhos (CPTM Linha 13). Entre a estação ' +
+        'e os terminais, use o ônibus gratuito do aeroporto (cerca de 10 min), que não está ' +
+        'incluído nos horários e na duração abaixo.'
+      );
     }
     if (notice === 'date_outside_service') {
       return (

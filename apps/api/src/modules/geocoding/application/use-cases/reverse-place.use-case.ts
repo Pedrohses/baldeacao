@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { FindNearbyStopsUseCase } from '../../../transit/application/use-cases/find-nearby-stops.use-case';
+import { FindAccessStopsUseCase } from '../../../transit/application/use-cases/find-access-stops.use-case';
 import { type Coordinates, Place } from '../../domain/entities/place.entity';
 import { InvalidPlaceQueryError } from '../../domain/errors/invalid-place-query.error';
 import { GeocodeCache } from '../../domain/ports/geocode-cache.port';
 import { Geocoder } from '../../domain/ports/geocoder.port';
 import { KnownPlaceRepository } from '../../domain/ports/known-place-repository.port';
+import { COMPACT_ACCESS_RADIUS_M } from '../../domain/value-objects/place-access';
 import type { ReversePlaceInput, ReversePlaceOutput } from '../dto/reverse-place.dto';
 import { GEOCODE_CACHE_TTL_S, GEOCODE_EMPTY_CACHE_TTL_S } from './search-places.use-case';
 
@@ -37,7 +38,7 @@ export class ReversePlaceUseCase {
     private readonly cache: GeocodeCache,
     private readonly geocoder: Geocoder,
     private readonly knownPlaces: KnownPlaceRepository,
-    private readonly nearbyStops: FindNearbyStopsUseCase,
+    private readonly accessStops: FindAccessStopsUseCase,
   ) {}
 
   async execute(input: ReversePlaceInput): Promise<ReversePlaceOutput> {
@@ -60,22 +61,35 @@ export class ReversePlaceUseCase {
     return { place };
   }
 
-  /** O mais próximo entre lugar conhecido e parada, dentro do raio local. */
+  /**
+   * O mais próximo entre lugar conhecido e parada, dentro do raio local. Estação de metrô ou
+   * trem volta como `station`, com o id e a coordenada da parada GTFS (como na busca).
+   */
   private async findLocal(location: Coordinates): Promise<Place | null> {
-    const [known, { stops }] = await Promise.all([
+    const [known, { stop, station }] = await Promise.all([
       this.knownPlaces.findNearest(location, REVERSE_LOCAL_RADIUS_M),
-      this.nearbyStops.execute({ center: location, radiusM: REVERSE_LOCAL_RADIUS_M, limit: 1 }),
+      this.accessStops.execute({ center: location, radiusM: REVERSE_LOCAL_RADIUS_M }),
     ]);
-    const stop = stops[0];
     if (stop && (!known || stop.distanceM <= known.distanceM)) {
       return new Place({
         id: `stop:${stop.stop.id}`,
         name: stop.stop.name,
         address: stop.stop.description,
-        kind: 'stop',
+        kind: station?.stop.id === stop.stop.id ? 'station' : 'stop',
         location: stop.stop.location,
       });
     }
-    return known?.place ?? null;
+    if (!known) return null;
+    if (known.place.kind !== 'station') return known.place;
+    const access = await this.accessStops.execute({
+      center: known.place.location,
+      radiusM: COMPACT_ACCESS_RADIUS_M,
+    });
+    if (!access.station) return known.place;
+    return new Place({
+      ...known.place,
+      id: `stop:${access.station.stop.id}`,
+      location: access.station.stop.location,
+    });
   }
 }

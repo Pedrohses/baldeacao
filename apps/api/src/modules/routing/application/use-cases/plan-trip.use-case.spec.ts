@@ -4,6 +4,13 @@ import {
   InMemoryServiceCalendar,
   InMemoryStopRepository,
 } from '../../../../../test/support/transit-in-memory';
+import {
+  InMemoryKnownPlaceRepository,
+  type KnownPlaceSeed,
+} from '../../../../../test/support/geocoding-in-memory';
+import { ResolvePlaceAccessUseCase } from '../../../geocoding/application/use-cases/resolve-place-access.use-case';
+import { Place } from '../../../geocoding/domain/entities/place.entity';
+import { FindAccessStopsUseCase } from '../../../transit/application/use-cases/find-access-stops.use-case';
 import { GetServicePeriodUseCase } from '../../../transit/application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
 import { Stop } from '../../../transit/domain/entities/stop.entity';
@@ -26,11 +33,19 @@ function planTrip(
   stops: Stop[] = [stopAt('A', FROM), stopAt('B', TO)],
   clock = new FixedClock(),
   calendar = new InMemoryServiceCalendar(),
+  known: KnownPlaceSeed[] = [],
+  stationIds: string[] = [],
 ): PlanTripUseCase {
+  const repository = new InMemoryStopRepository(stops);
+  for (const id of stationIds) repository.stationIds.add(id);
   return new PlanTripUseCase(
     planner,
-    new HasNearbyStopUseCase(new InMemoryStopRepository(stops)),
+    new HasNearbyStopUseCase(repository),
     new GetServicePeriodUseCase(calendar),
+    new ResolvePlaceAccessUseCase(
+      new InMemoryKnownPlaceRepository(known),
+      new FindAccessStopsUseCase(repository),
+    ),
     clock,
   );
 }
@@ -260,6 +275,82 @@ describe('PlanTripUseCase', () => {
       const single = new TwoAnswerPlanner([busOnly(1)]);
       await planTrip(single).execute({ from: FROM, to: TO, maxItineraries: 1 });
       expect(single.queries).toHaveLength(1);
+    });
+  });
+
+  describe('ponto de acesso de terminais e aeroporto', () => {
+    const tiete = new Place({
+      id: 'osm:relation:8546826',
+      name: 'Terminal Rodoviário Tietê',
+      address: null,
+      kind: 'poi',
+      location: { lat: -23.516319, lon: -46.623732 },
+    });
+    const airport = new Place({
+      id: 'osm:relation:5141542',
+      name: 'Aeroporto Internacional Governador André Franco Montoro',
+      address: null,
+      kind: 'poi',
+      location: { lat: -23.433452, lon: -46.47125 },
+    });
+    const metro = stopAt('18877', { lat: -23.516067, lon: -46.625162 });
+    const busStop = stopAt('B1', { lat: -23.5165, lon: -46.6239 });
+    const cptm = new Stop({
+      ...stopAt('1814713', { lat: -23.433667, lon: -46.493732 }),
+      name: 'Aeroporto Guarulhos',
+    });
+    const known: KnownPlaceSeed[] = [
+      { place: tiete, importance: 10, category: 'amenity=bus_station' },
+      { place: airport, importance: 11, category: 'aeroway=aerodrome' },
+    ];
+
+    it('terminal sai pela estação ao lado e aeroporto chega pela estação, com aviso', async () => {
+      const planner = new InMemoryTripPlanner([ITINERARY]);
+      const out = await planTrip(
+        planner,
+        [metro, busStop, cptm],
+        undefined,
+        undefined,
+        known,
+        ['18877', '1814713'],
+      ).execute({ from: tiete.location, to: airport.location, maxItineraries: 1 });
+      expect(mainQueries(planner)[0]).toMatchObject({
+        from: metro.location,
+        to: cptm.location,
+      });
+      expect(out.notices).toEqual(['airport_shuttle']);
+    });
+
+    it('a estação do aeroporto escolhida direto também avisa do ônibus gratuito', async () => {
+      const planner = new InMemoryTripPlanner([ITINERARY]);
+      const out = await planTrip(planner, [metro, cptm], undefined, undefined, [], [
+        '18877',
+        '1814713',
+      ]).execute({ from: metro.location, to: cptm.location, maxItineraries: 1 });
+      expect(mainQueries(planner)[0]).toMatchObject({ from: metro.location, to: cptm.location });
+      expect(out.notices).toEqual(['airport_shuttle']);
+    });
+
+    it('aeroporto com parada a pé (Congonhas) usa a parada, sem aviso', async () => {
+      const congonhas = new Place({ ...airport, id: 'osm:way:7', name: 'Aeroporto de Congonhas' });
+      const walkable = stopAt('C1', { lat: -23.4364, lon: -46.47125 });
+      const planner = new InMemoryTripPlanner([ITINERARY]);
+      const out = await planTrip(
+        planner,
+        [metro, walkable, cptm],
+        undefined,
+        undefined,
+        [{ place: congonhas, importance: 11, category: 'aeroway=aerodrome' }],
+        ['18877', '1814713'],
+      ).execute({ from: metro.location, to: congonhas.location, maxItineraries: 1 });
+      expect(mainQueries(planner)[0]?.to).toEqual(walkable.location);
+      expect(out.notices).toEqual([]);
+    });
+
+    it('ponto que não é lugar conhecido fica como está', async () => {
+      const planner = new InMemoryTripPlanner([ITINERARY]);
+      await planTrip(planner).execute({ from: FROM, to: TO });
+      expect(mainQueries(planner)[0]).toMatchObject({ from: FROM, to: TO });
     });
   });
 });

@@ -186,5 +186,13 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
     it('trata % e _ como texto', async () => {
       expect(await stops.searchByName('%%', 8)).toEqual([]);
     });
+
+    it('findNearestStation ignora parada de ônibus mais perto e respeita o raio', async () => {
+      const nearB1 = { lat: -23.536, lon: -46.634 };
+      const found = await stops.findNearestStation(nearB1, 500);
+      expect(found?.stop.id).toBe('T1');
+      expect(found?.distanceM).toBeGreaterThan(0);
+      expect(await stops.findNearestStation({ lat: -23.6, lon: -46.7 }, 500)).toBeNull();
+    });
   });
 });

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ResolvePlaceAccessUseCase } from '../../../geocoding/application/use-cases/resolve-place-access.use-case';
 import { GetServicePeriodUseCase } from '../../../transit/application/use-cases/get-service-period.use-case';
 import { HasNearbyStopUseCase } from '../../../transit/application/use-cases/has-nearby-stop.use-case';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
@@ -59,6 +60,7 @@ export class PlanTripUseCase {
     private readonly planner: TripPlanner,
     private readonly hasNearbyStop: HasNearbyStopUseCase,
     private readonly servicePeriod: GetServicePeriodUseCase,
+    private readonly placeAccess: ResolvePlaceAccessUseCase,
     private readonly clock: Clock,
   ) {}
 
@@ -91,15 +93,23 @@ export class PlanTripUseCase {
     const requested = Math.trunc(input.maxItineraries ?? PLAN_TRIP_DEFAULT_ITINERARIES);
     const maxItineraries = Math.min(Math.max(1, requested), PLAN_TRIP_MAX_ITINERARIES);
 
+    // Lugar grande ou terminal sai e chega pela parada ou estação de acesso (aeroporto: estação
+    // da CPTM, com aviso do ônibus gratuito). O ponto do mapa continua o do lugar.
+    const [from, to] = await Promise.all([
+      this.placeAccess.execute({ location: input.from }),
+      this.placeAccess.execute({ location: input.to }),
+    ]);
     // Antes do OTP: sem parada a 1 km, avisa (o OTP ainda pode achar rota longa a pé).
     const [areaNotices, dateNotices] = await Promise.all([
-      this.serviceAreaNotices(input.from, input.to),
+      this.serviceAreaNotices(from.location, to.location),
       this.serviceDateNotices(serviceDateOf(requestedIso, now)),
     ]);
-    const notices = [...timeNotices, ...dateNotices, ...areaNotices];
+    const accessNotices: PlanTripNotice[] =
+      from.airportShuttle || to.airportShuttle ? ['airport_shuttle'] : [];
+    const notices = [...timeNotices, ...dateNotices, ...areaNotices, ...accessNotices];
     const query = {
-      from: input.from,
-      to: input.to,
+      from: from.location,
+      to: to.location,
       time,
       maxItineraries,
       candidates: planTripCandidates(maxItineraries),

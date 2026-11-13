@@ -9,7 +9,7 @@ import {
 import { Place } from '../../src/modules/geocoding/domain/entities/place.entity';
 import { toTripDateTime } from '../../src/modules/routing/presentation/mcp/trip-time';
 import { SourceUnavailableError } from '../../src/shared/domain/errors/source-unavailable.error';
-import { connectClient, type McpFakes, startMcpApp } from './mcp-test-app';
+import { connectClient, type McpFakes, startMcpApp, stopAirportStation } from './mcp-test-app';
 
 function textOf(result: CallToolResult): string {
   return result.content.map((c) => (c.type === 'text' ? c.text : '')).join('\n');
@@ -133,6 +133,16 @@ describe('Tool MCP planejar_viagem', () => {
     fakes.planner.result = [];
     const empty = await plan({ origem: 'Morumbis', destino: 'Tietê' });
     expect(textOf(empty)).toContain('Escolha um ponto mais perto de uma linha.');
+  });
+
+  it('explica o ônibus gratuito quando o destino é a estação do aeroporto', async () => {
+    const { lat, lon } = stopAirportStation.location;
+    const result = await plan({ origem: 'Morumbis', destino: `${lat},${lon}` });
+    expect(result.isError).toBeFalsy();
+    expect(textOf(result)).toMatch(
+      /^Atenção: o trajeto vai até a estação Aeroporto-Guarulhos \(CPTM Linha 13\)\. Entre a estação e os terminais, use o ônibus gratuito do aeroporto/,
+    );
+    expect(result.structuredContent).toMatchObject({ avisos: ['airport_shuttle'] });
   });
 
   it('aceita hora de chegada no formato HH:MM e coordenada como origem', async () => {

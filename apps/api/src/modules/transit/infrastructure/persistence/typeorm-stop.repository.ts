@@ -16,6 +16,24 @@ const NEARBY_SQL = `
   ORDER BY distance_m, s.stop_id
   LIMIT $4`;
 
+// Estação = parada servida por rota de metrô/trem; o EXISTS usa idx_stop_times_stop e só roda
+// para as paradas do raio (no máximo poucas centenas).
+const NEAREST_STATION_SQL = `
+  WITH center AS (SELECT ST_SetSRID(ST_MakePoint($1, $2), 4326)::geography AS g)
+  SELECT s.source_id, s.stop_id, s.code, s.name, s.description,
+         ST_Y(s.location::geometry) AS lat, ST_X(s.location::geometry) AS lon,
+         ST_Distance(s.location, center.g) AS distance_m
+  FROM stops s, center
+  WHERE ST_DWithin(s.location, center.g, $3)
+    AND EXISTS (
+      SELECT 1 FROM stop_times st
+      JOIN trips t ON t.source_id = st.source_id AND t.trip_id = st.trip_id
+      JOIN routes r ON r.source_id = t.source_id AND r.route_id = t.route_id
+      WHERE st.source_id = s.source_id AND st.stop_id = s.stop_id AND r.route_type IN (1, 2)
+    )
+  ORDER BY distance_m, s.stop_id
+  LIMIT 1`;
+
 // Índice GIN idx_stops_name_trgm sobre f_unaccent(lower(name)). Estações = paradas servidas por
 // rotas de metrô/trem (route_type 1 e 2), calculadas a partir das poucas rotas ferroviárias.
 // Com menos de 3 caracteres ($3) só prefixo e início de palavra: o trigrama não ajuda e a varredura custa ~100 ms.
@@ -86,6 +104,16 @@ export class TypeormStopRepository extends StopRepository {
       stop: StopMapper.toDomain(row),
       distanceM: Math.round(Number(row.distance_m)),
     }));
+  }
+
+  async findNearestStation(center: Coordinates, radiusM: number): Promise<NearbyStop | null> {
+    const rows = await this.dataSource.query<Array<StopRow & { distance_m: number }>>(
+      NEAREST_STATION_SQL,
+      [center.lon, center.lat, radiusM],
+    );
+    const row = rows[0];
+    if (!row) return null;
+    return { stop: StopMapper.toDomain(row), distanceM: Math.round(Number(row.distance_m)) };
   }
 
   async searchByName(text: string, limit: number): Promise<StopNameMatch[]> {
