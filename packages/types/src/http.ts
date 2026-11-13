@@ -107,6 +107,7 @@ export const PlanTripNoticeSchema = z.enum([
   'destination_outside_service_area', // nenhuma parada a até 1 km do destino
   'date_outside_service', // data fora da validade do GTFS carregado
   'time_in_past_moved', // horário pedido já passou; a busca foi para o dia seguinte
+  'airport_shuttle', // origem ou destino no aeroporto: trecho final pelo ônibus gratuito, fora do GTFS
 ]);
 export type PlanTripNotice = z.infer<typeof PlanTripNoticeSchema>;
 

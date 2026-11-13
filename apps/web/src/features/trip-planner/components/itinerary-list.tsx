@@ -50,6 +50,11 @@ const NOTICE_COPY: Record<
     text: 'Esse horário já passou; mostramos as opções de amanhã.',
     action: null,
   },
+  airport_shuttle: {
+    field: null,
+    text: 'Entre a estação Aeroporto-Guarulhos e os terminais, use o ônibus gratuito do aeroporto (cerca de 10 min, não incluído no trajeto).',
+    action: null,
+  },
 };
 
 function Notices({
