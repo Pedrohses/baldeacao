@@ -1,4 +1,5 @@
 import {
+  formatGtfsTime,
   parseGtfsBoolean,
   parseGtfsColor,
   parseGtfsDate,
@@ -7,6 +8,13 @@ import {
 } from './gtfs-values';
 
 describe('valores do GTFS', () => {
+  it('formata segundos de volta em hora do GTFS, inclusive depois das 24h', () => {
+    expect(formatGtfsTime(0)).toBe('00:00:00');
+    expect(formatGtfsTime(30_615)).toBe('08:30:15');
+    expect(formatGtfsTime(90_600)).toBe('25:10:00');
+    expect(parseGtfsTime(formatGtfsTime(86_399))).toBe(86_399);
+  });
+
   it('converte horas em segundos, inclusive depois das 24h', () => {
     expect(parseGtfsTime('00:00:00')).toBe(0);
     expect(parseGtfsTime('08:30:15')).toBe(30_615);

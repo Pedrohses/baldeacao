@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ImportGtfsFeedUseCase } from './application/use-cases/import-gtfs-feed.use-case';
 import { RefreshGtfsFeedUseCase } from './application/use-cases/refresh-gtfs-feed.use-case';
+import { RepairGtfsShapesUseCase } from './application/use-cases/repair-gtfs-shapes.use-case';
 import { GtfsArchiveDownloader } from './domain/ports/gtfs-archive-downloader.port';
 import { GtfsFeedReader } from './domain/ports/gtfs-feed-reader.port';
 import { GtfsFeedStore } from './domain/ports/gtfs-feed-store.port';
@@ -15,6 +16,7 @@ import { PostgresGtfsFeedStore } from './infrastructure/persistence/postgres-gtf
   providers: [
     ImportGtfsFeedUseCase,
     RefreshGtfsFeedUseCase,
+    RepairGtfsShapesUseCase,
     { provide: GtfsFeedReader, useClass: CsvGtfsFeedReader },
     { provide: GtfsFeedStore, useClass: PostgresGtfsFeedStore },
     { provide: GtfsArchiveDownloader, useClass: FetchGtfsArchiveDownloader },

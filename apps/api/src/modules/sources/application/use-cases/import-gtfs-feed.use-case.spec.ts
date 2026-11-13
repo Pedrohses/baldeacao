@@ -99,6 +99,70 @@ describe('ImportGtfsFeedUseCase', () => {
     ]);
   });
 
+  it('grava os traçados já reparados (mesmo reparo do gtfs:prepare)', async () => {
+    // Ônibus cujo traçado segue ~1,1 km depois da última parada: a ponta é cortada.
+    const points: GtfsShapePoint[] = Array.from({ length: 31 }, (_, i) => ({
+      shapeId: 's1',
+      lat: -23.55,
+      lon: -46.6 + i * 0.001,
+      sequence: i + 1,
+    }));
+    const raw: RawGtfsFeed = {
+      routes: () =>
+        from([
+          {
+            routeId: 'r1',
+            agencyId: null,
+            shortName: 'R1',
+            longName: '',
+            routeType: 3,
+            color: null,
+            textColor: null,
+          },
+        ]),
+      stops: () =>
+        from([
+          { stopId: 'a', code: null, name: 'A', description: null, lat: -23.55, lon: -46.6 },
+          { stopId: 'b', code: null, name: 'B', description: null, lat: -23.55, lon: -46.58 },
+        ]),
+      trips: () =>
+        from([
+          {
+            tripId: 't1',
+            routeId: 'r1',
+            serviceId: 'U',
+            headsign: null,
+            directionId: 0 as const,
+            shapeId: 's1',
+          },
+        ]),
+      stopTimes: () =>
+        from([
+          { tripId: 't1', stopId: 'a', stopSequence: 1, arrivalTime: 0, departureTime: 0 },
+          { tripId: 't1', stopId: 'b', stopSequence: 2, arrivalTime: 60, departureTime: 60 },
+        ]),
+      calendar: () => from([]),
+      frequencies: () => from([]),
+      shapePoints: () => from(points),
+    };
+    const reader = new (class extends GtfsFeedReader {
+      open(): Promise<RawGtfsFeed> {
+        return Promise.resolve(raw);
+      }
+    })();
+    const store = new InMemoryGtfsFeedStore();
+
+    const result = await new ImportGtfsFeedUseCase(reader, store).execute({
+      sourceId: 'sptrans',
+      location: '/gtfs',
+    });
+
+    expect(result.shapeRepairs).toEqual([{ shapeId: 's1', kind: 'end-trimmed', meters: 1019 }]);
+    const saved = store.saved.get('sptrans')?.shapes[0]?.points ?? [];
+    expect(saved).toHaveLength(21);
+    expect(saved.at(-1)?.lon).toBeCloseTo(-46.58, 6);
+  });
+
   it('recusa source id fora do padrão sem abrir o feed', async () => {
     const reader = new InMemoryGtfsFeedReader([]);
     const useCase = new ImportGtfsFeedUseCase(reader, new InMemoryGtfsFeedStore());

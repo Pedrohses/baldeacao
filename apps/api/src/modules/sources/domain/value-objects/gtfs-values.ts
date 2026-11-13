@@ -13,6 +13,15 @@ export function parseGtfsTime(value: string): number | undefined {
   return Number(h) * 3600 + Number(m) * 60 + Number(s);
 }
 
+/** 90600 vira "25:10:00": inverso de parseGtfsTime. */
+export function formatGtfsTime(seconds: number): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
 /** "20260101" vira "2026-01-01". */
 export function parseGtfsDate(value: string): string | undefined {
   const match = DATE.exec(value.trim());
