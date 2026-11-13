@@ -3,7 +3,8 @@ import {
   readNominatimFixture,
 } from '../../../../../test/support/geocoding-in-memory';
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
-import { NominatimClient } from './nominatim.client';
+import { MinIntervalScheduler } from './min-interval-scheduler';
+import { NOMINATIM_MIN_INTERVAL_MS, NominatimClient } from './nominatim.client';
 import { NominatimGeocoderAdapter } from './nominatim-geocoder.adapter';
 
 const MORUMBIS = readNominatimFixture('search-morumbis.json');
@@ -168,6 +169,32 @@ describe('NominatimGeocoderAdapter', () => {
     await expect(adapterWith(fetchFn, null).search('sé', 8)).rejects.toThrow(
       /NOMINATIM_USER_AGENT/,
     );
+    expect(fetchFn.calls).toHaveLength(0);
+  });
+});
+
+describe('NominatimClient com a fila cheia', () => {
+  it('não chama o Nominatim e falha como fonte indisponível, com mensagem de muita procura', async () => {
+    const fetchFn = fakeNominatimFetch(MORUMBIS);
+    const full = new MinIntervalScheduler(
+      NOMINATIM_MIN_INTERVAL_MS,
+      () => 0,
+      () => Promise.resolve(),
+      0,
+    );
+    const adapter = new NominatimGeocoderAdapter(
+      new NominatimClient({
+        baseUrl: 'https://nominatim.test',
+        userAgent: 'baldeacao/test',
+        fetch: fetchFn,
+        retries: 0,
+        scheduler: full,
+      }),
+    );
+
+    const error: unknown = await adapter.search('estádio do morumbis', 8).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(SourceUnavailableError);
+    expect((error as Error).message).toMatch(/muita procura/);
     expect(fetchFn.calls).toHaveLength(0);
   });
 });

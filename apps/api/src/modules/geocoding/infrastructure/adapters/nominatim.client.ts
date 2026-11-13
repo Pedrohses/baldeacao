@@ -1,11 +1,16 @@
 import { SourceUnavailableError } from '../../../../shared/domain/errors/source-unavailable.error';
 import { type FetchFn, HttpClient } from '../../../../shared/infrastructure/http/http-client';
-import { MinIntervalScheduler } from './min-interval-scheduler';
+import { MinIntervalScheduler, SchedulerFullError } from './min-interval-scheduler';
 import type { NominatimSearchResult } from './nominatim.types';
 
 export const NOMINATIM_SOURCE = 'nominatim';
 /** Política de uso do Nominatim público: no máximo 1 requisição por segundo. */
 export const NOMINATIM_MIN_INTERVAL_MS = 1000;
+/**
+ * Máximo de consultas esperando a vez (≈10 s de fila a 1 req/s). Acima disso a consulta falha
+ * na hora como fonte indisponível, e a busca devolve só os resultados locais.
+ */
+export const NOMINATIM_MAX_PENDING = 10;
 /** Grande São Paulo (RMSP), em lon/lat: oeste, norte, leste, sul. */
 export const GREATER_SAO_PAULO_VIEWBOX = '-47.21,-23.18,-45.69,-24.07';
 
@@ -39,7 +44,14 @@ export class NominatimClient {
       headers: { Accept: 'application/json' },
       fetch: options.fetch,
     });
-    this.scheduler = options.scheduler ?? new MinIntervalScheduler(NOMINATIM_MIN_INTERVAL_MS);
+    this.scheduler =
+      options.scheduler ??
+      new MinIntervalScheduler(
+        NOMINATIM_MIN_INTERVAL_MS,
+        undefined,
+        undefined,
+        NOMINATIM_MAX_PENDING,
+      );
   }
 
   async search(query: string, limit: number): Promise<NominatimSearchResult[]> {
@@ -150,7 +162,19 @@ export class NominatimClient {
 
   /** GET pela fila de 1 req/s; HTTP de erro ou JSON inválido viram SourceUnavailableError. */
   private async getJson(path: string): Promise<unknown> {
-    const response = await this.scheduler.schedule(() => this.http.get(path));
+    let response: Awaited<ReturnType<HttpClient['get']>>;
+    try {
+      response = await this.scheduler.schedule(() => this.http.get(path));
+    } catch (error) {
+      if (error instanceof SchedulerFullError) {
+        throw new SourceUnavailableError(
+          NOMINATIM_SOURCE,
+          'A busca de endereços está com muita procura agora. Tente de novo em alguns segundos.',
+          { cause: error },
+        );
+      }
+      throw error;
+    }
     if (!response.ok) {
       throw new SourceUnavailableError(NOMINATIM_SOURCE, undefined, {
         cause: new Error(`HTTP ${response.status}`),
