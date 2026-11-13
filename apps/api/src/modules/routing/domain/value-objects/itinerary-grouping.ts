@@ -35,6 +35,27 @@ export function hasSameLineTransfer(itinerary: Itinerary): boolean {
   });
 }
 
+const MINUTE_MS = 60_000;
+/** Peso da caminhada (min por km) e de cada baldeação (min) na ordem das opções. */
+const WALK_MIN_PER_KM = 8;
+const TRANSFER_MIN = 3;
+/** Fração do tempo de viagem somada à chegada: entre chegadas iguais, a viagem mais curta vence. */
+const DURATION_WEIGHT = 0.3;
+
+/**
+ * Custo para ordenar as opções de "sair agora/às": chegada (min) mais parte do tempo de viagem,
+ * caminhada e baldeações. Ex.: 2105-10 + L12 + L13 (sai 06:38, 1,7 km a pé, 2 baldeações) perde
+ * para L1 + L11 + L12 + L13 (sai 06:55, 679 m, 3 baldeações) com a mesma chegada 07:56.
+ */
+export function rankCost(it: Itinerary): number {
+  return (
+    time(it.endAt) / MINUTE_MS +
+    DURATION_WEIGHT * (it.durationS / 60) +
+    WALK_MIN_PER_KM * (it.walkDistanceM / 1000) +
+    TRANSFER_MIN * it.transfers
+  );
+}
+
 /**
  * `a` é dominado por `b`: sai mais cedo ou junto, chega mais tarde ou junto, com baldeações e
  * caminhada iguais ou maiores, e pior em pelo menos um desses quatro pontos.
@@ -57,7 +78,7 @@ export function isDominated(a: Itinerary, b: Itinerary): boolean {
  * Agrupa itinerários com a mesma assinatura: cada grupo vira o de saída mais cedo, com as
  * saídas seguintes (até 3, sem repetir horário) em `alsoDepartsAt`. Antes, descarta quem troca
  * para a mesma linha (se houver outra opção); depois, os dominados por outro grupo. Saída
- * (ou agora): ordem pela chegada e depois baldeações. Chegar até: chegada mais tardia primeiro,
+ * (ou agora): ordem por `rankCost` (chegada, tempo de viagem, caminhada e baldeações). Chegar até: chegada mais tardia primeiro,
  * sem as que chegam mais de 30 min antes dela. Devolve até `max` grupos.
  */
 export function groupItineraries(
@@ -78,11 +99,15 @@ export function groupItineraries(
 
   const grouped: Itinerary[] = [];
   for (const group of groups.values()) {
+    // Saída: o representante chega mais cedo e, entre os que chegam juntos, sai mais tarde
+    // (não faz a pessoa sair antes para esperar o mesmo trem). Chegar até: a última saída
+    // que ainda chega no limite.
     const sorted = [...group].sort(
-      (a, b) => time(a.startAt) - time(b.startAt) || time(a.endAt) - time(b.endAt),
+      (a, b) => time(a.endAt) - time(b.endAt) || time(b.startAt) - time(a.startAt),
     );
-    // Chegar até: o representante é a última saída que ainda chega no limite.
-    const ordered = options.arriveBy ? [...sorted].reverse() : sorted;
+    const ordered = options.arriveBy
+      ? [...group].sort((a, b) => time(b.startAt) - time(a.startAt))
+      : sorted;
     const first = ordered[0];
     if (!first) continue;
     const seen = new Set<number>([time(first.startAt)]);
@@ -115,12 +140,7 @@ export function groupItineraries(
           time(b.startAt) - time(a.startAt),
       );
   } else {
-    kept.sort(
-      (a, b) =>
-        time(a.endAt) - time(b.endAt) ||
-        a.transfers - b.transfers ||
-        time(b.startAt) - time(a.startAt),
-    );
+    kept.sort((a, b) => rankCost(a) - rankCost(b) || time(a.endAt) - time(b.endAt));
   }
   return kept.slice(0, Math.max(0, max));
 }

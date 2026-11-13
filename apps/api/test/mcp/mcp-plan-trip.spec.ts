@@ -103,8 +103,16 @@ describe('Tool MCP planejar_viagem', () => {
   it('cita as saídas seguintes com as mesmas linhas ("também às")', async () => {
     fakes.planner.result = [
       itineraryExample,
-      { ...itineraryExample, startAt: '2026-11-12T08:10:00-03:00' },
-      { ...itineraryExample, startAt: '2026-11-12T08:20:00-03:00' },
+      {
+        ...itineraryExample,
+        startAt: '2026-11-12T08:10:00-03:00',
+        endAt: '2026-11-12T09:14:00-03:00',
+      },
+      {
+        ...itineraryExample,
+        startAt: '2026-11-12T08:20:00-03:00',
+        endAt: '2026-11-12T09:24:00-03:00',
+      },
     ];
     const result = await plan({ origem: 'Morumbis', destino: 'Tietê' });
     expect(textOf(result)).toContain(

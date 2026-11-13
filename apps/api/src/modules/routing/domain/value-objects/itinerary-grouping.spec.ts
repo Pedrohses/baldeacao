@@ -65,3 +65,41 @@ describe('groupItineraries', () => {
     expect(out?.alsoDepartsAt).toEqual([first.startAt]);
   });
 });
+
+describe('groupItineraries: ordem por custo (bug Tietê -> Aeroporto Guarulhos)', () => {
+  const sampleLeg = itineraryExample.legs[1] as Leg;
+  const leg = (mode: Leg['mode'], routeId: string | null): Leg => ({
+    ...sampleLeg,
+    mode,
+    routeId,
+    routeShortName: routeId,
+  });
+  const base = (
+    startAt: string,
+    walkDistanceM: number,
+    transfers: number,
+    routes: string[],
+  ): Itinerary => ({
+    ...itineraryExample,
+    startAt,
+    endAt: '2026-11-13T07:56:00-03:00',
+    durationS: (Date.parse('2026-11-13T07:56:00-03:00') - Date.parse(startAt)) / 1000,
+    walkDistanceM,
+    transfers,
+    legs: routes.map((r) => leg(r.startsWith('L') ? 'rail' : 'bus', r)),
+  });
+
+  it('com a mesma chegada, a opção que sai mais tarde e anda menos vem primeiro', () => {
+    const bus = base('2026-11-13T06:38:00-03:00', 1700, 2, ['2105-10', 'L12', 'L13']);
+    const metro = base('2026-11-13T06:55:00-03:00', 679, 3, ['L1', 'L11', 'L12', 'L13']);
+    const [first] = groupItineraries([bus, metro], 3);
+    expect(first?.legs.map((l) => l.routeId)).toEqual(['L1', 'L11', 'L12', 'L13']);
+  });
+
+  it('no mesmo grupo, a saída mais tarde que pega o mesmo trem é a representante', () => {
+    const early = base('2026-11-13T06:30:00-03:00', 679, 3, ['L1', 'L11', 'L12', 'L13']);
+    const late = base('2026-11-13T06:55:00-03:00', 679, 3, ['L1', 'L11', 'L12', 'L13']);
+    const [first] = groupItineraries([early, late], 3);
+    expect(first?.startAt).toBe('2026-11-13T06:55:00-03:00');
+  });
+});

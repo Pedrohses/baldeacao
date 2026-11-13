@@ -56,12 +56,33 @@ function legPlace(place: OtpPlace): LegPlace {
   };
 }
 
+/** Distância acima da qual a geometria "não encosta" na parada (metros). */
+const GEOMETRY_GAP_M = 150;
+
+function distanceM(a: Coordinates, b: Coordinates): number {
+  const rad = Math.PI / 180;
+  const x = (b.lon - a.lon) * rad * Math.cos(((a.lat + b.lat) / 2) * rad);
+  const y = (b.lat - a.lat) * rad;
+  return Math.sqrt(x * x + y * y) * 6_371_000;
+}
+
+/**
+ * Geometria do trecho. Alguns traçados do GTFS da SPTrans não cobrem a linha toda (ex.: a
+ * CPTM L12 começa no Tatuapé, não no Brás); quando a geometria não encosta na parada de
+ * embarque ou de desembarque, a ponta que falta é ligada em reta até a parada.
+ */
 function legPoints(leg: OtpLeg, from: Coordinates, to: Coordinates): Coordinates[] {
   const encoded = leg.legGeometry?.points;
   if (encoded) {
     try {
       const points = decodeGooglePolyline(encoded);
-      if (points.length >= 2) return points;
+      if (points.length >= 2) {
+        const first = points[0];
+        const last = points[points.length - 1];
+        if (first && distanceM(first, from) > GEOMETRY_GAP_M) points.unshift(from);
+        if (last && distanceM(last, to) > GEOMETRY_GAP_M) points.push(to);
+        return points;
+      }
     } catch {
       // Geometria corrompida: cai na reta entre as pontas.
     }

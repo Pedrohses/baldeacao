@@ -231,19 +231,20 @@ describe('mapeamento do OTP', () => {
       it.legs.filter((leg) => leg.mode !== 'walk').map((leg) => leg.routeShortName),
     );
     expect(lines).toEqual([
-      ['METRÔ L4', '746H-10'],
-      ['917H-10', 'METRÔ L4', '746H-10'],
-      ['857R-10', 'METRÔ L4', '746H-10'],
+      // Ordem por custo (rankCost): 631 m a pé vence 2,1 km mesmo chegando 7 min depois.
       ['6262-10', '775F-10'],
+      ['METRÔ L4', '746H-10'],
+      ['857R-10', 'METRÔ L4', '746H-10'],
+      ['917H-10', 'METRÔ L4', '746H-10'],
     ]);
     expect(grouped.map((it) => it.startAt)).toEqual(
       Array(4).fill('2026-11-12T14:00:00-03:00') as string[],
     );
     expect(grouped.map((it) => it.alsoDepartsAt)).toEqual([
+      undefined,
       ['2026-11-12T14:01:00-03:00', '2026-11-12T14:02:00-03:00', '2026-11-12T14:03:00-03:00'],
       ['2026-11-12T14:01:00-03:00'],
       ['2026-11-12T14:01:00-03:00'],
-      undefined,
     ]);
     for (const it of grouped) expect(() => ItinerarySchema.parse(it)).not.toThrow();
     expect(groupItineraries(raw, 2)).toHaveLength(2);
