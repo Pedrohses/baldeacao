@@ -22,6 +22,9 @@ const SHAPES_BY_DIRECTION_SQL = `
   JOIN shapes s ON s.source_id = $1 AND s.shape_id = r.shape_id
   ORDER BY r.direction_id`;
 
+/** Termo de até isto casa o nome da linha só como palavra inteira. */
+export const SHORT_TERM_MAX_LENGTH = 3;
+
 @Injectable()
 export class TypeormRouteRepository extends RouteRepository {
   private readonly routes: Repository<RouteOrmEntity>;
@@ -31,11 +34,19 @@ export class TypeormRouteRepository extends RouteRepository {
     this.routes = dataSource.getRepository(RouteOrmEntity);
   }
 
+  /**
+   * Letreiro por trecho; nome por trecho sem acento, ou por palavra inteira quando o termo
+   * tem até 3 letras ("Sé" não casa "José Bonifácio").
+   */
   async search(text: string, limit: number): Promise<Route[]> {
     const escaped = text.replace(/[\\%_]/g, (c) => `\\${c}`);
+    const shortTerm = text.trim().length <= SHORT_TERM_MAX_LENGTH;
+    const nameMatch = shortTerm
+      ? `f_unaccent(lower(r.long_name)) ~ ('(^|[^[:alnum:]])' || f_unaccent(lower(:word)) || '($|[^[:alnum:]])')`
+      : 'f_unaccent(lower(r.long_name)) LIKE f_unaccent(lower(:contains))';
     const rows = await this.routes
       .createQueryBuilder('r')
-      .where('(r.short_name ILIKE :contains OR r.long_name ILIKE :contains)')
+      .where(`(r.short_name ILIKE :contains OR ${nameMatch})`)
       .orderBy(
         `CASE WHEN lower(r.short_name) = lower(:exact) THEN 0
               WHEN r.short_name ILIKE :prefix THEN 1
@@ -43,7 +54,12 @@ export class TypeormRouteRepository extends RouteRepository {
       )
       .addOrderBy('r.short_name')
       .addOrderBy('r.source_id')
-      .setParameters({ contains: `%${escaped}%`, prefix: `${escaped}%`, exact: text })
+      .setParameters({
+        contains: `%${escaped}%`,
+        prefix: `${escaped}%`,
+        exact: text,
+        word: text.trim().replace(/[\\^$.|?*+()[\]{}]/g, (c) => `\\${c}`),
+      })
       .limit(limit)
       .getMany();
     return rows.map((row) => RouteMapper.toDomain(row));

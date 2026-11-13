@@ -195,4 +195,22 @@ describe('repositórios do transit (Testcontainers + PostGIS)', () => {
       expect(await stops.findNearestStation({ lat: -23.6, lon: -46.7 }, 500)).toBeNull();
     });
   });
+
+  describe('TypeormRouteRepository.search por palavra curta', () => {
+    beforeAll(async () => {
+      await db.dataSource.query(`INSERT INTO routes (source_id, route_id, short_name, long_name, route_type) VALUES
+        ('sptrans', '1', '9001-10', 'José Bonifácio - Pedro José', 3),
+        ('sptrans', '2', '9002-10', 'Praça da Sé - Vila Sônia', 3),
+        ('sptrans', '3', '9003-10', 'Sé - Lapa', 3)`);
+    });
+
+    it('termo de até 3 letras casa só palavra inteira, sem acento', async () => {
+      const found = await routes.search('Se', 20);
+      expect(found.map((r) => r.id).sort()).toEqual(['2', '3']);
+    });
+
+    it('termo maior casa trecho do nome sem acento', async () => {
+      expect((await routes.search('bonifacio', 20)).map((r) => r.id)).toEqual(['1']);
+    });
+  });
 });
